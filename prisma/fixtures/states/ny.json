@@ -1,0 +1,63 @@
+{
+  "jurisdictions": [
+    {
+      "code": "NY-STATE",
+      "name": "State of New York",
+      "level": "STATE",
+      "state": "NY"
+    }
+  ],
+  "rules": [
+    {
+      "jurisdictionCode": "NY-STATE",
+      "ruleCode": "NY_SIT_BRACKETS",
+      "name": "NY Personal Income Tax Withholding Brackets",
+      "category": "WITHHOLDING",
+      "description": "New York state personal income tax withholding brackets (4.0% up to 10.9%).",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "BRACKET_PERCENTAGE",
+        "ruleData": {
+          "brackets": [
+            { "over": 0, "max": 8500, "rate": 0.04, "baseTax": 0 },
+            { "over": 8500, "max": 11700, "rate": 0.045, "baseTax": 340 },
+            { "over": 11700, "max": 13900, "rate": 0.0525, "baseTax": 484 },
+            { "over": 13900, "max": 80650, "rate": 0.055, "baseTax": 599.50 },
+            { "over": 80650, "max": 215400, "rate": 0.06, "baseTax": 4270.75 },
+            { "over": 215400, "max": 1077550, "rate": 0.0685, "baseTax": 12355.75 },
+            { "over": 1077550, "max": null, "rate": 0.109, "baseTax": 71413.00 }
+          ]
+        },
+        "sourceTitle": "NYS Dept of Taxation & Finance Publication NYS-50",
+        "sourceUrl": "https://www.tax.ny.gov/forms/withholding_cur_forms.htm",
+        "sourcePublisher": "NYS Department of Taxation and Finance",
+        "statuteReference": "N.Y. Tax Law § 601",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "jurisdictionCode": "NY-STATE",
+      "ruleCode": "NY_SUTA_EMPLOYER",
+      "name": "NY Employer SUTA Tax Rate",
+      "category": "EMPLOYER_TAX",
+      "description": "New York Unemployment Insurance standard new employer rate.",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "FLAT_RATE",
+        "ruleData": {
+          "rate": 0.041,
+          "wageCap": 12500
+        },
+        "sourceTitle": "NYS Dept of Labor UI Employer Contribution Rates",
+        "sourceUrl": "https://dol.ny.gov/unemployment-insurance-information-employers",
+        "sourcePublisher": "NYS Department of Labor",
+        "statuteReference": "N.Y. Lab. Law § 581",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    }
+  ]
+}

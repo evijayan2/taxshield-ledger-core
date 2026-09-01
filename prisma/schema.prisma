@@ -1,0 +1,392 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RuleStatus {
+  DISCOVERED
+  IN_REVIEW
+  VALIDATED
+  APPROVED
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum CitationTier {
+  TIER_1_OFFICIAL
+  TIER_2_GOV_DEPT
+  TIER_3_THIRD_PARTY
+}
+
+enum RuleType {
+  FLAT_RATE
+  BRACKET_PERCENTAGE
+  STANDARD_ALLOWANCE
+  THRESHOLD
+  EXEMPTION
+  PER_MILE_RATE
+}
+
+model Company {
+  id                  String            @id @default(uuid())
+  name                String
+  ein                 String
+  stateTaxId          String            @map("stateTaxId")
+  address             String
+  city                String
+  state               String
+  zip                 String
+  ownerName           String            @map("ownerName")
+  ownerEmail          String            @map("ownerEmail")
+  ownerTaxBracket     Float             @default(24.0) @map("ownerTaxBracket")
+  stateFilingFrequency String           @default("MONTHLY") @map("stateFilingFrequency")
+  standardMileageRate Float?            @default(0.67) @map("standardMileageRate")
+  bankName            String?           @map("bankName")
+  routingNumber       String?           @map("routingNumber")
+  accountNumber       String?           @map("accountNumber")
+  mercuryApiKey       String?           @map("mercuryApiKey")
+  mercuryAccountId    String?           @map("mercuryAccountId")
+  mercuryEnvironment  String            @default("SANDBOX") @map("mercuryEnvironment")
+  createdAt           DateTime          @default(now()) @map("createdAt")
+  updatedAt           DateTime          @updatedAt @map("updatedAt")
+
+  taxYears          TaxYear[]
+  employees         Employee[]
+  mileageLogs       MileageLog[]
+  travelExpenses    TravelExpense[]
+  generalExpenses   GeneralExpense[]
+  payrollRuns       PayrollRun[]
+  complianceTasks   ComplianceTask[]
+  auditLogs         AuditLogEntry[]
+
+  @@map("companies")
+}
+
+model TaxYear {
+  id        String   @id @default(uuid())
+  companyId String
+  year      Int
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, year])
+  @@map("tax_years")
+}
+
+model TaxJurisdiction {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  name      String
+  level     String
+  state     String?
+  createdAt DateTime  @default(now())
+
+  rules     TaxRule[]
+
+  @@map("tax_jurisdictions")
+}
+
+model TaxRule {
+  id             String           @id @default(uuid())
+  jurisdictionId String
+  ruleCode       String
+  name           String
+  description    String?
+  category       String
+  createdAt      DateTime         @default(now())
+
+  jurisdiction   TaxJurisdiction  @relation(fields: [jurisdictionId], references: [id], onDelete: Cascade)
+  versions       TaxRuleVersion[]
+
+  @@unique([jurisdictionId, ruleCode])
+  @@map("tax_rules")
+}
+
+model TaxRuleVersion {
+  id               String       @id @default(uuid())
+  ruleId           String
+  versionNumber    Int
+  status           RuleStatus   @default(IN_REVIEW)
+  ruleType         RuleType
+  ruleData         Json
+  sourceTitle      String
+  sourceUrl        String
+  sourcePublisher  String
+  statuteReference String
+  citationTier     CitationTier
+  effectiveStart   DateTime
+  effectiveEnd     DateTime?
+  createdAt        DateTime     @default(now())
+  activatedAt      DateTime?
+  activatedBy      String?
+
+  rule             TaxRule      @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@map("tax_rule_versions")
+}
+
+model CalculationSnapshot {
+  id              String   @id @default(uuid())
+  calculationType String
+  entityId        String
+  ruleVersionIds  Json
+  snapshotData    Json
+  createdAt       DateTime @default(now())
+
+  @@map("calculation_snapshots")
+}
+
+model AuditLogEntry {
+  id            String   @id @default(uuid())
+  companyId     String   @map("companyId")
+  entityType    String   @map("entityType")
+  entityId      String   @map("entityId")
+  action        String
+  actorId       String   @map("actorId")
+  previousState Json?    @map("previousState")
+  newState      Json?    @map("newState")
+  reason        String?
+  timestamp     DateTime @default(now())
+
+  company       Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("audit_log_entries")
+}
+
+model Employee {
+  id                  String          @id @default(uuid())
+  companyId           String?         @map("company_id")
+  firstName           String          @map("first_name")
+  lastName            String          @map("last_name")
+  age                 Int?
+  relationshipToOwner String          @default("NONE") @map("relationship_to_owner")
+  email               String
+  phone               String
+  ssnLastFour         String          @map("ssn_last_four")
+  streetAddress       String?         @map("street_address")
+  city                String?
+  state               String?
+  zip                 String?
+  employmentType      String          @map("employment_type")
+  payRate             Float           @map("pay_rate")
+  payFrequency        String          @map("pay_frequency")
+  w4FilingStatus      String          @map("w4_filing_status")
+  w4MultipleJobs      Boolean         @default(false) @map("w4_multiple_jobs")
+  w4DependentCredit   Float           @default(0) @map("w4_dependent_credit")
+  w4OtherIncome       Float           @default(0) @map("w4_other_income")
+  w4Deductions        Float           @default(0) @map("w4_deductions")
+  w4ExtraWithholding  Float           @default(0) @map("w4_extra_withholding")
+  workState           String?         @map("work_state")
+  stateW4FilingStatus String?         @map("state_w4_filing_status")
+  stateAllowances     Int             @default(0) @map("state_allowances")
+  localTaxJurisdictionCode String?     @map("local_tax_jurisdiction_code")
+  localTaxJurisdictionName String?     @map("local_tax_jurisdiction_name")
+  localTaxRate        Float           @default(0) @map("local_tax_rate")
+  localFlatTaxAnnual  Float           @default(52.0) @map("local_flat_tax_annual")
+  localFlatTaxExempt  Boolean         @default(false) @map("local_flat_tax_exempt")
+  taxAttributes       Json?           @map("tax_attributes")
+  bankName            String?         @map("bank_name")
+  accountType         String          @default("CHECKING") @map("account_type")
+  routingNumber       String?         @map("routing_number")
+  accountNumber       String?         @map("account_number")
+  bankAccountMasked   String?         @map("bank_account_masked")
+  isActive            Boolean         @default(true) @map("is_active")
+  createdAt           DateTime        @default(now()) @map("created_at")
+
+  company             Company?        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  mileageLogs         MileageLog[]
+  travelExpenses      TravelExpense[]
+  payStubs            PayStub[]
+  timesheets          Timesheet[]
+
+  @@map("employees")
+}
+
+model MileageLog {
+  id                            String   @id @default(uuid())
+  companyId                     String?  @map("company_id")
+  employeeId                    String   @map("employee_id")
+  tripDate                      String   @map("trip_date")
+  originLocation                String   @map("origin_location")
+  destinationLocation           String   @map("destination_location")
+  businessPurpose               String   @map("business_purpose")
+  startOdometer                 Float    @map("start_odometer")
+  endOdometer                   Float    @map("end_odometer")
+  calculatedMiles               Float    @map("calculated_miles")
+  rateApplied                   Float    @map("rate_applied")
+  mileageAllowance              Float    @map("mileage_allowance")
+  isReimbursableAccountablePlan Boolean  @default(true) @map("is_reimbursable_accountable_plan")
+  status                        String
+  linkedPayStubId               String?  @map("linked_pay_stub_id")
+  notes                         String?
+  createdAt                     DateTime @default(now()) @map("created_at")
+
+  company                       Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee                      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("mileage_logs")
+}
+
+model TravelExpense {
+  id              String   @id @default(uuid())
+  companyId       String?  @map("company_id")
+  employeeId      String   @map("employee_id")
+  mileageLogId    String?  @map("mileage_log_id")
+  expenseDate     String   @map("expense_date")
+  category        String
+  description     String
+  amount          Float
+  paymentSource   String   @map("payment_source")
+  receiptNote     String?  @map("receipt_note")
+  receiptUrl      String?  @map("receipt_url")
+  isReimbursable  Boolean  @default(true) @map("is_reimbursable")
+  status          String
+  linkedPayStubId String?  @map("linked_pay_stub_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  company         Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("travel_expenses")
+}
+
+model GeneralExpense {
+  id              String   @id @default(uuid())
+  companyId       String?  @map("company_id")
+  expenseDate     String   @map("expense_date")
+  category        String
+  payee           String
+  description     String
+  amount          Float
+  scheduleCLine   String?  @map("schedule_c_line")
+  isTaxDeductible Boolean  @default(true) @map("is_tax_deductible")
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  company         Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("general_expenses")
+}
+
+model PayrollRun {
+  id                  String    @id @default(uuid())
+  companyId           String?   @map("company_id")
+  periodStart         String    @map("period_start")
+  periodEnd           String    @map("period_end")
+  payDate             String    @map("pay_date")
+  status              String
+  totalGross          Float     @map("total_gross")
+  totalEmployeeTaxes  Float     @map("total_employee_taxes")
+  totalReimbursements Float     @map("total_reimbursements")
+  totalNetPay         Float     @map("total_net_pay")
+  totalEmployerTaxes  Float     @map("total_employer_taxes")
+  totalCompanyCost    Float     @map("total_company_cost")
+  stubsCount          Int       @map("stubs_count")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  lockedAt            DateTime? @map("locked_at")
+
+  company             Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payStubs            PayStub[]
+
+  @@map("payroll_runs")
+}
+
+model PayStub {
+  id                          String     @id @default(uuid())
+  payrollRunId                String     @map("payroll_run_id")
+  employeeId                  String     @map("employee_id")
+  periodStart                 String     @map("period_start")
+  periodEnd                   String     @map("period_end")
+  payDate                     String     @map("pay_date")
+  hoursWorked                 Float      @map("hours_worked")
+  overtimeHours               Float      @map("overtime_hours")
+  hourlyRate                  Float      @map("hourly_rate")
+  grossEarnings               Float      @map("gross_earnings")
+  federalIncomeTax            Float      @map("federal_income_tax")
+  socialSecurityTax           Float      @map("social_security_tax")
+  medicareTax                 Float      @map("medicare_tax")
+  stateCode                   String     @default("PA") @map("state_code")
+  localityCode                String?    @map("locality_code")
+  localityName                String?    @map("locality_name")
+  stateIncomeTax              Float      @default(0) @map("state_income_tax")
+  localIncomeTax              Float      @default(0) @map("local_income_tax")
+  localFlatTax                Float      @default(0) @map("local_flat_tax")
+  totalEmployeeTaxes          Float      @map("total_employee_taxes")
+  mileageReimbursement        Float      @map("mileage_reimbursement")
+  travelExpensesReimbursement Float      @map("travel_expenses_reimbursement")
+  totalReimbursements         Float      @map("total_reimbursements")
+  netPay                      Float      @map("net_pay")
+  employerSocialSecurity      Float      @map("employer_social_security")
+  employerMedicare            Float      @map("employer_medicare")
+  employerStateUnemployment   Float      @default(0) @map("employer_state_unemployment")
+  taxBreakdown                Json?      @map("tax_breakdown")
+  totalEmployerTaxes          Float      @map("total_employer_taxes")
+  totalCompanyCost            Float      @map("total_company_cost")
+  disbursementMethod          String     @map("disbursement_method")
+  disbursementStatus          String     @map("disbursement_status")
+  achTraceRef                 String?    @map("ach_trace_ref")
+  paidAt                      DateTime?  @map("paid_at")
+  createdAt                   DateTime   @default(now()) @map("created_at")
+
+  payrollRun                  PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  employee                    Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("pay_stubs")
+}
+
+model ComplianceTask {
+  id                 String    @id @default(uuid())
+  companyId          String?   @map("company_id")
+  jurisdiction       String
+  formIdentifier     String    @map("form_identifier")
+  title              String
+  taxPeriodLabel     String    @map("tax_period_label")
+  dueDate            String    @map("due_date")
+  filingMethod       String?   @map("filing_method")
+  portalUrl          String?   @map("portal_url")
+  status             String
+  amountDue          Float     @map("amount_due")
+  boxValues          Json      @map("box_values")
+  confirmationNumber String?   @map("confirmation_number")
+  filedDate          String?   @map("filed_date")
+  notes              String?
+  createdAt          DateTime  @default(now()) @map("created_at")
+
+  company            Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("compliance_tasks")
+}
+
+model Timesheet {
+  id                 String   @id @default(uuid())
+  employeeId         String   @map("employee_id")
+  workDate           String   @map("work_date")
+  startTime          String   @map("start_time")
+  endTime            String   @map("end_time")
+  unpaidBreakMinutes Int      @default(0) @map("unpaid_break_minutes")
+  regularHours       Float    @map("regular_hours")
+  overtimeHours      Float    @map("overtime_hours")
+  notes              String?
+  status             String
+  linkedPayStubId    String?  @map("linked_pay_stub_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  employee           Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("timesheets")
+}
+
+model AppStateSnapshot {
+  id        String   @id @default("current_state")
+  data      Json
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("app_state_snapshots")
+}

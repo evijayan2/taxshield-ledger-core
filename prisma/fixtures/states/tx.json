@@ -1,0 +1,55 @@
+{
+  "jurisdictions": [
+    {
+      "code": "TX-STATE",
+      "name": "State of Texas",
+      "level": "STATE",
+      "state": "TX"
+    }
+  ],
+  "rules": [
+    {
+      "jurisdictionCode": "TX-STATE",
+      "ruleCode": "TX_SIT_RATE",
+      "name": "TX Personal Income Tax Rate (No State PIT)",
+      "category": "WITHHOLDING",
+      "description": "Texas constitutional prohibition of personal income tax (0.00%).",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "FLAT_RATE",
+        "ruleData": {
+          "rate": 0.00
+        },
+        "sourceTitle": "Texas Constitution Article 8 Section 24-a",
+        "sourceUrl": "https://comptroller.texas.gov/",
+        "sourcePublisher": "Texas Comptroller of Public Accounts",
+        "statuteReference": "Tex. Const. art. VIII, § 24-a",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "jurisdictionCode": "TX-STATE",
+      "ruleCode": "TX_SUTA_EMPLOYER",
+      "name": "TX Unemployment Tax Employer Rate",
+      "category": "EMPLOYER_TAX",
+      "description": "Texas Workforce Commission Unemployment Tax standard entry rate.",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "FLAT_RATE",
+        "ruleData": {
+          "rate": 0.027,
+          "wageCap": 9000
+        },
+        "sourceTitle": "Texas Workforce Commission Employer Tax Rates",
+        "sourceUrl": "https://www.twc.texas.gov/businesses/unemployment-tax-rates",
+        "sourcePublisher": "Texas Workforce Commission",
+        "statuteReference": "Tex. Lab. Code § 204.006",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    }
+  ]
+}

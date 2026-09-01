@@ -1,0 +1,117 @@
+{
+  "jurisdictions": [
+    {
+      "code": "US-FED",
+      "name": "US Federal Government",
+      "level": "FEDERAL",
+      "state": null
+    }
+  ],
+  "rules": [
+    {
+      "jurisdictionCode": "US-FED",
+      "ruleCode": "FED_FICA_SS",
+      "name": "Social Security Employee Tax Rate",
+      "category": "WITHHOLDING",
+      "description": "Federal Social Security tax rate (6.2%) for employees.",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "FLAT_RATE",
+        "ruleData": {
+          "rate": 0.062,
+          "wageCap": 176100
+        },
+        "sourceTitle": "IRS Publication 15 (Circular E) 2026",
+        "sourceUrl": "https://www.irs.gov/publications/p15",
+        "sourcePublisher": "Internal Revenue Service",
+        "statuteReference": "26 U.S. Code § 3101(a)",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "jurisdictionCode": "US-FED",
+      "ruleCode": "FED_FICA_MEDICARE",
+      "name": "Medicare Employee Tax Rate",
+      "category": "WITHHOLDING",
+      "description": "Federal Medicare tax rate (1.45%) for employees.",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "FLAT_RATE",
+        "ruleData": {
+          "rate": 0.0145
+        },
+        "sourceTitle": "IRS Publication 15 (Circular E) 2026",
+        "sourceUrl": "https://www.irs.gov/publications/p15",
+        "sourcePublisher": "Internal Revenue Service",
+        "statuteReference": "26 U.S. Code § 3101(b)",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "jurisdictionCode": "US-FED",
+      "ruleCode": "IRS_MILEAGE",
+      "name": "IRS Standard Business Mileage Rate",
+      "category": "MILEAGE",
+      "description": "IRS optional standard mileage rate for business use of a vehicle.",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "PER_MILE_RATE",
+        "ruleData": {
+          "ratePerMile": 0.67
+        },
+        "sourceTitle": "IRS Notice 2026-XX Standard Mileage Rates",
+        "sourceUrl": "https://www.irs.gov/newsroom/irs-issues-standard-mileage-rates",
+        "sourcePublisher": "Internal Revenue Service",
+        "statuteReference": "Rev. Proc. 2019-46",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "jurisdictionCode": "US-FED",
+      "ruleCode": "FED_FIT_WITHHOLDING",
+      "name": "Federal Income Tax Withholding Brackets",
+      "category": "WITHHOLDING",
+      "description": "Percentage method income tax withholding tables (IRS Pub 15-T).",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "BRACKET_PERCENTAGE",
+        "ruleData": {
+          "standardAllowances": {
+            "SINGLE": 14600,
+            "MARRIED_FILING_JOINTLY": 29200,
+            "HEAD_OF_HOUSEHOLD": 21900
+          },
+          "brackets": {
+            "MARRIED_FILING_JOINTLY": [
+              { "max": 23200, "rate": 0.10, "baseTax": 0, "over": 0 },
+              { "max": 94300, "rate": 0.12, "baseTax": 2320, "over": 23200 },
+              { "max": 201050, "rate": 0.22, "baseTax": 10852, "over": 94300 },
+              { "max": 383900, "rate": 0.24, "baseTax": 34337, "over": 201050 },
+              { "max": null, "rate": 0.32, "baseTax": 78221, "over": 383900 }
+            ],
+            "SINGLE": [
+              { "max": 11600, "rate": 0.10, "baseTax": 0, "over": 0 },
+              { "max": 47150, "rate": 0.12, "baseTax": 1160, "over": 11600 },
+              { "max": 100525, "rate": 0.22, "baseTax": 5426, "over": 47150 },
+              { "max": 191950, "rate": 0.24, "baseTax": 17168.50, "over": 100525 },
+              { "max": null, "rate": 0.32, "baseTax": 39110.50, "over": 191950 }
+            ]
+          }
+        },
+        "sourceTitle": "IRS Publication 15-T (Federal Income Tax Withholding Methods)",
+        "sourceUrl": "https://www.irs.gov/pub/irs-pdf/p15t.pdf",
+        "sourcePublisher": "Internal Revenue Service",
+        "statuteReference": "26 U.S. Code § 3402",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    }
+  ]
+}

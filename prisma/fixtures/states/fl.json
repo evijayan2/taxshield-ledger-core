@@ -1,0 +1,55 @@
+{
+  "jurisdictions": [
+    {
+      "code": "FL-STATE",
+      "name": "State of Florida",
+      "level": "STATE",
+      "state": "FL"
+    }
+  ],
+  "rules": [
+    {
+      "jurisdictionCode": "FL-STATE",
+      "ruleCode": "FL_SIT_RATE",
+      "name": "FL Personal Income Tax Rate (No State PIT)",
+      "category": "WITHHOLDING",
+      "description": "Florida state constitutional exemption from personal income tax (0.00%).",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "FLAT_RATE",
+        "ruleData": {
+          "rate": 0.00
+        },
+        "sourceTitle": "Florida Constitution Article VII Section 5",
+        "sourceUrl": "https://floridarevenue.com/taxes/Pages/default.aspx",
+        "sourcePublisher": "Florida Department of Revenue",
+        "statuteReference": "Fla. Const. art. VII, § 5",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "jurisdictionCode": "FL-STATE",
+      "ruleCode": "FL_SUTA_EMPLOYER",
+      "name": "FL Reemployment Tax Employer Rate",
+      "category": "EMPLOYER_TAX",
+      "description": "Florida Reemployment Tax standard new employer rate.",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "FLAT_RATE",
+        "ruleData": {
+          "rate": 0.027,
+          "wageCap": 7000
+        },
+        "sourceTitle": "Florida Dept of Revenue Reemployment Tax Rates",
+        "sourceUrl": "https://floridarevenue.com/taxes/taxesfees/Pages/reemployment.aspx",
+        "sourcePublisher": "Florida Department of Revenue",
+        "statuteReference": "Fla. Stat. § 443.131",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    }
+  ]
+}

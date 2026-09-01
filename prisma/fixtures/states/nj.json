@@ -1,0 +1,63 @@
+{
+  "jurisdictions": [
+    {
+      "code": "NJ-STATE",
+      "name": "State of New Jersey",
+      "level": "STATE",
+      "state": "NJ"
+    }
+  ],
+  "rules": [
+    {
+      "jurisdictionCode": "NJ-STATE",
+      "ruleCode": "NJ_SIT_BRACKETS",
+      "name": "NJ Gross Income Tax Withholding Brackets",
+      "category": "WITHHOLDING",
+      "description": "New Jersey Gross Income Tax graduated withholding rate brackets (1.4% up to 10.75%).",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "BRACKET_PERCENTAGE",
+        "ruleData": {
+          "brackets": [
+            { "over": 0, "max": 20000, "rate": 0.014, "baseTax": 0 },
+            { "over": 20000, "max": 35000, "rate": 0.0175, "baseTax": 280 },
+            { "over": 35000, "max": 40000, "rate": 0.035, "baseTax": 542.50 },
+            { "over": 40000, "max": 75000, "rate": 0.0552, "baseTax": 717.50 },
+            { "over": 75000, "max": 500000, "rate": 0.0637, "baseTax": 2649.50 },
+            { "over": 500000, "max": 1000000, "rate": 0.0897, "baseTax": 29722.00 },
+            { "over": 1000000, "max": null, "rate": 0.1075, "baseTax": 74572.00 }
+          ]
+        },
+        "sourceTitle": "NJ Division of Taxation Gross Income Tax Tables",
+        "sourceUrl": "https://www.nj.gov/treasury/taxation/njit1.shtml",
+        "sourcePublisher": "NJ Division of Taxation",
+        "statuteReference": "N.J.S.A. 54A:2-1",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "jurisdictionCode": "NJ-STATE",
+      "ruleCode": "NJ_SUI_EMPLOYER",
+      "name": "NJ Employer SUI Tax Rate",
+      "category": "EMPLOYER_TAX",
+      "description": "New Jersey State Unemployment Insurance new employer rate.",
+      "version": {
+        "versionNumber": 1,
+        "status": "ACTIVE",
+        "ruleType": "FLAT_RATE",
+        "ruleData": {
+          "rate": 0.028,
+          "wageCap": 42300
+        },
+        "sourceTitle": "NJ Dept of Labor & Workforce Development Employer Rates",
+        "sourceUrl": "https://www.nj.gov/labor/ea/ea_index.html",
+        "sourcePublisher": "NJ Department of Labor",
+        "statuteReference": "N.J.S.A. 43:21-7",
+        "citationTier": "TIER_1_OFFICIAL",
+        "effectiveStart": "2026-01-01T00:00:00Z"
+      }
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import { Employee, Organization, PayStub } from '../types';
-import { getActiveRates, calculateFederalIncomeTax } from './taxEngine';
+import { findDistrictByPsdCode } from './paSchoolDistricts';
 
 export interface W2BoxValues {
   box1Wages: number;
@@ -99,36 +99,32 @@ export function calculateEmployeeW2(
   let localTax = empStubs.reduce((sum, s) => sum + (s.localIncomeTax ?? s.paLocalEit ?? 0), 0);
   let localFlat = empStubs.reduce((sum, s) => sum + (s.localFlatTax ?? s.paLst ?? 0), 0);
 
-  // Fallback estimates if no stubs are generated yet but employee has payRate
-  if (empStubs.length === 0 && employee.payRate > 0) {
-    const rates = getActiveRates();
-    const annualEst = employee.employmentType === 'W2_SALARY' ? employee.payRate : employee.payRate * 2080;
-    gross = annualEst;
-    fedTax = calculateFederalIncomeTax(
-      gross,
-      employee.payFrequency,
-      employee.w4FilingStatus,
-      employee.w4MultipleJobs,
-      employee.w4DependentCredit,
-      employee.w4OtherIncome,
-      employee.w4Deductions,
-      employee.w4ExtraWithholding
-    );
-    ssTax = gross * rates.socialSecurityRate;
-    medTax = gross * rates.medicareRate;
-    stateTax = gross * rates.paSitRate;
-    localTax = annualEst * (employee.localTaxRate || employee.paResidentEitRate || 0.01);
-    const isExempt = employee.localFlatTaxExempt ?? employee.paLstExempt ?? false;
-    if (!isExempt) {
-      localFlat = employee.localFlatTaxAnnual || employee.paLstAnnual || 52;
-    }
-  }
 
   const ssCap = 168600;
   const ssWages = Math.min(gross, ssCap);
 
   const empState = (employee.state || employee.workState || org.state || 'PA').toUpperCase();
-  const locality = employee.localTaxJurisdictionName || employee.paPsdName || (empState === 'DE' ? 'Delaware' : 'Lower Merion / Montgomery');
+
+  const stubLocality = empStubs.find(s => s.localityName && s.localityName.trim() !== '')?.localityName;
+
+  let psdDistrictName: string | undefined = undefined;
+  if (employee.paPsdCode) {
+    psdDistrictName = findDistrictByPsdCode(employee.paPsdCode)?.name;
+  } else if (employee.localTaxJurisdictionCode) {
+    const cleanCode = employee.localTaxJurisdictionCode.replace('PA-PSD-', '');
+    psdDistrictName = findDistrictByPsdCode(cleanCode)?.name;
+  }
+
+  const profileLocality = (employee.localTaxJurisdictionName && !employee.localTaxJurisdictionName.includes('Lower Merion / Montgomery'))
+    ? employee.localTaxJurisdictionName
+    : (employee.paPsdName && !employee.paPsdName.includes('Lower Merion / Montgomery') ? employee.paPsdName : undefined);
+
+  const locality = stubLocality
+    || psdDistrictName
+    || profileLocality
+    || employee.localTaxJurisdictionName
+    || employee.paPsdName
+    || (empState === 'DE' ? 'City of Wilmington' : 'PA Local Tax Resident');
 
   const box14Parts: string[] = [];
   if (localFlat > 0) {

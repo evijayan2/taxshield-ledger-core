@@ -1,0 +1,123 @@
+{
+  "packageCode": "FL-STATE-2026",
+  "name": "State of Florida Statutory Tax Rules 2026",
+  "version": "1.0.0",
+  "jurisdictionCode": "FL",
+  "generatedAt": "2026-09-06T14:46:08.670Z",
+  "jurisdictions": [
+    {
+      "code": "FL-STATE",
+      "name": "State of Florida",
+      "level": "STATE",
+      "state": "FL",
+      "parentJurisdictionCode": "US-FED"
+    }
+  ],
+  "rules": [
+    {
+      "ruleCode": "FL_SIT_RATE",
+      "name": "FL Personal Income Tax Rate (No State PIT)",
+      "category": "WITHHOLDING",
+      "taxType": "STATE_INCOME_TAX",
+      "jurisdictionCode": "FL-STATE",
+      "description": "Florida state constitutional exemption from personal income tax (0.00%).",
+      "versions": [
+        {
+          "versionCode": "FL-SIT-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "Florida Department of Revenue",
+              "title": "Florida Constitution Article VII Section 5",
+              "statuteReference": "Fla. Const. art. VII, § 5",
+              "sourceUrl": "https://floridarevenue.com/taxes/Pages/default.aspx",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "No tax upon the income of natural persons who are residents or citizens of this state shall be levied by the state."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-fl-pit-01",
+              "description": "No state PIT tax levied",
+              "inputPayload": {
+                "grossWages": 10000
+              },
+              "expectedOutput": {
+                "taxAmount": 0,
+                "taxableWages": 10000,
+                "effectiveRate": 0
+              }
+            }
+          ],
+          "checksum": "sha256:4f4604553be83ba324e83908b8a2ea5ce5ac78a42dd010f83ff049e695a22d6c",
+          "publishedAt": "2026-09-06T14:46:08.670Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "FL_SUTA_EMPLOYER",
+      "name": "FL Reemployment Tax Employer Rate",
+      "category": "EMPLOYER_TAX",
+      "taxType": "STATE_UNEMPLOYMENT_TAX",
+      "jurisdictionCode": "FL-STATE",
+      "description": "Florida Reemployment Tax standard new employer rate (2.7% on $7,000 wage cap).",
+      "versions": [
+        {
+          "versionCode": "FL-SUTA-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.027,
+            "wageCap": 7000
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "Florida Department of Revenue",
+              "title": "Florida Dept of Revenue Reemployment Tax Rates 2026",
+              "statuteReference": "Fla. Stat. § 443.131",
+              "sourceUrl": "https://floridarevenue.com/taxes/taxesfees/Pages/reemployment.aspx",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Florida Reemployment Tax standard new employer rate is 2.7% on initial $7,000 wages per employee."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-fl-suta-01",
+              "description": "Standard wage within cap",
+              "inputPayload": {
+                "grossWages": 5000,
+                "priorCumulativeWages": 0
+              },
+              "expectedOutput": {
+                "taxAmount": 135,
+                "taxableWages": 5000,
+                "effectiveRate": 0.027
+              }
+            }
+          ],
+          "checksum": "sha256:0dc0f7e3fe5479f5577d3e5e04d595f4dd6c19217fa84d461ce9cfbbba22a647",
+          "publishedAt": "2026-09-06T14:46:08.670Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    }
+  ],
+  "manifestChecksum": "sha256:cfcda2b6e73112f099a9eb6bb24039847abff80e0658d67778a5fa5d3865f3dd"
+}

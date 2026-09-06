@@ -37,6 +37,21 @@ function buildInitialCache(): Record<string, ResolvedRule> {
 const ACTIVE_RULE_CACHE: Record<string, ResolvedRule> = buildInitialCache();
 
 /**
+ * Refreshes or updates the in-memory active rule cache.
+ */
+export function refreshActiveRuleCache(updatedRules?: Record<string, ResolvedRule>): void {
+  if (updatedRules) {
+    Object.assign(ACTIVE_RULE_CACHE, updatedRules);
+  } else {
+    const fresh = buildInitialCache();
+    for (const key of Object.keys(ACTIVE_RULE_CACHE)) {
+      delete ACTIVE_RULE_CACHE[key];
+    }
+    Object.assign(ACTIVE_RULE_CACHE, fresh);
+  }
+}
+
+/**
  * Synchronously resolves an active tax rule version from the cache/registry.
  */
 export function resolveActiveRuleSync(jurisdictionCode: string, ruleCode: string): ResolvedRule {
@@ -100,10 +115,16 @@ export function computeFederalWithholdingFromRule(
   const taxableAnnual = Math.max(0, annualizedGross - allowance);
   if (taxableAnnual <= 0) return 0;
 
-  const bracketList = payload.brackets?.[w4Status] || payload.brackets?.['SINGLE'] || [];
+  const bracketList: any[] | undefined = payload.brackets?.[w4Status] ?? (Array.isArray(payload.brackets) ? payload.brackets : undefined);
+  if (!bracketList || bracketList.length === 0) {
+    throw new Error(`No tax brackets found for W-4 filing status [${w4Status}] in tax rule [${rule.ruleCode}].`);
+  }
   for (const b of bracketList) {
-    if (b.max === null || taxableAnnual <= b.max) {
-      return b.baseTax + (taxableAnnual - b.over) * b.rate;
+    const maxVal = b.max ?? b.incomeTo ?? null;
+    const overVal = b.over ?? b.incomeFrom ?? 0;
+    const rateVal = b.rate ?? b.marginalRate ?? 0;
+    if (maxVal === null || taxableAnnual <= maxVal) {
+      return (b.baseTax || 0) + (taxableAnnual - overVal) * rateVal;
     }
   }
   return 0;

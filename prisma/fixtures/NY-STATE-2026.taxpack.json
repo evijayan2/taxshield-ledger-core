@@ -1,0 +1,180 @@
+{
+  "packageCode": "NY-STATE-2026",
+  "name": "State of New York Statutory Tax Rules 2026",
+  "version": "1.0.0",
+  "jurisdictionCode": "NY",
+  "generatedAt": "2026-09-06T14:46:08.668Z",
+  "jurisdictions": [
+    {
+      "code": "NY-STATE",
+      "name": "State of New York",
+      "level": "STATE",
+      "state": "NY",
+      "parentJurisdictionCode": "US-FED"
+    }
+  ],
+  "rules": [
+    {
+      "ruleCode": "NY_SIT_BRACKETS",
+      "name": "NY Personal Income Tax Withholding Brackets",
+      "category": "WITHHOLDING",
+      "taxType": "STATE_INCOME_TAX",
+      "jurisdictionCode": "NY-STATE",
+      "description": "New York state personal income tax withholding brackets (4.0% up to 10.9%).",
+      "versions": [
+        {
+          "versionCode": "NY-SIT-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "BRACKET_PERCENTAGE",
+          "ruleData": {
+            "brackets": [
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 1,
+                "incomeFrom": 0,
+                "incomeTo": 8500,
+                "baseTax": 0,
+                "marginalRate": 0.04
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 2,
+                "incomeFrom": 8500,
+                "incomeTo": 11700,
+                "baseTax": 340,
+                "marginalRate": 0.045
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 3,
+                "incomeFrom": 11700,
+                "incomeTo": 13900,
+                "baseTax": 484,
+                "marginalRate": 0.0525
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 4,
+                "incomeFrom": 13900,
+                "incomeTo": 80650,
+                "baseTax": 599.5,
+                "marginalRate": 0.055
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 5,
+                "incomeFrom": 80650,
+                "incomeTo": 215400,
+                "baseTax": 4270.75,
+                "marginalRate": 0.06
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 6,
+                "incomeFrom": 215400,
+                "incomeTo": 1077550,
+                "baseTax": 12355.75,
+                "marginalRate": 0.0685
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 7,
+                "incomeFrom": 1077550,
+                "incomeTo": null,
+                "baseTax": 71413,
+                "marginalRate": 0.109
+              }
+            ]
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "NYS Department of Taxation and Finance",
+              "title": "NYS Dept of Taxation & Finance Publication NYS-50 2026",
+              "statuteReference": "N.Y. Tax Law § 601",
+              "sourceUrl": "https://www.tax.ny.gov/forms/withholding_cur_forms.htm",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "New York state personal income tax withholding brackets."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-ny-pit-01",
+              "description": "Income under $8.5k - 4.0%",
+              "inputPayload": {
+                "grossWages": 5000,
+                "filingStatus": "SINGLE"
+              },
+              "expectedOutput": {
+                "taxAmount": 200,
+                "taxableWages": 5000
+              }
+            }
+          ],
+          "checksum": "sha256:5e3a16d59dafcb03c0d42052b5ccebe7221d31e0c327a3048badd0070fc38328",
+          "publishedAt": "2026-09-06T14:46:08.668Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "NY_SUTA_EMPLOYER",
+      "name": "NY Employer SUTA Tax Rate",
+      "category": "EMPLOYER_TAX",
+      "taxType": "STATE_UNEMPLOYMENT_TAX",
+      "jurisdictionCode": "NY-STATE",
+      "description": "New York Unemployment Insurance standard new employer rate (4.1% on $12,500 wage cap).",
+      "versions": [
+        {
+          "versionCode": "NY-SUTA-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.041,
+            "wageCap": 12500
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "NYS Department of Labor",
+              "title": "NYS Dept of Labor UI Employer Contribution Rates 2026",
+              "statuteReference": "N.Y. Lab. Law § 581",
+              "sourceUrl": "https://dol.ny.gov/unemployment-insurance-information-employers",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "New York Unemployment Insurance standard new employer rate is 4.1%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-ny-suta-01",
+              "description": "Standard wage within cap",
+              "inputPayload": {
+                "grossWages": 10000,
+                "priorCumulativeWages": 0
+              },
+              "expectedOutput": {
+                "taxAmount": 410,
+                "taxableWages": 10000,
+                "effectiveRate": 0.041
+              }
+            }
+          ],
+          "checksum": "sha256:64ec2bdd9c52518f2ab257afd537f2c37e2b2ca154f55304fbf7e3259a9e5c72",
+          "publishedAt": "2026-09-06T14:46:08.668Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    }
+  ],
+  "manifestChecksum": "sha256:e18edeba72252fdcc7dfcf3be5a43d45e336a5a9bc423bc5d455cbc74bc05cb3"
+}

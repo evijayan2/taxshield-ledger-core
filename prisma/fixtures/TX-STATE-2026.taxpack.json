@@ -1,0 +1,161 @@
+{
+  "packageCode": "TX-STATE-2026",
+  "name": "State of Texas Statutory Tax Rules 2026",
+  "version": "1.0.0",
+  "jurisdictionCode": "TX",
+  "generatedAt": "2026-09-06T14:46:08.666Z",
+  "jurisdictions": [
+    {
+      "code": "TX",
+      "name": "State of Texas",
+      "level": "STATE",
+      "state": "TX",
+      "parentJurisdictionCode": "US-FED"
+    }
+  ],
+  "rules": [
+    {
+      "ruleCode": "TX_SIT_RATE",
+      "name": "Texas Personal Income Tax (No State PIT)",
+      "category": "WITHHOLDING",
+      "taxType": "STATE_INCOME_TAX",
+      "jurisdictionCode": "TX",
+      "description": "Texas constitutional prohibition on personal income tax (0.00% withholding).",
+      "versions": [
+        {
+          "versionCode": "TX-SIT-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "TX_COMPTROLLER",
+              "title": "Texas Constitution Article 8 Section 24-a",
+              "statuteReference": "Tex. Const. art. VIII, § 24-a",
+              "sourceUrl": "https://comptroller.texas.gov/",
+              "publicationDate": "2025-12-01",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "The legislature may not impose a tax on the net incomes of natural persons, including a person's share of partnership and unincorporated association income."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-tx-pit-01",
+              "description": "Standard $1,000 wage check - 0.00% state tax",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 0,
+                "taxableWages": 1000,
+                "effectiveRate": 0
+              }
+            },
+            {
+              "id": "tc-tx-pit-02",
+              "description": "Standard $5,000 wage check - 0.00% state tax",
+              "inputPayload": {
+                "grossWages": 5000
+              },
+              "expectedOutput": {
+                "taxAmount": 0,
+                "taxableWages": 5000,
+                "effectiveRate": 0
+              }
+            }
+          ],
+          "checksum": "sha256:afe5ecab90805e4339d999549d82746b50aafcd8e587e1411634016a588c3b19",
+          "publishedAt": "2026-09-06T14:46:08.666Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "TX_SUTA_EMPLOYER",
+      "name": "Texas Unemployment Tax Employer Rate",
+      "category": "EMPLOYER_TAX",
+      "taxType": "STATE_UNEMPLOYMENT_TAX",
+      "jurisdictionCode": "TX",
+      "description": "Texas Workforce Commission standard new employer unemployment tax rate (2.7% on $9,000 cap).",
+      "versions": [
+        {
+          "versionCode": "TX-SUTA-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.027,
+            "wageCap": 9000
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "TEXAS_WORKFORCE_COMMISSION",
+              "title": "Texas Workforce Commission Employer Tax Rates 2026",
+              "statuteReference": "Tex. Lab. Code § 204.006",
+              "sourceUrl": "https://www.twc.texas.gov/businesses/unemployment-tax-rates",
+              "publicationDate": "2025-12-10",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Standard entry rate for new employers in Texas is 2.70 percent on taxable wages up to $9,000."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-tx-suta-01",
+              "description": "Standard wage within $9,000 SUTA cap",
+              "inputPayload": {
+                "grossWages": 5000,
+                "priorCumulativeWages": 0
+              },
+              "expectedOutput": {
+                "taxAmount": 135,
+                "taxableWages": 5000,
+                "effectiveRate": 0.027
+              }
+            },
+            {
+              "id": "tc-tx-suta-02",
+              "description": "Wage reaching $9,000 SUTA cap",
+              "inputPayload": {
+                "grossWages": 5000,
+                "priorCumulativeWages": 7000
+              },
+              "expectedOutput": {
+                "taxAmount": 54,
+                "taxableWages": 2000,
+                "effectiveRate": 0.027
+              }
+            },
+            {
+              "id": "tc-tx-suta-03",
+              "description": "Wage strictly beyond $9,000 SUTA cap",
+              "inputPayload": {
+                "grossWages": 5000,
+                "priorCumulativeWages": 10000
+              },
+              "expectedOutput": {
+                "taxAmount": 0,
+                "taxableWages": 0,
+                "effectiveRate": 0.027
+              }
+            }
+          ],
+          "checksum": "sha256:beec7c961666d8f684c0c2ee8352aaaa0466fcf577a504fe496d97a52be86167",
+          "publishedAt": "2026-09-06T14:46:08.666Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    }
+  ],
+  "manifestChecksum": "sha256:240c437072c5ed4d636d609e39522af7196d5c08284f1d12b1bc8691e5a36912"
+}

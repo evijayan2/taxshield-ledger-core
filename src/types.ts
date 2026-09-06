@@ -1,20 +1,22 @@
+export type TaxFilingFrequency = 'SEMI_MONTHLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';
+export type PayrollFrequency = 'WEEKLY' | 'BI_WEEKLY' | 'SEMI_MONTHLY' | 'MONTHLY';
+
 export interface Company {
   id: string;
   name: string;
   ein: string;
-  stateTaxId: string; // PA Account ID
+  stateTaxId: string;
   address: string;
   city: string;
   state: string;
   zip: string;
   ownerName: string;
   ownerEmail: string;
-  ownerTaxBracket: number; // e.g. 24 for 24%
-  stateFilingFrequency?: 'SEMI_MONTHLY' | 'MONTHLY' | 'QUARTERLY';
-  filingFrequencyPA?: 'SEMI_MONTHLY' | 'MONTHLY' | 'QUARTERLY'; // Legacy alias
-  payFrequency?: 'WEEKLY' | 'BI_WEEKLY' | 'SEMI_MONTHLY' | 'MONTHLY';
-  standardMileageRate: number; // e.g. 0.67
-  // Company Banking & Mercury API Integration
+  ownerTaxBracket: number;
+  stateFilingFrequency?: TaxFilingFrequency;
+  filingFrequencyPA?: TaxFilingFrequency;
+  payFrequency?: PayrollFrequency;
+  standardMileageRate: number;
   bankName?: string;
   routingNumber?: string;
   accountNumber?: string;
@@ -39,26 +41,23 @@ export interface Employee {
   state?: string;
   zip?: string;
   employmentType: 'W2_HOURLY' | 'W2_SALARY' | '1099_CONTRACTOR';
-  payRate: number; // hourly rate ($) or salary per period ($)
+  payRate: number;
   payFrequency?: 'WEEKLY' | 'BI_WEEKLY' | 'SEMI_MONTHLY' | 'MONTHLY';
-  // Federal W-4
   w4FilingStatus: 'SINGLE' | 'MARRIED_FILING_JOINTLY' | 'HEAD_OF_HOUSEHOLD';
   w4MultipleJobs: boolean;
-  w4DependentCredit: number; // $ annual credit
+  w4DependentCredit: number;
   w4OtherIncome: number;
   w4Deductions: number;
   w4ExtraWithholding: number;
-  // Generic State & Local Tax
   workState?: string;
   stateW4FilingStatus?: string;
   stateAllowances?: number;
-  localTaxJurisdictionCode?: string; // e.g. 460401 or DE-WILMINGTON
+  localTaxJurisdictionCode?: string;
   localTaxJurisdictionName?: string;
-  localTaxRate?: number; // e.g. 0.01 (1.0%)
-  localFlatTaxAnnual?: number; // e.g. 52 ($52/yr LST)
+  localTaxRate?: number;
+  localFlatTaxAnnual?: number;
   localFlatTaxExempt?: boolean;
   taxAttributes?: Record<string, unknown>;
-  // Legacy PA aliases (optional)
   paPsdCode?: string;
   paPsdName?: string;
   paResidentEitRate?: number;
@@ -66,7 +65,6 @@ export interface Employee {
   paWorkEitRate?: number;
   paLstAnnual?: number;
   paLstExempt?: boolean;
-  // Payout Details — ACH Direct Deposit (Single Bank Supported)
   bankName?: string;
   accountType?: 'CHECKING' | 'SAVINGS';
   routingNumber?: string;
@@ -78,18 +76,15 @@ export interface Employee {
 export interface MileageLog {
   id: string;
   employeeId: string;
-  tripDate: string; // YYYY-MM-DD
-  // 5-Point IRS Requirements
+  tripDate: string;
   originLocation: string;
   destinationLocation: string;
-  businessPurpose: string; // Specific (e.g. "Vendor negotiation at distributor")
+  businessPurpose: string;
   startOdometer: number;
   endOdometer: number;
   calculatedMiles: number;
-  // Financial
-  rateApplied: number; // e.g. 0.67
-  mileageAllowance: number; // miles * rate
-  // Reimbursement & Tax Categorization
+  rateApplied: number;
+  mileageAllowance: number;
   isReimbursableAccountablePlan: boolean;
   status: 'PENDING' | 'APPROVED' | 'REIMBURSED' | 'OWNER_TAX_DEDUCTION';
   linkedPayStubId?: string;
@@ -100,11 +95,11 @@ export interface MileageLog {
 export interface TravelExpense {
   id: string;
   employeeId: string;
-  mileageLogId?: string; // optionally linked to a 5-point trip
-  expenseDate: string; // YYYY-MM-DD
+  mileageLogId?: string;
+  expenseDate: string;
   category: 'PARKING_FEE' | 'TOLL_ROAD' | 'BRIDGE_TOLL' | 'PUBLIC_TRANSIT';
-  description: string; // e.g. "PA Turnpike Exit 326 Valley Forge Toll"
-  amount: number; // in dollars e.g. 14.50
+  description: string;
+  amount: number;
   paymentSource: 'PERSONAL_OUT_OF_POCKET' | 'COMPANY_CARD' | 'EZPASS_BUSINESS';
   receiptNote?: string;
   receiptUrl?: string;
@@ -121,42 +116,34 @@ export interface PayStub {
   periodStart: string;
   periodEnd: string;
   payDate: string;
-  // Earnings
   hoursWorked: number;
   overtimeHours: number;
   hourlyRate: number;
   grossEarnings: number;
-  // Taxes Withheld (Employee)
   federalIncomeTax: number;
-  socialSecurityTax: number; // 6.2%
-  medicareTax: number; // 1.45%
-  // State & Locality Attribution
-  stateCode?: string; // e.g. "PA", "DE", "NJ"
-  localityCode?: string; // e.g. "PA-PSD-460401"
-  localityName?: string; // e.g. "Lower Merion Township"
+  socialSecurityTax: number;
+  medicareTax: number;
+  stateCode?: string;
+  localityCode?: string;
+  localityName?: string;
   stateIncomeTax?: number;
   localIncomeTax?: number;
   localFlatTax?: number;
   totalEmployeeTaxes: number;
-  // Accountable Plan Reimbursements (Non-Taxable)
   mileageReimbursement: number;
   travelExpensesReimbursement: number;
   totalReimbursements: number;
-  // Net Take-Home Pay
-  netPay: number; // (Gross - Taxes) + Reimbursements
-  // Employer Taxes (Company Cost)
-  employerSocialSecurity: number; // 6.2%
-  employerMedicare: number; // 1.45%
-  employerStateUnemployment?: number; // SUTA e.g. 3.5%
+  netPay: number;
+  employerSocialSecurity: number;
+  employerMedicare: number;
+  employerStateUnemployment?: number;
   taxBreakdown?: Record<string, unknown>;
-  // Legacy aliases
   paStateTax?: number;
   paLocalEit?: number;
   paLst?: number;
   employerPaUc?: number;
   totalEmployerTaxes: number;
-  totalCompanyCost: number; // Gross + Employer Taxes + Reimbursements
-  // Disbursement
+  totalCompanyCost: number;
   disbursementMethod: 'ACH' | 'CHECK';
   disbursementStatus: 'PENDING' | 'PAID';
   achTraceRef?: string;
@@ -185,9 +172,9 @@ export interface ComplianceTask {
   id: string;
   taxYear?: number;
   jurisdiction: 'FEDERAL_IRS' | 'PA_MYPATH_SIT' | 'PA_MYPATH_UC' | 'LOCAL_EIT' | 'SSA_W2';
-  formIdentifier: string; // 'FORM_941', 'REV_1667', 'PA_UC_2', 'LOCAL_EIT_QTR', 'W2_W3'
+  formIdentifier: string;
   title: string;
-  taxPeriodLabel: string; // e.g. '2026 Q1', '2026 Annual'
+  taxPeriodLabel: string;
   dueDate: string;
   status: 'PENDING' | 'READY_TO_FILE' | 'FILED';
   amountDue: number;
@@ -198,13 +185,13 @@ export interface ComplianceTask {
 
 export interface GeneralExpense {
   id: string;
-  expenseDate: string; // YYYY-MM-DD
+  expenseDate: string;
   category: 'LEGAL_ACCOUNTING' | 'SOFTWARE_TECH' | 'OFFICE_SUPPLIES' | 'PHONE_INTERNET' | 'BANK_FEES' | 'MARKETING' | 'UTILITIES' | 'RENT_LEASE' | 'OTHER';
   payee: string;
   description: string;
   amount: number;
   paidBy: 'OWNER_PERSONAL' | 'LLC_ACCOUNT';
-  scheduleCLine?: string; // e.g. "Line 18 - Office Expense", "Line 8 - Advertising"
+  scheduleCLine?: string;
   isTaxDeductible?: boolean;
   receiptUrl?: string;
   receiptNote?: string;
@@ -215,7 +202,7 @@ export interface GeneralExpense {
 export interface AuditLogEntry {
   id: string;
   companyId?: string;
-  entityType: string; // e.g. "GeneralExpense", "PayrollRun", "MileageLog", "TaxRuleVersion"
+  entityType: string;
   entityId: string;
   action: 'CREATE' | 'UPDATE' | 'DELETE' | 'ACTIVATE';
   actorId: string;
@@ -227,7 +214,7 @@ export interface AuditLogEntry {
 
 export interface CalculationSnapshot {
   id: string;
-  calculationType: string; // e.g. "PAYROLL_WITHHOLDING", "MILEAGE_DEDUCTION"
+  calculationType: string;
   entityId: string;
   ruleVersionIds: string[];
   snapshotData: Record<string, unknown>;
@@ -247,9 +234,9 @@ export type TimesheetStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
 export interface TimesheetEntry {
   id: string;
   employeeId: string;
-  workDate: string; // YYYY-MM-DD
-  startTime: string; // HH:mm format
-  endTime: string; // HH:mm format
+  workDate: string;
+  startTime: string;
+  endTime: string;
   unpaidBreakMinutes: number;
   regularHours: number;
   overtimeHours: number;
@@ -258,7 +245,5 @@ export interface TimesheetEntry {
   linkedPayStubId?: string;
   createdAt: string;
 }
-
-export type AllAppData = import('./utils/storage').AllAppData;
 
 

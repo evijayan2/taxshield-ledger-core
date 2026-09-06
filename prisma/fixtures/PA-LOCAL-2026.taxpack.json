@@ -1,0 +1,2100 @@
+{
+  "packageCode": "PA-LOCAL-2026",
+  "name": "Commonwealth of Pennsylvania Act 32 Local EIT School District Tax Rules 2026",
+  "version": "1.0.0",
+  "jurisdictionCode": "PA",
+  "generatedAt": "2026-09-06T14:46:08.663Z",
+  "jurisdictions": [
+    {
+      "code": "PA-PSD-460401",
+      "name": "Lower Merion School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-510101",
+      "name": "Philadelphia City School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-460101",
+      "name": "Abington School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-230801",
+      "name": "Upper Darby School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-090201",
+      "name": "Central Bucks School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-090901",
+      "name": "Pennsbury School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-460601",
+      "name": "North Penn School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150801",
+      "name": "West Chester Area School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-230601",
+      "name": "Radnor Township School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150701",
+      "name": "Tredyffrin-Easttown School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-460801",
+      "name": "Spring-Ford Area School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-460301",
+      "name": "Methacton School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-460201",
+      "name": "Colonial School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-460901",
+      "name": "Upper Merion Area School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-461101",
+      "name": "Wissahickon School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-230301",
+      "name": "Haverford Township School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-230401",
+      "name": "Marple Newtown School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-230701",
+      "name": "Springfield School District (Delco)",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-090301",
+      "name": "Council Rock School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-090701",
+      "name": "Neshaminy School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-090101",
+      "name": "Bensalem Township School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150201",
+      "name": "Downingtown Area School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150202",
+      "name": "East Brandywine Township (Downingtown Area SD)",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150301",
+      "name": "Great Valley School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150501",
+      "name": "Phoenixville Area School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-210201",
+      "name": "Central Dauphin School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-210301",
+      "name": "Harrisburg City School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-390101",
+      "name": "Allentown City School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-390401",
+      "name": "Parkland School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-700101",
+      "name": "Pittsburgh Public Schools",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-480101",
+      "name": "Bethlehem Area School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-060801",
+      "name": "Reading School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-250201",
+      "name": "Erie City School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-350801",
+      "name": "Scranton School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-360501",
+      "name": "Lancaster School District",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-880000",
+      "name": "Out of State / Non-PA Resident",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    }
+  ],
+  "rules": [
+    {
+      "ruleCode": "PA_LOCAL_EIT_460401",
+      "name": "PA Act 32 Local EIT Rate - Lower Merion School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-460401",
+      "description": "Local Earned Income Tax (EIT) rate for Lower Merion School District (PSD Code 460401).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-460401-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "460401",
+            "county": "Montgomery"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 460401: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-460401-01",
+              "description": "Calculation check for Lower Merion School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:230cfe048ec500275f7fb3757a55ff969fddd31b550b0dcc8eb1664fb4dcc1f3",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_510101",
+      "name": "PA Act 32 Local EIT Rate - Philadelphia City School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-510101",
+      "description": "Local Earned Income Tax (EIT) rate for Philadelphia City School District (PSD Code 510101).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-510101-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.0375,
+            "psdCode": "510101",
+            "county": "Philadelphia"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 510101: 3.7500%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-510101-01",
+              "description": "Calculation check for Philadelphia City School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 37.5
+              }
+            }
+          ],
+          "checksum": "sha256:69a11d19f115c95be0c396f2353d3838584591891071ca9e37b75e48fe224ff3",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_460101",
+      "name": "PA Act 32 Local EIT Rate - Abington School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-460101",
+      "description": "Local Earned Income Tax (EIT) rate for Abington School District (PSD Code 460101).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-460101-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "460101",
+            "county": "Montgomery"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 460101: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-460101-01",
+              "description": "Calculation check for Abington School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:d46cddff89d0f2f73ae17e72722924bb1fa487b495cd21e1db9b2b80bf862b95",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_230801",
+      "name": "PA Act 32 Local EIT Rate - Upper Darby School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-230801",
+      "description": "Local Earned Income Tax (EIT) rate for Upper Darby School District (PSD Code 230801).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-230801-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "230801",
+            "county": "Delaware"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 230801: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-230801-01",
+              "description": "Calculation check for Upper Darby School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:c20807eb2b50d0bc074367469d7b1b395779880a6cd58b14fa869588643bea2e",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_090201",
+      "name": "PA Act 32 Local EIT Rate - Central Bucks School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-090201",
+      "description": "Local Earned Income Tax (EIT) rate for Central Bucks School District (PSD Code 090201).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-090201-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "090201",
+            "county": "Bucks"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 090201: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-090201-01",
+              "description": "Calculation check for Central Bucks School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:49e19803cba939c1afb92dec65b1a64495e62d5dde31b16ef9b754f027ac0532",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_090901",
+      "name": "PA Act 32 Local EIT Rate - Pennsbury School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-090901",
+      "description": "Local Earned Income Tax (EIT) rate for Pennsbury School District (PSD Code 090901).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-090901-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "090901",
+            "county": "Bucks"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 090901: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-090901-01",
+              "description": "Calculation check for Pennsbury School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:94aa3ab876fd59e5d90b46eb1047f812d18f1c7a5ba4698a6345af1ad78a2869",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_460601",
+      "name": "PA Act 32 Local EIT Rate - North Penn School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-460601",
+      "description": "Local Earned Income Tax (EIT) rate for North Penn School District (PSD Code 460601).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-460601-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "460601",
+            "county": "Montgomery"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 460601: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-460601-01",
+              "description": "Calculation check for North Penn School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:a67419e5f9a9fe8c7f951a879172b6d098cc89d223b01a8b1c6126c96fb782f2",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150801",
+      "name": "PA Act 32 Local EIT Rate - West Chester Area School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150801",
+      "description": "Local Earned Income Tax (EIT) rate for West Chester Area School District (PSD Code 150801).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150801-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "150801",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150801: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150801-01",
+              "description": "Calculation check for West Chester Area School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:7c4d8b0197f4944b9956f6af9f8f9909bd836d8d99a9e67083594cb3cb6631ce",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_230601",
+      "name": "PA Act 32 Local EIT Rate - Radnor Township School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-230601",
+      "description": "Local Earned Income Tax (EIT) rate for Radnor Township School District (PSD Code 230601).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-230601-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "230601",
+            "county": "Delaware"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 230601: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-230601-01",
+              "description": "Calculation check for Radnor Township School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:cbeab963a12619ebf22cdde1e7d79784b896e49e46569f7993b73cf4866d15f4",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150701",
+      "name": "PA Act 32 Local EIT Rate - Tredyffrin-Easttown School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150701",
+      "description": "Local Earned Income Tax (EIT) rate for Tredyffrin-Easttown School District (PSD Code 150701).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150701-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "150701",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150701: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150701-01",
+              "description": "Calculation check for Tredyffrin-Easttown School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:7f852f96cd82bc35a20d37c3919bb328afdcfc9f7de6a8b7da530646fb23a969",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_460801",
+      "name": "PA Act 32 Local EIT Rate - Spring-Ford Area School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-460801",
+      "description": "Local Earned Income Tax (EIT) rate for Spring-Ford Area School District (PSD Code 460801).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-460801-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "460801",
+            "county": "Montgomery"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 460801: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-460801-01",
+              "description": "Calculation check for Spring-Ford Area School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:e8ffa4acbc0c630fd9cd2b24c2b9b9108376e9835823f89c336d445c283c0f4d",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_460301",
+      "name": "PA Act 32 Local EIT Rate - Methacton School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-460301",
+      "description": "Local Earned Income Tax (EIT) rate for Methacton School District (PSD Code 460301).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-460301-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "460301",
+            "county": "Montgomery"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 460301: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-460301-01",
+              "description": "Calculation check for Methacton School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:c7cf9c1f0bdbad0ae6d93b0bfb62c195dea393caead4b26c7987889be4d1a79e",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_460201",
+      "name": "PA Act 32 Local EIT Rate - Colonial School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-460201",
+      "description": "Local Earned Income Tax (EIT) rate for Colonial School District (PSD Code 460201).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-460201-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "460201",
+            "county": "Montgomery"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 460201: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-460201-01",
+              "description": "Calculation check for Colonial School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:9856c6bacaa64c5bf59c1aa881498092948535b3970dabafab6bf14c40a94548",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_460901",
+      "name": "PA Act 32 Local EIT Rate - Upper Merion Area School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-460901",
+      "description": "Local Earned Income Tax (EIT) rate for Upper Merion Area School District (PSD Code 460901).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-460901-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "460901",
+            "county": "Montgomery"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 460901: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-460901-01",
+              "description": "Calculation check for Upper Merion Area School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:162e100feddaff1c51f9b21bcd5b374729a355973ffd92ac01b928803e4e5473",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_461101",
+      "name": "PA Act 32 Local EIT Rate - Wissahickon School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-461101",
+      "description": "Local Earned Income Tax (EIT) rate for Wissahickon School District (PSD Code 461101).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-461101-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "461101",
+            "county": "Montgomery"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 461101: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-461101-01",
+              "description": "Calculation check for Wissahickon School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:cc9e8c1723a67c79ce244f33e98b07f9274570c5e28c263992cc3459432fa8c6",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_230301",
+      "name": "PA Act 32 Local EIT Rate - Haverford Township School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-230301",
+      "description": "Local Earned Income Tax (EIT) rate for Haverford Township School District (PSD Code 230301).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-230301-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "230301",
+            "county": "Delaware"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 230301: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-230301-01",
+              "description": "Calculation check for Haverford Township School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:56b8195cfa8c199c26371859a0e867be54b9d500a9cda373e100f31c4438e68e",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_230401",
+      "name": "PA Act 32 Local EIT Rate - Marple Newtown School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-230401",
+      "description": "Local Earned Income Tax (EIT) rate for Marple Newtown School District (PSD Code 230401).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-230401-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "230401",
+            "county": "Delaware"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 230401: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-230401-01",
+              "description": "Calculation check for Marple Newtown School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:fec2f599f3972442b31b02d5a5d49a84feed952e3d16a26b10b83bdcb1808ef7",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_230701",
+      "name": "PA Act 32 Local EIT Rate - Springfield School District (Delco)",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-230701",
+      "description": "Local Earned Income Tax (EIT) rate for Springfield School District (Delco) (PSD Code 230701).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-230701-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "230701",
+            "county": "Delaware"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 230701: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-230701-01",
+              "description": "Calculation check for Springfield School District (Delco)",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:ad82047e3d6f4c1ad73e6733a96f058c4b8625ec3e41471628eb77cd207f1e2f",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_090301",
+      "name": "PA Act 32 Local EIT Rate - Council Rock School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-090301",
+      "description": "Local Earned Income Tax (EIT) rate for Council Rock School District (PSD Code 090301).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-090301-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "090301",
+            "county": "Bucks"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 090301: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-090301-01",
+              "description": "Calculation check for Council Rock School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:dca8b23410341c70af776dce3b334ba98747509f3605946a086cc3abc299b443",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_090701",
+      "name": "PA Act 32 Local EIT Rate - Neshaminy School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-090701",
+      "description": "Local Earned Income Tax (EIT) rate for Neshaminy School District (PSD Code 090701).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-090701-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "090701",
+            "county": "Bucks"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 090701: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-090701-01",
+              "description": "Calculation check for Neshaminy School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:08f858af179ff6ab092d427f6468f92622e7e1ba21f687d6bcf4bf48a14544a9",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_090101",
+      "name": "PA Act 32 Local EIT Rate - Bensalem Township School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-090101",
+      "description": "Local Earned Income Tax (EIT) rate for Bensalem Township School District (PSD Code 090101).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-090101-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "090101",
+            "county": "Bucks"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 090101: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-090101-01",
+              "description": "Calculation check for Bensalem Township School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:60fdcd25aee3997e8b73f5f1d47994967c1649f40e6a08350c2057bc2fc09215",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150201",
+      "name": "PA Act 32 Local EIT Rate - Downingtown Area School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150201",
+      "description": "Local Earned Income Tax (EIT) rate for Downingtown Area School District (PSD Code 150201).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150201-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01125,
+            "psdCode": "150201",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150201: 1.1250%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150201-01",
+              "description": "Calculation check for Downingtown Area School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 11.25
+              }
+            }
+          ],
+          "checksum": "sha256:c43dd1aff56904a505ceae4a17fa655fb7ec52a591cfcf21686057b4a102de76",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150202",
+      "name": "PA Act 32 Local EIT Rate - East Brandywine Township (Downingtown Area SD)",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150202",
+      "description": "Local Earned Income Tax (EIT) rate for East Brandywine Township (Downingtown Area SD) (PSD Code 150202).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150202-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01125,
+            "psdCode": "150202",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150202: 1.1250%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150202-01",
+              "description": "Calculation check for East Brandywine Township (Downingtown Area SD)",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 11.25
+              }
+            }
+          ],
+          "checksum": "sha256:e318f71a58e31e27a0d142d7716db69e7b33cd27079352ad73a79d849a67b1e6",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150301",
+      "name": "PA Act 32 Local EIT Rate - Great Valley School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150301",
+      "description": "Local Earned Income Tax (EIT) rate for Great Valley School District (PSD Code 150301).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150301-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "150301",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150301: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150301-01",
+              "description": "Calculation check for Great Valley School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:302ae2b14ad3099ac33af305f56c78b2d3d284b89b678fa297b102fb3ed25f95",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150501",
+      "name": "PA Act 32 Local EIT Rate - Phoenixville Area School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150501",
+      "description": "Local Earned Income Tax (EIT) rate for Phoenixville Area School District (PSD Code 150501).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150501-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "150501",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150501: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150501-01",
+              "description": "Calculation check for Phoenixville Area School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:9452f681f9086a64cf7817383d448c4419a02442f4c01e26d7bd45276fcb59a8",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_210201",
+      "name": "PA Act 32 Local EIT Rate - Central Dauphin School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-210201",
+      "description": "Local Earned Income Tax (EIT) rate for Central Dauphin School District (PSD Code 210201).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-210201-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "210201",
+            "county": "Dauphin"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 210201: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-210201-01",
+              "description": "Calculation check for Central Dauphin School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:9507a489f007ddc0eae6e151e0a2e18da97e350bd43d2f6a9ab76c067e32df17",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_210301",
+      "name": "PA Act 32 Local EIT Rate - Harrisburg City School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-210301",
+      "description": "Local Earned Income Tax (EIT) rate for Harrisburg City School District (PSD Code 210301).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-210301-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.02,
+            "psdCode": "210301",
+            "county": "Dauphin"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 210301: 2.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-210301-01",
+              "description": "Calculation check for Harrisburg City School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 20
+              }
+            }
+          ],
+          "checksum": "sha256:885a813c194f820fa2f1867a36451fa9796aa97461623c796ab9190d7072e31f",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_390101",
+      "name": "PA Act 32 Local EIT Rate - Allentown City School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-390101",
+      "description": "Local Earned Income Tax (EIT) rate for Allentown City School District (PSD Code 390101).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-390101-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.0185,
+            "psdCode": "390101",
+            "county": "Lehigh"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 390101: 1.8500%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-390101-01",
+              "description": "Calculation check for Allentown City School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 18.5
+              }
+            }
+          ],
+          "checksum": "sha256:b85091a5c819c2cea21799c5f69c1b0d8d3e16ed220f3d29e8ebe7a53fc53e52",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_390401",
+      "name": "PA Act 32 Local EIT Rate - Parkland School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-390401",
+      "description": "Local Earned Income Tax (EIT) rate for Parkland School District (PSD Code 390401).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-390401-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "390401",
+            "county": "Lehigh"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 390401: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-390401-01",
+              "description": "Calculation check for Parkland School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:02044d43f518fb2d3b05989a5050090d4550b5780cb14d37a988aa163f3f4004",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_700101",
+      "name": "PA Act 32 Local EIT Rate - Pittsburgh Public Schools",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-700101",
+      "description": "Local Earned Income Tax (EIT) rate for Pittsburgh Public Schools (PSD Code 700101).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-700101-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.03,
+            "psdCode": "700101",
+            "county": "Allegheny"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 700101: 3.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-700101-01",
+              "description": "Calculation check for Pittsburgh Public Schools",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 30
+              }
+            }
+          ],
+          "checksum": "sha256:033640b00510bb2e7d03babe08cf1130a64a61413233fbd4b33deac4ab2a1ec9",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_480101",
+      "name": "PA Act 32 Local EIT Rate - Bethlehem Area School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-480101",
+      "description": "Local Earned Income Tax (EIT) rate for Bethlehem Area School District (PSD Code 480101).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-480101-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "480101",
+            "county": "Northampton"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 480101: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-480101-01",
+              "description": "Calculation check for Bethlehem Area School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:9271475595e4caccf937a1febb9f2c2b9088b7e6c767182ea5cd57f61e1d7ebb",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_060801",
+      "name": "PA Act 32 Local EIT Rate - Reading School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-060801",
+      "description": "Local Earned Income Tax (EIT) rate for Reading School District (PSD Code 060801).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-060801-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.013,
+            "psdCode": "060801",
+            "county": "Berks"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 060801: 1.3000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-060801-01",
+              "description": "Calculation check for Reading School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 13
+              }
+            }
+          ],
+          "checksum": "sha256:562dac7571dda391e89fec675a8e9883868a67b905c532bc5f039d255b929af5",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_250201",
+      "name": "PA Act 32 Local EIT Rate - Erie City School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-250201",
+      "description": "Local Earned Income Tax (EIT) rate for Erie City School District (PSD Code 250201).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-250201-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.0118,
+            "psdCode": "250201",
+            "county": "Erie"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 250201: 1.1800%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-250201-01",
+              "description": "Calculation check for Erie City School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 11.8
+              }
+            }
+          ],
+          "checksum": "sha256:cc70613074833d26cad7dfbd38a689fa2521e81ec98338046b25e5dd016bfcc0",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_350801",
+      "name": "PA Act 32 Local EIT Rate - Scranton School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-350801",
+      "description": "Local Earned Income Tax (EIT) rate for Scranton School District (PSD Code 350801).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-350801-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.034,
+            "psdCode": "350801",
+            "county": "Lackawanna"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 350801: 3.4000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-350801-01",
+              "description": "Calculation check for Scranton School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 34
+              }
+            }
+          ],
+          "checksum": "sha256:0ff2df454eff7011babdec868e0b344afdf783158b6998b5bf8aa18be843307f",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_360501",
+      "name": "PA Act 32 Local EIT Rate - Lancaster School District",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-360501",
+      "description": "Local Earned Income Tax (EIT) rate for Lancaster School District (PSD Code 360501).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-360501-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.011,
+            "psdCode": "360501",
+            "county": "Lancaster"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 360501: 1.1000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-360501-01",
+              "description": "Calculation check for Lancaster School District",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 11
+              }
+            }
+          ],
+          "checksum": "sha256:909a966d90b3427400d8b3b0dadf035e8cc37938343ec3f8d449e768554ab400",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_880000",
+      "name": "PA Act 32 Local EIT Rate - Out of State / Non-PA Resident",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-880000",
+      "description": "Local Earned Income Tax (EIT) rate for Out of State / Non-PA Resident (PSD Code 880000).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-880000-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0,
+            "psdCode": "880000",
+            "county": "Out of State"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 880000: 0.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-880000-01",
+              "description": "Calculation check for Out of State / Non-PA Resident",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 0
+              }
+            }
+          ],
+          "checksum": "sha256:2fd23194af7688153b6f3702d885c33f48205b30a076fdaeb9e695dacd3031d5",
+          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    }
+  ],
+  "manifestChecksum": "sha256:e1cfc0237595d08d743d38ffdee8a521d39d0b3f0dac3bdb37346e83f80d451c"
+}

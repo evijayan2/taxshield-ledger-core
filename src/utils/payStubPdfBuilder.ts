@@ -56,6 +56,12 @@ export function generatePayStubPdf(
   org: Organization
 ): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+  doc.setProperties({
+    title: `${org.name || 'Pay Stub'} - ${employee.firstName} ${employee.lastName} (${stub.payDate})`,
+    subject: `Official Earnings Statement for ${employee.firstName} ${employee.lastName}`,
+    author: org.name || 'TaxShield Ledger',
+    creator: 'TaxShield Ledger',
+  });
   const pageWidth = doc.internal.pageSize.getWidth(); // 612 pt
   const margin = 40;
   const contentWidth = pageWidth - margin * 2; // 532 pt
@@ -392,6 +398,7 @@ export function printPayStubPdf(
 
   // Attempt silent print via temporary invisible iframe
   const iframe = document.createElement('iframe');
+  iframe.title = `${org.name || 'Pay Stub'} - ${employee.firstName} ${employee.lastName} (${stub.payDate})`;
   iframe.style.position = 'fixed';
   iframe.style.right = '0';
   iframe.style.bottom = '0';
@@ -409,6 +416,7 @@ export function printPayStubPdf(
       // Fallback if browser blocks iframe print: open blob URL in window for print
       const printWin = window.open(blobUrl, '_blank');
       if (printWin) {
+        printWin.document.title = `${org.name || 'Pay Stub'} - ${employee.firstName} ${employee.lastName} (${stub.payDate})`;
         printWin.focus();
       }
     }
@@ -424,6 +432,8 @@ export function savePayStubPdf(
   org: Organization
 ): void {
   const doc = generatePayStubPdf(stub, employee, org);
-  const cleanName = `${employee.lastName}_${employee.firstName}_PayStub_${stub.payDate}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const cleanOrg = (org.name || 'Company').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const cleanEmp = `${employee.lastName}_${employee.firstName}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const cleanName = `${cleanOrg}_${cleanEmp}_PayStub_${stub.payDate}`.replace(/[^a-zA-Z0-9_-]/g, '_');
   doc.save(`${cleanName}.pdf`);
 }

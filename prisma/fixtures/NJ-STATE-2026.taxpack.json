@@ -1,0 +1,180 @@
+{
+  "packageCode": "NJ-STATE-2026",
+  "name": "State of New Jersey Statutory Tax Rules 2026",
+  "version": "1.0.0",
+  "jurisdictionCode": "NJ",
+  "generatedAt": "2026-09-06T14:46:08.668Z",
+  "jurisdictions": [
+    {
+      "code": "NJ-STATE",
+      "name": "State of New Jersey",
+      "level": "STATE",
+      "state": "NJ",
+      "parentJurisdictionCode": "US-FED"
+    }
+  ],
+  "rules": [
+    {
+      "ruleCode": "NJ_SIT_BRACKETS",
+      "name": "NJ Gross Income Tax Withholding Brackets",
+      "category": "WITHHOLDING",
+      "taxType": "STATE_INCOME_TAX",
+      "jurisdictionCode": "NJ-STATE",
+      "description": "New Jersey Gross Income Tax graduated withholding rate brackets (1.4% up to 10.75%).",
+      "versions": [
+        {
+          "versionCode": "NJ-SIT-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "BRACKET_PERCENTAGE",
+          "ruleData": {
+            "brackets": [
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 1,
+                "incomeFrom": 0,
+                "incomeTo": 20000,
+                "baseTax": 0,
+                "marginalRate": 0.014
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 2,
+                "incomeFrom": 20000,
+                "incomeTo": 35000,
+                "baseTax": 280,
+                "marginalRate": 0.0175
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 3,
+                "incomeFrom": 35000,
+                "incomeTo": 40000,
+                "baseTax": 542.5,
+                "marginalRate": 0.035
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 4,
+                "incomeFrom": 40000,
+                "incomeTo": 75000,
+                "baseTax": 717.5,
+                "marginalRate": 0.0552
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 5,
+                "incomeFrom": 75000,
+                "incomeTo": 500000,
+                "baseTax": 2649.5,
+                "marginalRate": 0.0637
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 6,
+                "incomeFrom": 500000,
+                "incomeTo": 1000000,
+                "baseTax": 29722,
+                "marginalRate": 0.0897
+              },
+              {
+                "filingStatus": "SINGLE",
+                "bracketSequence": 7,
+                "incomeFrom": 1000000,
+                "incomeTo": null,
+                "baseTax": 74572,
+                "marginalRate": 0.1075
+              }
+            ]
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "NJ Division of Taxation",
+              "title": "NJ Division of Taxation Gross Income Tax Tables 2026",
+              "statuteReference": "N.J.S.A. 54A:2-1",
+              "sourceUrl": "https://www.nj.gov/treasury/taxation/njit1.shtml",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "New Jersey Gross Income Tax rates from 1.4% up to 10.75% for taxable income."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-nj-pit-01",
+              "description": "Income under $20k - 1.4%",
+              "inputPayload": {
+                "grossWages": 10000,
+                "filingStatus": "SINGLE"
+              },
+              "expectedOutput": {
+                "taxAmount": 140,
+                "taxableWages": 10000
+              }
+            }
+          ],
+          "checksum": "sha256:3bd714ffcf5698b7bb1dc60242156b3b73880b5dad0b0bd60e9592257a983489",
+          "publishedAt": "2026-09-06T14:46:08.668Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "NJ_SUI_EMPLOYER",
+      "name": "NJ Employer SUI Tax Rate",
+      "category": "EMPLOYER_TAX",
+      "taxType": "STATE_UNEMPLOYMENT_TAX",
+      "jurisdictionCode": "NJ-STATE",
+      "description": "New Jersey State Unemployment Insurance new employer rate (2.8% on $42,300 wage cap).",
+      "versions": [
+        {
+          "versionCode": "NJ-SUI-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.028,
+            "wageCap": 42300
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "NJ Department of Labor",
+              "title": "NJ Dept of Labor & Workforce Development Employer Rates 2026",
+              "statuteReference": "N.J.S.A. 43:21-7",
+              "sourceUrl": "https://www.nj.gov/labor/ea/ea_index.html",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "New employer tax rate for New Jersey unemployment insurance is 2.8%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-nj-sui-01",
+              "description": "Standard wage within cap",
+              "inputPayload": {
+                "grossWages": 10000,
+                "priorCumulativeWages": 0
+              },
+              "expectedOutput": {
+                "taxAmount": 280,
+                "taxableWages": 10000,
+                "effectiveRate": 0.028
+              }
+            }
+          ],
+          "checksum": "sha256:fb28a504d85341a807b1492deaf79720986ca24b1e65fea0100a884526a02595",
+          "publishedAt": "2026-09-06T14:46:08.668Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    }
+  ],
+  "manifestChecksum": "sha256:3db2f335d95756e4d9f8f0d67f2363cb4da448fecc27454a19015d2254114532"
+}

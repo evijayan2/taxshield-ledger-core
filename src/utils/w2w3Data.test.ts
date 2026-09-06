@@ -141,4 +141,21 @@ describe('W2 & W3 Data Engine', () => {
     expect(w3Summary.totalBox2FedTax).toBe(369.23);
     expect(w3Summary.employerEin).toBe('12-3456789');
   });
+
+  it('should render Downingtown Area School District in Box 20 when employee is in Downingtown SD', () => {
+    const downingtownEmp: Employee = {
+      ...sampleEmployee,
+      paPsdCode: '150201',
+      paPsdName: 'Downingtown Area School District',
+      localTaxJurisdictionCode: 'PA-PSD-150201',
+      localTaxJurisdictionName: 'Downingtown Area School District',
+    };
+    const downingtownStub: PayStub = {
+      ...samplePayStub,
+      localityName: 'Downingtown Area School District',
+      localityCode: 'PA-PSD-150201',
+    };
+    const summary = calculateEmployeeW2(downingtownEmp, [downingtownStub], sampleOrg, 2026);
+    expect(summary.boxes.box20Locality).toBe('Downingtown Area School District');
+  });
 });

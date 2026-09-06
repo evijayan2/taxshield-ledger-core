@@ -45,6 +45,7 @@ model Company {
   ownerEmail          String            @map("ownerEmail")
   ownerTaxBracket     Float             @default(24.0) @map("ownerTaxBracket")
   stateFilingFrequency String           @default("MONTHLY") @map("stateFilingFrequency")
+  payFrequency         String?          @default("BI_WEEKLY") @map("payFrequency")
   standardMileageRate Float?            @default(0.67) @map("standardMileageRate")
   bankName            String?           @map("bankName")
   routingNumber       String?           @map("routingNumber")

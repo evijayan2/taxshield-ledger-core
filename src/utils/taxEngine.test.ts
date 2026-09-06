@@ -137,6 +137,39 @@ describe('Delaware Multi-State Tax Calculations', () => {
     expect(result.employerStateUnemployment).toBeGreaterThan(0);
     expect(result.taxBreakdown).toBeDefined();
     expect((result.taxBreakdown as any).state.code).toBe('DE');
+    expect((result.taxBreakdown as any).workState).toBe('DE');
+    expect((result.taxBreakdown as any).residentState).toBe('DE');
+  });
+
+  it('should calculate DE SIT and PA resident local EIT for employee living in PA working in DE', () => {
+    const crossBorderEmployee: Employee = {
+      ...baseEmployee,
+      age: 28,
+      relationshipToOwner: 'NONE',
+      state: 'PA', // Lives in Pennsylvania
+      workState: 'DE', // Company / work location in Delaware
+      paPsdCode: '460401',
+      paPsdName: 'Lower Merion School District',
+      paResidentEitRate: 0.01, // 1% PA resident EIT
+      localTaxJurisdictionCode: 'PA-PSD-460401',
+      localTaxJurisdictionName: 'Lower Merion School District',
+      localTaxRate: 0.01,
+      localFlatTaxAnnual: 52.0,
+      localFlatTaxExempt: false,
+    };
+
+    const result = calculateGrossToNet(crossBorderEmployee, 40); // $600 gross (40 hrs @ $15)
+    expect(result.stateCode).toBe('DE');
+    expect(result.stateIncomeTax).toBeGreaterThan(0);
+    expect((result.taxBreakdown as any).state.code).toBe('DE');
+    expect((result.taxBreakdown as any).workState).toBe('DE');
+    expect((result.taxBreakdown as any).residentState).toBe('PA');
+    // PA Resident Local EIT applied at 1% ($6.00)
+    expect(result.localIncomeTax).toBe(6.00);
+    expect(result.localityName).toBe('Lower Merion School District');
+    // DE SUTA employer contribution applied
+    expect(result.employerStateUnemployment).toBeGreaterThan(0);
+    expect((result.taxBreakdown as any).suta.name).toContain('DE');
   });
 });
 

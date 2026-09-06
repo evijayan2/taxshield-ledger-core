@@ -1,0 +1,363 @@
+{
+  "packageCode": "US-FED-2026",
+  "name": "United States Federal Statutory Tax Rules 2026",
+  "version": "1.0.0",
+  "jurisdictionCode": "US-FED",
+  "generatedAt": "2026-09-06T14:46:08.658Z",
+  "jurisdictions": [
+    {
+      "code": "US-FED",
+      "name": "United States Federal Government",
+      "level": "FEDERAL",
+      "state": null
+    }
+  ],
+  "rules": [
+    {
+      "ruleCode": "FED_FICA_SS",
+      "name": "Social Security (OASDI) Employee Withholding",
+      "category": "WITHHOLDING",
+      "taxType": "FICA_SOCIAL_SECURITY",
+      "jurisdictionCode": "US-FED",
+      "description": "Federal Old-Age, Survivors, and Disability Insurance employee withholding rate of 6.2% up to annual wage cap.",
+      "versions": [
+        {
+          "versionCode": "FED-FICA-SS-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.062,
+            "wageCap": 176100
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "IRS",
+              "title": "IRS Publication 15 (Circular E) 2026",
+              "statuteReference": "26 U.S. Code § 3101(a)",
+              "sourceUrl": "https://www.irs.gov/publications/p15",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "The 2026 social security tax rate is 6.2% for the employee. The social security wage base limit is $176,100."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-fed-ss-01",
+              "description": "Standard monthly wage below cap",
+              "inputPayload": {
+                "grossWages": 5000,
+                "priorCumulativeWages": 0
+              },
+              "expectedOutput": {
+                "taxAmount": 310,
+                "taxableWages": 5000,
+                "effectiveRate": 0.062
+              }
+            },
+            {
+              "id": "tc-fed-ss-02",
+              "description": "Partial wage cap threshold reach",
+              "inputPayload": {
+                "grossWages": 10000,
+                "priorCumulativeWages": 170000
+              },
+              "expectedOutput": {
+                "taxAmount": 378.2,
+                "taxableWages": 6100,
+                "effectiveRate": 0.062
+              }
+            },
+            {
+              "id": "tc-fed-ss-03",
+              "description": "Prior cumulative wages strictly exceeds wage cap",
+              "inputPayload": {
+                "grossWages": 5000,
+                "priorCumulativeWages": 180000
+              },
+              "expectedOutput": {
+                "taxAmount": 0,
+                "taxableWages": 0,
+                "effectiveRate": 0.062
+              }
+            }
+          ],
+          "checksum": "sha256:ecccb0fd1372851dab48faa1490ce8a805c843256c71398930c4cd3f2d380e3c",
+          "publishedAt": "2026-09-06T14:46:08.658Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "FED_FICA_MEDICARE",
+      "name": "Medicare Hospital Insurance Employee Withholding",
+      "category": "WITHHOLDING",
+      "taxType": "FICA_MEDICARE",
+      "jurisdictionCode": "US-FED",
+      "description": "Federal Medicare Hospital Insurance employee withholding rate of 1.45% on all earnings.",
+      "versions": [
+        {
+          "versionCode": "FED-FICA-MED-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.0145
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "IRS",
+              "title": "IRS Publication 15 (Circular E) 2026",
+              "statuteReference": "26 U.S. Code § 3101(b)",
+              "sourceUrl": "https://www.irs.gov/publications/p15",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "The Medicare tax rate is 1.45% each for the employee and employer, unchanged for 2026."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-fed-med-01",
+              "description": "Standard monthly Medicare withholding",
+              "inputPayload": {
+                "grossWages": 5000
+              },
+              "expectedOutput": {
+                "taxAmount": 72.5,
+                "taxableWages": 5000,
+                "effectiveRate": 0.0145
+              }
+            },
+            {
+              "id": "tc-fed-med-02",
+              "description": "Higher wage Medicare withholding",
+              "inputPayload": {
+                "grossWages": 10000
+              },
+              "expectedOutput": {
+                "taxAmount": 145,
+                "taxableWages": 10000,
+                "effectiveRate": 0.0145
+              }
+            }
+          ],
+          "checksum": "sha256:8ef2c325943947f01f84402936b1ba013385e88b1f9df04842fbd80f432792c1",
+          "publishedAt": "2026-09-06T14:46:08.658Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "FED_FIT_WITHHOLDING",
+      "name": "Federal Income Tax Withholding Brackets",
+      "category": "WITHHOLDING",
+      "taxType": "FEDERAL_INCOME_TAX",
+      "jurisdictionCode": "US-FED",
+      "description": "Percentage method income tax withholding tables (IRS Pub 15-T).",
+      "versions": [
+        {
+          "versionCode": "FED-FIT-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "BRACKET_PERCENTAGE",
+          "ruleData": {
+            "standardAllowances": {
+              "SINGLE": 14600,
+              "MARRIED_FILING_JOINTLY": 29200,
+              "HEAD_OF_HOUSEHOLD": 21900
+            },
+            "brackets": {
+              "MARRIED_FILING_JOINTLY": [
+                {
+                  "incomeFrom": 0,
+                  "incomeTo": 23200,
+                  "over": 0,
+                  "max": 23200,
+                  "marginalRate": 0.1,
+                  "rate": 0.1,
+                  "baseTax": 0
+                },
+                {
+                  "incomeFrom": 23200,
+                  "incomeTo": 94300,
+                  "over": 23200,
+                  "max": 94300,
+                  "marginalRate": 0.12,
+                  "rate": 0.12,
+                  "baseTax": 2320
+                },
+                {
+                  "incomeFrom": 94300,
+                  "incomeTo": 201050,
+                  "over": 94300,
+                  "max": 201050,
+                  "marginalRate": 0.22,
+                  "rate": 0.22,
+                  "baseTax": 10852
+                },
+                {
+                  "incomeFrom": 201050,
+                  "incomeTo": 383900,
+                  "over": 201050,
+                  "max": 383900,
+                  "marginalRate": 0.24,
+                  "rate": 0.24,
+                  "baseTax": 34337
+                },
+                {
+                  "incomeFrom": 383900,
+                  "incomeTo": null,
+                  "over": 383900,
+                  "max": null,
+                  "marginalRate": 0.32,
+                  "rate": 0.32,
+                  "baseTax": 78221
+                }
+              ],
+              "SINGLE": [
+                {
+                  "incomeFrom": 0,
+                  "incomeTo": 11600,
+                  "over": 0,
+                  "max": 11600,
+                  "marginalRate": 0.1,
+                  "rate": 0.1,
+                  "baseTax": 0
+                },
+                {
+                  "incomeFrom": 11600,
+                  "incomeTo": 47150,
+                  "over": 11600,
+                  "max": 47150,
+                  "marginalRate": 0.12,
+                  "rate": 0.12,
+                  "baseTax": 1160
+                },
+                {
+                  "incomeFrom": 47150,
+                  "incomeTo": 100525,
+                  "over": 47150,
+                  "max": 100525,
+                  "marginalRate": 0.22,
+                  "rate": 0.22,
+                  "baseTax": 5426
+                },
+                {
+                  "incomeFrom": 100525,
+                  "incomeTo": 191950,
+                  "over": 100525,
+                  "max": 191950,
+                  "marginalRate": 0.24,
+                  "rate": 0.24,
+                  "baseTax": 17168.5
+                },
+                {
+                  "incomeFrom": 191950,
+                  "incomeTo": null,
+                  "over": 191950,
+                  "max": null,
+                  "marginalRate": 0.32,
+                  "rate": 0.32,
+                  "baseTax": 39110.5
+                }
+              ]
+            }
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "IRS",
+              "title": "IRS Publication 15-T (Federal Income Tax Withholding Methods) 2026",
+              "statuteReference": "26 U.S. Code § 3402",
+              "sourceUrl": "https://www.irs.gov/pub/irs-pdf/p15t.pdf",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Percentage method income tax withholding tables."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-fed-fit-01",
+              "description": "Standard FIT withholding calculation",
+              "inputPayload": {
+                "grossWages": 5000,
+                "filingStatus": "SINGLE"
+              },
+              "expectedOutput": {
+                "taxAmount": 500,
+                "taxableWages": 5000
+              }
+            }
+          ],
+          "checksum": "sha256:789bd9ca2fb37a09747adc93fec0bbb6b5c71d12954b114ca0903861cd5e2031",
+          "publishedAt": "2026-09-06T14:46:08.658Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "IRS_MILEAGE",
+      "name": "IRS Standard Business Mileage Rate",
+      "category": "MILEAGE",
+      "taxType": "MILEAGE_REIMBURSEMENT",
+      "jurisdictionCode": "US-FED",
+      "description": "IRS standard mileage rate for business use of a vehicle (67 cents per mile).",
+      "versions": [
+        {
+          "versionCode": "IRS-MILEAGE-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "PER_MILE_RATE",
+          "ruleData": {
+            "rate": 0.67,
+            "ratePerMile": 0.67
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "IRS",
+              "title": "IRS Notice 2026-08 Standard Mileage Rates",
+              "statuteReference": "Rev. Proc. 2019-46; IRS Notice 2026-08",
+              "sourceUrl": "https://www.irs.gov/newsroom/standard-mileage-rates",
+              "publicationDate": "2025-12-20",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "The standard mileage rate for business use of a van, pickup or panel truck will be 67 cents per mile."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-fed-mileage-01",
+              "description": "100 business miles calculation",
+              "inputPayload": {
+                "miles": 100
+              },
+              "expectedOutput": {
+                "reimbursementAmount": 67,
+                "miles": 100,
+                "ratePerMile": 0.67
+              }
+            }
+          ],
+          "checksum": "sha256:41603369fef2359a18542571fa9bead8837f7ec4e11e9e3d0a5470204864f42d",
+          "publishedAt": "2026-09-06T14:46:08.658Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    }
+  ],
+  "manifestChecksum": "sha256:dae866cc83aa39e61741db3949cac0ccd33af83f99545bc597e05b93678827f6"
+}

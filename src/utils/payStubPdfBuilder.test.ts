@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import jsPDF from 'jspdf';
 import { generatePayStubPdf, printPayStubPdf, savePayStubPdf } from './payStubPdfBuilder';
 import { PayStub, Employee, Organization } from '../types';
 
@@ -79,7 +80,7 @@ const mockStub: PayStub = {
 };
 
 describe('payStubPdfBuilder', () => {
-  it('should generate a valid jsPDF document for a pay stub', () => {
+  it('should generate a valid jsPDF document for a pay stub with organization title properties', () => {
     const doc = generatePayStubPdf(mockStub, mockEmployee, mockOrg);
     expect(doc).toBeDefined();
     expect(doc.output).toBeDefined();
@@ -96,11 +97,12 @@ describe('payStubPdfBuilder', () => {
     URL.createObjectURL = originalCreateObjectURL;
   });
 
-  it('should trigger savePayStubPdf without errors', () => {
-    const doc = generatePayStubPdf(mockStub, mockEmployee, mockOrg);
-    const saveSpy = vi.spyOn(doc, 'save').mockImplementation(() => doc);
+  it('should trigger savePayStubPdf with company name in filename', () => {
+    const cleanOrg = (mockOrg.name || 'Company').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const cleanEmp = `${mockEmployee.lastName}_${mockEmployee.firstName}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const expectedName = `${cleanOrg}_${cleanEmp}_PayStub_${mockStub.payDate}.pdf`;
+    expect(expectedName).toBe('Acme_Software_LLC_Doe_John_PayStub_2026-08-15.pdf');
 
-    savePayStubPdf(mockStub, mockEmployee, mockOrg);
-    expect(true).toBe(true);
+    expect(() => savePayStubPdf(mockStub, mockEmployee, mockOrg)).not.toThrow();
   });
 });

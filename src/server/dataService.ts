@@ -6,32 +6,39 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
 
   const client = await pool.connect();
   try {
-    // Check if snapshot exists
-    const snapRes = await client.query('SELECT data FROM app_state_snapshots WHERE id = $1', ['current_state']);
-    if (snapRes.rows.length > 0 && snapRes.rows[0].data) {
-      return snapRes.rows[0].data;
-    }
+    // 1. Concurrently fetch company profile and latest state snapshot
+    const [compRes, snapRes] = await Promise.all([
+      client.query('SELECT * FROM companies LIMIT 1').catch(() => ({ rows: [] })),
+      client.query('SELECT data FROM app_state_snapshots WHERE id = $1', ['current_state']).catch(() => ({ rows: [] }))
+    ]);
 
-    // Reconstruct company from companies table
-    const compRes = await client.query('SELECT * FROM companies LIMIT 1');
     let org: any = null;
     if (compRes.rows.length > 0) {
       const cRow = compRes.rows[0];
+      const stateTaxId = cRow.statetaxid ?? cRow.state_tax_id ?? cRow.stateTaxId ?? '';
+      const ownerName = cRow.ownername ?? cRow.owner_name ?? cRow.ownerName ?? '';
+      const ownerEmail = cRow.owneremail ?? cRow.owner_email ?? cRow.ownerEmail ?? '';
+      const rawBracket = cRow.ownertaxbracket ?? cRow.owner_tax_bracket ?? cRow.ownerTaxBracket ?? 24;
+      const stateFilingFreq = cRow.statefilingfrequency ?? cRow.state_filing_frequency ?? cRow.stateFilingFrequency ?? cRow.filingFrequencyPa ?? 'MONTHLY';
+      const payFreq = cRow.payfrequency ?? cRow.pay_frequency ?? cRow.payFrequency ?? 'BI_WEEKLY';
+      const rawMileage = cRow.standardmileagerate ?? cRow.standard_mileage_rate ?? cRow.standardMileageRate ?? 0.67;
+
       org = {
         id: cRow.id,
-        name: cRow.name,
-        ein: cRow.ein,
-        stateTaxId: cRow.stateTaxId,
-        address: cRow.address,
-        city: cRow.city,
-        state: cRow.state,
-        zip: cRow.zip,
-        ownerName: cRow.ownerName,
-        ownerEmail: cRow.ownerEmail,
-        ownerTaxBracket: parseFloat(cRow.ownerTaxBracket),
-        stateFilingFrequency: cRow.stateFilingFrequency || cRow.filingFrequencyPa || 'MONTHLY',
-        filingFrequencyPA: cRow.stateFilingFrequency || cRow.filingFrequencyPa || 'MONTHLY',
-        standardMileageRate: cRow.standardMileageRate ? parseFloat(cRow.standardMileageRate) : 0.67,
+        name: cRow.name || '',
+        ein: cRow.ein || '',
+        stateTaxId: stateTaxId || '',
+        address: cRow.address || '',
+        city: cRow.city || '',
+        state: cRow.state || 'PA',
+        zip: cRow.zip || '',
+        ownerName: ownerName || '',
+        ownerEmail: ownerEmail || '',
+        ownerTaxBracket: typeof rawBracket === 'number' ? rawBracket : (parseFloat(rawBracket) || 24),
+        stateFilingFrequency: stateFilingFreq || 'MONTHLY',
+        filingFrequencyPA: stateFilingFreq || 'MONTHLY',
+        payFrequency: payFreq || 'BI_WEEKLY',
+        standardMileageRate: typeof rawMileage === 'number' ? rawMileage : (parseFloat(rawMileage) || 0.67),
       };
     } else {
       org = {
@@ -48,11 +55,46 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
         ownerTaxBracket: 24,
         stateFilingFrequency: 'MONTHLY',
         filingFrequencyPA: 'MONTHLY',
+        payFrequency: 'BI_WEEKLY',
         standardMileageRate: 0.67,
       };
     }
 
-    const empRes = await client.query('SELECT * FROM employees ORDER BY first_name ASC');
+    // Fast path: Check if snapshot exists and return immediately
+    if (snapRes.rows.length > 0 && snapRes.rows[0].data) {
+      const snapData = snapRes.rows[0].data;
+      if (org && org.name && org.ein) {
+        snapData.org = { ...snapData.org, ...org };
+        snapData.company = snapData.org;
+      }
+      return snapData;
+    }
+
+    // Fallback: Concurrently fetch all normalized relational tables
+    const [
+      empRes,
+      milRes,
+      trvRes,
+      runRes,
+      stubRes,
+      taskRes,
+      genRes,
+      tsRes,
+      auditRes,
+      tyRes,
+    ] = await Promise.all([
+      client.query('SELECT * FROM employees ORDER BY first_name ASC').catch(() => ({ rows: [] })),
+      client.query('SELECT * FROM mileage_logs ORDER BY trip_date DESC').catch(() => ({ rows: [] })),
+      client.query('SELECT * FROM travel_expenses ORDER BY expense_date DESC').catch(() => ({ rows: [] })),
+      client.query('SELECT * FROM payroll_runs ORDER BY period_end DESC').catch(() => ({ rows: [] })),
+      client.query('SELECT * FROM pay_stubs ORDER BY pay_date DESC').catch(() => ({ rows: [] })),
+      client.query('SELECT * FROM compliance_tasks ORDER BY due_date ASC').catch(() => ({ rows: [] })),
+      client.query('SELECT * FROM general_expenses ORDER BY expense_date DESC').catch(() => ({ rows: [] })),
+      client.query('SELECT * FROM timesheets ORDER BY work_date DESC').catch(() => ({ rows: [] })),
+      client.query('SELECT * FROM audit_log_entries ORDER BY timestamp DESC').catch(() => ({ rows: [] })),
+      client.query('SELECT * FROM tax_years ORDER BY year DESC').catch(() => ({ rows: [] })),
+    ]);
+
     const employees = empRes.rows.map(e => {
       const locCode = e.local_tax_jurisdiction_code || e.pa_psd_code || undefined;
       const locName = e.local_tax_jurisdiction_name || e.pa_psd_name || undefined;
@@ -106,7 +148,6 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       };
     });
 
-    const milRes = await client.query('SELECT * FROM mileage_logs ORDER BY trip_date DESC');
     const mileageLogs = milRes.rows.map(m => ({
       id: m.id,
       employeeId: m.employee_id,
@@ -126,7 +167,6 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       createdAt: m.created_at,
     }));
 
-    const trvRes = await client.query('SELECT * FROM travel_expenses ORDER BY expense_date DESC');
     const travelExpenses = trvRes.rows.map(t => ({
       id: t.id,
       employeeId: t.employee_id,
@@ -144,7 +184,6 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       createdAt: t.created_at,
     }));
 
-    const runRes = await client.query('SELECT * FROM payroll_runs ORDER BY period_end DESC');
     const payrollRuns = runRes.rows.map(r => ({
       id: r.id,
       periodStart: r.period_start,
@@ -162,7 +201,6 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       lockedAt: r.locked_at,
     }));
 
-    const stubRes = await client.query('SELECT * FROM pay_stubs ORDER BY pay_date DESC');
     const payStubs = stubRes.rows.map(s => {
       const stateCode = s.state_code || 'PA';
       const localityCode = s.locality_code || undefined;
@@ -215,7 +253,6 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       };
     });
 
-    const taskRes = await client.query('SELECT * FROM compliance_tasks ORDER BY due_date ASC');
     const complianceTasks = taskRes.rows.map(c => ({
       id: c.id,
       jurisdiction: c.jurisdiction,
@@ -234,7 +271,6 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       createdAt: c.created_at,
     }));
 
-    const genRes = await client.query('SELECT * FROM general_expenses ORDER BY expense_date DESC');
     const generalExpenses = genRes.rows.map(g => ({
       id: g.id,
       expenseDate: g.expense_date,
@@ -248,53 +284,41 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       createdAt: g.created_at,
     }));
 
-    let timesheets: any[] = [];
-    try {
-      const tsRes = await client.query('SELECT * FROM timesheets ORDER BY work_date DESC');
-      timesheets = tsRes.rows.map(t => ({
-        id: t.id,
-        employeeId: t.employee_id,
-        workDate: t.work_date,
-        startTime: t.start_time,
-        endTime: t.end_time,
-        unpaidBreakMinutes: parseInt(t.unpaid_break_minutes || '0', 10),
-        regularHours: parseFloat(t.regular_hours),
-        overtimeHours: parseFloat(t.overtime_hours),
-        notes: t.notes,
-        status: t.status,
-        linkedPayStubId: t.linked_pay_stub_id,
-        createdAt: t.created_at,
-      }));
-    } catch {}
+    const timesheets = tsRes.rows.map(t => ({
+      id: t.id,
+      employeeId: t.employee_id,
+      workDate: t.work_date,
+      startTime: t.start_time,
+      endTime: t.end_time,
+      unpaidBreakMinutes: parseInt(t.unpaid_break_minutes || '0', 10),
+      regularHours: parseFloat(t.regular_hours),
+      overtimeHours: parseFloat(t.overtime_hours),
+      notes: t.notes,
+      status: t.status,
+      linkedPayStubId: t.linked_pay_stub_id,
+      createdAt: t.created_at,
+    }));
 
-    let auditLogs: any[] = [];
-    try {
-      const auditRes = await client.query('SELECT * FROM audit_log_entries ORDER BY timestamp DESC');
-      auditLogs = auditRes.rows.map(a => ({
-        id: a.id,
-        companyId: a.companyId,
-        entityType: a.entityType,
-        entityId: a.entityId,
-        action: a.action,
-        actorId: a.actorId,
-        previousState: a.previousState,
-        newState: a.newState,
-        reason: a.reason,
-        timestamp: a.timestamp,
-      }));
-    } catch {}
+    const auditLogs = auditRes.rows.map(a => ({
+      id: a.id,
+      companyId: a.companyId,
+      entityType: a.entityType,
+      entityId: a.entityId,
+      action: a.action,
+      actorId: a.actorId,
+      previousState: a.previousState,
+      newState: a.newState,
+      reason: a.reason,
+      timestamp: a.timestamp,
+    }));
 
-    let taxYears: any[] = [];
-    try {
-      const tyRes = await client.query('SELECT * FROM tax_years ORDER BY year DESC');
-      taxYears = tyRes.rows.map(t => ({
-        id: t.id,
-        companyId: t.companyId,
-        year: parseInt(t.year, 10),
-        status: t.status,
-        createdAt: t.createdAt,
-      }));
-    } catch {}
+    let taxYears = tyRes.rows.map(t => ({
+      id: t.id,
+      companyId: t.companyId,
+      year: parseInt(t.year, 10),
+      status: t.status,
+      createdAt: t.createdAt,
+    }));
 
     if (taxYears.length === 0) {
       taxYears = [{
@@ -355,8 +379,8 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       await client.query(
         `INSERT INTO companies (
           id, name, ein, "stateTaxId", address, city, state, zip, 
-          "ownerName", "ownerEmail", "ownerTaxBracket", "stateFilingFrequency", "standardMileageRate", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, CURRENT_TIMESTAMP)
+          "ownerName", "ownerEmail", "ownerTaxBracket", "stateFilingFrequency", "payFrequency", "standardMileageRate", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP)
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name,
           ein = EXCLUDED.ein,
@@ -369,6 +393,7 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
           "ownerEmail" = EXCLUDED."ownerEmail",
           "ownerTaxBracket" = EXCLUDED."ownerTaxBracket",
           "stateFilingFrequency" = EXCLUDED."stateFilingFrequency",
+          "payFrequency" = EXCLUDED."payFrequency",
           "standardMileageRate" = EXCLUDED."standardMileageRate",
           "updatedAt" = CURRENT_TIMESTAMP`,
         [
@@ -384,6 +409,7 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
           companyData.ownerEmail || 'owner@micro-llc.tax',
           companyData.ownerTaxBracket || 24,
           companyData.stateFilingFrequency || companyData.filingFrequencyPA || companyData.filingFrequencyPa || 'MONTHLY',
+          companyData.payFrequency || 'BI_WEEKLY',
           companyData.standardMileageRate || 0.67,
         ]
       );

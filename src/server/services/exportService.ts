@@ -1,4 +1,4 @@
-import { AllAppData, GeneralExpense, MileageLog, PayStub } from '../../types';
+import { GeneralExpense, MileageLog, PayStub } from '../../types';
 
 /**
  * Format string field safely for CSV export.
@@ -73,10 +73,10 @@ export function generatePayrollSummaryCsv(stubs: PayStub[]): string {
     escapeCsv(s.employeeId),
     escapeCsv(s.grossEarnings.toFixed(2)),
     escapeCsv(s.federalIncomeTax.toFixed(2)),
-    escapeCsv(s.paStateTax.toFixed(2)),
+    escapeCsv((s.paStateTax ?? 0).toFixed(2)),
     escapeCsv(s.socialSecurityTax.toFixed(2)),
     escapeCsv(s.medicareTax.toFixed(2)),
-    escapeCsv(s.paLocalEit.toFixed(2)),
+    escapeCsv((s.paLocalEit ?? 0).toFixed(2)),
     escapeCsv(s.totalReimbursements.toFixed(2)),
     escapeCsv(s.netPay.toFixed(2)),
     escapeCsv(s.totalCompanyCost.toFixed(2)),

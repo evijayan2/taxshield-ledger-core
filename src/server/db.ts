@@ -37,7 +37,7 @@ export function getPool(): pg.Pool | null {
       ssl: isLocalhost ? false : { rejectUnauthorized: false },
       max: 10,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
+      connectionTimeoutMillis: 3000,
     });
 
     pool.on('error', (err) => {
@@ -65,7 +65,7 @@ async function ensureLocalDatabaseExists(connStr: string): Promise<boolean> {
     const maintenancePool = new Pool({
       connectionString: url.toString(),
       ssl: false,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 3000,
     });
 
     const client = await maintenancePool.connect();
@@ -133,14 +133,25 @@ export async function initPostgresTables(): Promise<{ success: boolean; message:
     }
   }
   try {
-    const compCountRes = await client.query('SELECT COUNT(*) FROM companies').catch(() => ({ rows: [{ count: '0' }] }));
-    const empRes = await client.query('SELECT COUNT(*) FROM employees').catch(() => ({ rows: [{ count: '0' }] }));
-    const milRes = await client.query('SELECT COUNT(*) FROM mileage_logs').catch(() => ({ rows: [{ count: '0' }] }));
-    const trvRes = await client.query('SELECT COUNT(*) FROM travel_expenses').catch(() => ({ rows: [{ count: '0' }] }));
-    const runRes = await client.query('SELECT COUNT(*) FROM payroll_runs').catch(() => ({ rows: [{ count: '0' }] }));
-    const stubRes = await client.query('SELECT COUNT(*) FROM pay_stubs').catch(() => ({ rows: [{ count: '0' }] }));
-    const compRes = await client.query('SELECT COUNT(*) FROM compliance_tasks').catch(() => ({ rows: [{ count: '0' }] }));
-    const auditRes = await client.query('SELECT COUNT(*) FROM audit_log_entries').catch(() => ({ rows: [{ count: '0' }] }));
+    const [
+      compCountRes,
+      empRes,
+      milRes,
+      trvRes,
+      runRes,
+      stubRes,
+      compRes,
+      auditRes
+    ] = await Promise.all([
+      client.query('SELECT COUNT(*) FROM companies').catch(() => ({ rows: [{ count: '0' }] })),
+      client.query('SELECT COUNT(*) FROM employees').catch(() => ({ rows: [{ count: '0' }] })),
+      client.query('SELECT COUNT(*) FROM mileage_logs').catch(() => ({ rows: [{ count: '0' }] })),
+      client.query('SELECT COUNT(*) FROM travel_expenses').catch(() => ({ rows: [{ count: '0' }] })),
+      client.query('SELECT COUNT(*) FROM payroll_runs').catch(() => ({ rows: [{ count: '0' }] })),
+      client.query('SELECT COUNT(*) FROM pay_stubs').catch(() => ({ rows: [{ count: '0' }] })),
+      client.query('SELECT COUNT(*) FROM compliance_tasks').catch(() => ({ rows: [{ count: '0' }] })),
+      client.query('SELECT COUNT(*) FROM audit_log_entries').catch(() => ({ rows: [{ count: '0' }] }))
+    ]);
 
     return {
       success: true,

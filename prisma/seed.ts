@@ -58,10 +58,16 @@ async function main() {
       },
     });
 
+    const rawStatus = String(v.status).toUpperCase();
+    const mappedStatus: RuleStatus =
+      rawStatus === 'PUBLISHED' || rawStatus === 'ACTIVE'
+        ? RuleStatus.ACTIVE
+        : (RuleStatus[rawStatus as keyof typeof RuleStatus] ?? RuleStatus.ACTIVE);
+
     const versionData = {
       ruleId: ruleRecord.id,
       versionNumber: v.versionNumber,
-      status: v.status as RuleStatus,
+      status: mappedStatus,
       ruleType: v.ruleType as RuleType,
       ruleData: JSON.parse(JSON.stringify(v.ruleData)),
       sourceTitle: v.sourceTitle,

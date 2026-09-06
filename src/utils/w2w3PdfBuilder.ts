@@ -151,6 +151,12 @@ function drawW3Header(doc: jsPDF, year: number = 2026): void {
  */
 export function generateW2Pdf(w2: W2EmployeeSummary, org: Organization): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+  doc.setProperties({
+    title: `${org.name || 'Company'} - Form W-2 (${w2.employeeName}) - 2026`,
+    subject: `IRS Form W-2 Wage and Tax Statement for ${w2.employeeName}`,
+    author: org.name || 'TaxShield Ledger',
+    creator: 'TaxShield Ledger',
+  });
 
   // Copy B (Federal Tax Return)
   drawW2Header(doc, 'Copy B — To Be Filed With Employee\'s FEDERAL Tax Return', 2026, 0);
@@ -176,6 +182,12 @@ export function generateW2Pdf(w2: W2EmployeeSummary, org: Organization): jsPDF {
  */
 export function generateW3Pdf(w3: W3TransmittalSummary, org: Organization): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+  doc.setProperties({
+    title: `${org.name || 'Company'} - Form W-3 Transmittal - ${w3.taxYear}`,
+    subject: 'IRS Form W-3 Transmittal of Wage and Tax Statements',
+    author: org.name || 'TaxShield Ledger',
+    creator: 'TaxShield Ledger',
+  });
   const fmt = formatCurrency;
 
   drawW3Header(doc, w3.taxYear);
@@ -225,6 +237,12 @@ export function generateW2W3BundlePdf(
   w3Summary: W3TransmittalSummary
 ): jsPDF {
   const bundleDoc = generateW3Pdf(w3Summary, org);
+  bundleDoc.setProperties({
+    title: `${org.name || 'Company'} - IRS W-2 and W-3 Tax Package - ${w3Summary.taxYear}`,
+    subject: 'IRS Form W-2 and W-3 Wage and Tax Statements Package',
+    author: org.name || 'TaxShield Ledger',
+    creator: 'TaxShield Ledger',
+  });
 
   w2Summaries.forEach(w2 => {
     bundleDoc.addPage();

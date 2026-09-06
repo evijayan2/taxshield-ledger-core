@@ -1,11 +1,12 @@
-import federalRules from './tax-rules.json';
-import deRules from './states/de.json';
-import paRules from './states/pa.json';
-import njRules from './states/nj.json';
-import nyRules from './states/ny.json';
-import ohRules from './states/oh.json';
-import flRules from './states/fl.json';
-import txRules from './states/tx.json';
+import fedPack from './US-FED-2026.taxpack.json';
+import paStatePack from './PA-STATE-2026.taxpack.json';
+import paLocalPack from './PA-LOCAL-2026.taxpack.json';
+import deStatePack from './DE-STATE-2026.taxpack.json';
+import txStatePack from './TX-STATE-2026.taxpack.json';
+import njStatePack from './NJ-STATE-2026.taxpack.json';
+import nyStatePack from './NY-STATE-2026.taxpack.json';
+import ohStatePack from './OH-STATE-2026.taxpack.json';
+import flStatePack from './FL-STATE-2026.taxpack.json';
 
 export interface TaxJurisdictionFixture {
   code: string;
@@ -42,30 +43,84 @@ export interface TaxRulesBundle {
 }
 
 /**
- * Combines federal tax rules and all state-specific tax rule fixtures.
+ * Extracts jurisdictions and rules exclusively from a compiled .taxpack.json package.
  */
-export function getAllTaxRuleFixtures(): TaxRulesBundle {
-  const stateBundles: any[] = [
-    deRules,
-    paRules,
-    njRules,
-    nyRules,
-    ohRules,
-    flRules,
-    txRules,
-  ];
+function extractFromTaxpack(taxpack: any): TaxRulesBundle {
+  const jurisdictions: TaxJurisdictionFixture[] = (taxpack.jurisdictions || []).map((j: any) => ({
+    code: j.code,
+    name: j.name,
+    level: j.level,
+    state: j.state || null,
+  }));
 
-  const jurisdictions: TaxJurisdictionFixture[] = [
-    ...(federalRules.jurisdictions as TaxJurisdictionFixture[]),
-    ...stateBundles.flatMap((s) => s.jurisdictions as TaxJurisdictionFixture[]),
-  ];
-
-  const rules: TaxRuleFixture[] = [
-    ...(federalRules.rules as unknown as TaxRuleFixture[]),
-    ...stateBundles.flatMap((s) => s.rules as unknown as TaxRuleFixture[]),
-  ];
+  const rules: TaxRuleFixture[] = [];
+  for (const r of taxpack.rules || []) {
+    const v = r.versions?.[0];
+    if (!v) continue;
+    const citation = v.citations?.[0] || {};
+    rules.push({
+      jurisdictionCode: r.jurisdictionCode,
+      ruleCode: r.ruleCode,
+      name: r.name,
+      category: r.category,
+      description: r.description || '',
+      version: {
+        versionNumber: v.versionNumber || 1,
+        status: v.status || 'ACTIVE',
+        ruleType: v.ruleType || 'FLAT_RATE',
+        ruleData: v.ruleData || {},
+        sourceTitle: citation.title || 'Official Citation',
+        sourceUrl: citation.sourceUrl || 'https://www.irs.gov',
+        sourcePublisher: citation.authority || 'GOVERNMENT_AUTHORITY',
+        statuteReference: citation.statuteReference || 'Statutory Authority',
+        citationTier: citation.citationTier || 'TIER_1_OFFICIAL',
+        effectiveStart: v.effectiveFrom || '2026-01-01T00:00:00.000Z',
+      },
+    });
+  }
 
   return { jurisdictions, rules };
+}
+
+/**
+ * Combines all tax rule packages sealed by the packaging engine.
+ */
+export function getAllTaxRuleFixtures(): TaxRulesBundle {
+  const taxpacks = [
+    fedPack,
+    paStatePack,
+    paLocalPack,
+    deStatePack,
+    txStatePack,
+    njStatePack,
+    nyStatePack,
+    ohStatePack,
+    flStatePack,
+  ];
+  const packBundles = taxpacks.map(extractFromTaxpack);
+
+  const jurisdictions: TaxJurisdictionFixture[] = packBundles.flatMap((b) => b.jurisdictions);
+  const rules: TaxRuleFixture[] = packBundles.flatMap((b) => b.rules);
+
+  // Deduplicate by ruleCode
+  const uniqueRulesMap = new Map<string, TaxRuleFixture>();
+  for (const r of rules) {
+    if (!uniqueRulesMap.has(r.ruleCode)) {
+      uniqueRulesMap.set(r.ruleCode, r);
+    }
+  }
+
+  const uniqueJurisdictionsMap = new Map<string, TaxJurisdictionFixture>();
+  for (const j of jurisdictions) {
+    if (!uniqueJurisdictionsMap.has(j.code)) {
+      uniqueJurisdictionsMap.set(j.code, j);
+    }
+  }
+
+  return {
+    jurisdictions: Array.from(uniqueJurisdictionsMap.values()),
+    rules: Array.from(uniqueRulesMap.values()),
+  };
 }
 
 export const allTaxRuleFixtures = getAllTaxRuleFixtures();

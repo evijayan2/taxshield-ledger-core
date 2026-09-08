@@ -1,6 +1,20 @@
 import { Employee, Organization, PayStub } from '../types';
 import { findDistrictByPsdCode } from './paSchoolDistricts';
 
+export interface W2LocalLine {
+  localWages: number;
+  localTax: number;
+  localityName: string;
+  psdCode?: string;
+}
+
+export interface W2StateLine {
+  state: string;
+  stateId: string;
+  stateWages: number;
+  stateTax: number;
+}
+
 export interface W2BoxValues {
   box1Wages: number;
   box2FedTax: number;
@@ -19,6 +33,8 @@ export interface W2BoxValues {
   box18LocalWages: number;
   box19LocalTax: number;
   box20Locality: string;
+  localLines?: W2LocalLine[];
+  stateLines?: W2StateLine[];
 }
 
 export interface W2EmployeeSummary {
@@ -99,11 +115,35 @@ export function calculateEmployeeW2(
   let localTax = empStubs.reduce((sum, s) => sum + (s.localIncomeTax ?? s.paLocalEit ?? 0), 0);
   let localFlat = empStubs.reduce((sum, s) => sum + (s.localFlatTax ?? s.paLst ?? 0), 0);
 
-
   const ssCap = 168600;
   const ssWages = Math.min(gross, ssCap);
 
   const empState = (employee.state || employee.workState || org.state || 'PA').toUpperCase();
+
+  // Multi-locality collection from PayStub.taxLines
+  const localMap: Record<string, W2LocalLine> = {};
+
+  for (const stub of empStubs) {
+    if (stub.taxLines && stub.taxLines.length > 0) {
+      for (const line of stub.taxLines) {
+        if (line.jurisdictionType === 'LOCAL_EIT') {
+          const key = line.jurisdictionCode || line.jurisdictionName;
+          if (!localMap[key]) {
+            localMap[key] = {
+              localWages: 0,
+              localTax: 0,
+              localityName: line.jurisdictionName,
+              psdCode: line.jurisdictionCode?.replace('PA-PSD-', ''),
+            };
+          }
+          localMap[key].localWages += line.taxableWages;
+          localMap[key].localTax += line.taxWithheld;
+        }
+      }
+    }
+  }
+
+  const localLines = Object.values(localMap);
 
   const stubLocality = empStubs.find(s => s.localityName && s.localityName.trim() !== '')?.localityName;
 
@@ -119,12 +159,14 @@ export function calculateEmployeeW2(
     ? employee.localTaxJurisdictionName
     : (employee.paPsdName && !employee.paPsdName.includes('Lower Merion / Montgomery') ? employee.paPsdName : undefined);
 
-  const locality = stubLocality
-    || psdDistrictName
-    || profileLocality
-    || employee.localTaxJurisdictionName
-    || employee.paPsdName
-    || (empState === 'DE' ? 'City of Wilmington' : 'PA Local Tax Resident');
+  const locality = localLines.length > 0
+    ? localLines[0].localityName
+    : (stubLocality
+      || psdDistrictName
+      || profileLocality
+      || employee.localTaxJurisdictionName
+      || employee.paPsdName
+      || (empState === 'DE' ? 'City of Wilmington' : 'PA Local Tax Resident'));
 
   const box14Parts: string[] = [];
   if (localFlat > 0) {
@@ -159,7 +201,8 @@ export function calculateEmployeeW2(
       box17StateTax: stateTax,
       box18LocalWages: gross,
       box19LocalTax: localTax,
-      box20Locality: locality
+      box20Locality: locality,
+      localLines: localLines.length > 0 ? localLines : undefined,
     }
   };
 }

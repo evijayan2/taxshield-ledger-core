@@ -36,11 +36,9 @@ export const DEFAULT_EMPTY_COMPANY: Company = {
   zip: '',
   ownerName: '',
   ownerEmail: '',
-  ownerTaxBracket: 24,
   stateFilingFrequency: 'MONTHLY',
   filingFrequencyPA: 'MONTHLY',
   payFrequency: 'BI_WEEKLY',
-  standardMileageRate: 0.67,
 };
 
 export const DEFAULT_EMPTY_ORG: Organization = DEFAULT_EMPTY_COMPANY;
@@ -71,7 +69,7 @@ export const INITIAL_COMPLIANCE_TASKS: ComplianceTask[] = [
     amountDue: 0.0,
     boxValues: {
       box1_gross: { label: 'Total PA Gross Compensation', value: '$0.00', helper: 'Total wages paid to PA residents and for PA work' },
-      box2_tax_withheld: { label: 'PA Income Tax Withheld (3.07%)', value: '$0.00', helper: 'Exact 3.07% PA statutory withholding' },
+      box2_tax_withheld: { label: 'PA Income Tax Withheld', value: '$0.00', helper: 'Exact PA statutory withholding resolved from active TaxRuleVersion' },
       box3_remittance: { label: 'Total Remittance Amount', value: '$0.00', helper: 'Paid via myPATH electronic bank debit / credit' },
     },
   },
@@ -89,8 +87,8 @@ export const INITIAL_COMPLIANCE_TASKS: ComplianceTask[] = [
       box1_employees: { label: '1. Number of employees paid in period', value: '0' },
       box2_wages: { label: '2. Wages, tips, and other compensation', value: '$0.00' },
       box3_fed_tax: { label: '3. Federal income tax withheld from wages', value: '$0.00' },
-      box5a_ss_wages: { label: '5a. Taxable social security wages', value: '$0.00', helper: 'Both employee (6.2%) and employer (6.2%)' },
-      box5c_med_wages: { label: '5c. Taxable Medicare wages', value: '$0.00', helper: 'Both employee (1.45%) and employer (1.45%)' },
+      box5a_ss_wages: { label: '5a. Taxable social security wages', value: '$0.00', helper: 'Both employee and employer statutory Social Security rates' },
+      box5c_med_wages: { label: '5c. Taxable Medicare wages', value: '$0.00', helper: 'Both employee and employer statutory Medicare rates' },
       box10_total_taxes: { label: '10. Total taxes after adjustments', value: '$0.00' },
     },
   },
@@ -106,8 +104,8 @@ export const INITIAL_COMPLIANCE_TASKS: ComplianceTask[] = [
     amountDue: 0.0,
     boxValues: {
       total_wages: { label: 'Gross PA UC Covered Wages', value: '$0.00' },
-      employer_contribution: { label: 'Employer UC Contribution (3.822%)', value: '$0.00' },
-      employee_withholding: { label: 'Employee UC Withholding (0.07%)', value: '$0.00' },
+      employer_contribution: { label: 'Employer UC Contribution', value: '$0.00' },
+      employee_withholding: { label: 'Employee UC Withholding', value: '$0.00' },
     },
   },
   {
@@ -128,7 +126,7 @@ export const INITIAL_COMPLIANCE_TASKS: ComplianceTask[] = [
       box5_med_wages: { label: 'Box 5: Medicare wages and tips', value: '$0.00' },
       box6_med_tax: { label: 'Box 6: Medicare tax withheld', value: '$0.00' },
       box16_pa_wages: { label: 'Box 16: State wages (PA)', value: '$0.00' },
-      box17_pa_tax: { label: 'Box 17: State income tax (PA 3.07%)', value: '$0.00' },
+      box17_pa_tax: { label: 'Box 17: State income tax (PA)', value: '$0.00' },
       box18_local_wages: { label: 'Box 18: Local wages, tips, etc.', value: '$0.00' },
       box19_local_tax: { label: 'Box 19: Local income tax (EIT)', value: '$0.00' },
     },

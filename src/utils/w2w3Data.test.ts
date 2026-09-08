@@ -158,4 +158,39 @@ describe('W2 & W3 Data Engine', () => {
     const summary = calculateEmployeeW2(downingtownEmp, [downingtownStub], sampleOrg, 2026);
     expect(summary.boxes.box20Locality).toBe('Downingtown Area School District');
   });
+
+  it('should collect multi-locality lines in W2 boxes when pay stub contains itemized taxLines', () => {
+    const multiLocalityStub: PayStub = {
+      ...samplePayStub,
+      taxLines: [
+        {
+          id: 'tl-1',
+          payStubId: 'stub1',
+          jurisdictionType: 'LOCAL_EIT',
+          jurisdictionCode: 'PA-PSD-700101',
+          jurisdictionName: 'Pittsburgh SD',
+          taxableWages: 2000,
+          taxRate: 0.03,
+          taxWithheld: 60.00
+        },
+        {
+          id: 'tl-2',
+          payStubId: 'stub1',
+          jurisdictionType: 'LOCAL_EIT',
+          jurisdictionCode: 'PA-PSD-700204',
+          jurisdictionName: 'Mt Lebanon SD',
+          taxableWages: 2000,
+          taxRate: 0.015,
+          taxWithheld: 30.00
+        }
+      ]
+    };
+    const summary = calculateEmployeeW2(sampleEmployee, [multiLocalityStub], sampleOrg, 2026);
+    expect(summary.boxes.localLines).toBeDefined();
+    expect(summary.boxes.localLines?.length).toBe(2);
+    expect(summary.boxes.localLines?.[0].localityName).toBe('Pittsburgh SD');
+    expect(summary.boxes.localLines?.[0].localTax).toBe(60);
+    expect(summary.boxes.localLines?.[1].localityName).toBe('Mt Lebanon SD');
+    expect(summary.boxes.localLines?.[1].localTax).toBe(30);
+  });
 });

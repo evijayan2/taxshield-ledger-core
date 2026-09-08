@@ -12,17 +12,36 @@ export interface Company {
   zip: string;
   ownerName: string;
   ownerEmail: string;
-  ownerTaxBracket: number;
+  ownerTaxBracket?: number;
   stateFilingFrequency?: TaxFilingFrequency;
   filingFrequencyPA?: TaxFilingFrequency;
   payFrequency?: PayrollFrequency;
-  standardMileageRate: number;
+  standardMileageRate?: number;
   bankName?: string;
   routingNumber?: string;
   accountNumber?: string;
   mercuryApiKey?: string;
   mercuryAccountId?: string;
   mercuryEnvironment?: 'SANDBOX' | 'PRODUCTION';
+  status?: 'ACTIVE' | 'DISSOLVED';
+  closedAt?: string;
+  closureReason?: string;
+  addressHistory?: CompanyAddressHistory[];
+}
+
+export interface CompanyAddressHistory {
+  id: string;
+  companyId: string;
+  streetAddress: string;
+  city: string;
+  state: string;
+  zip: string;
+  psdCode?: string;
+  localJurisdictionName?: string;
+  workEitRate: number;
+  effectiveDate: string;
+  endDate?: string | null;
+  createdAt?: string;
 }
 
 export type Organization = Company;
@@ -71,6 +90,36 @@ export interface Employee {
   accountNumber?: string;
   bankAccountMasked?: string;
   isActive: boolean;
+  residenceHistory?: EmployeeResidenceHistory[];
+  bankHistory?: EmployeeBankHistory[];
+}
+
+export interface EmployeeBankHistory {
+  id: string;
+  employeeId: string;
+  bankName: string;
+  accountType: 'CHECKING' | 'SAVINGS';
+  routingNumber: string;
+  accountNumber: string;
+  bankAccountMasked: string;
+  effectiveDate: string;
+  endDate?: string | null;
+  createdAt?: string;
+}
+
+export interface EmployeeResidenceHistory {
+  id: string;
+  employeeId: string;
+  streetAddress: string;
+  city: string;
+  state: string;
+  zip: string;
+  psdCode?: string;
+  localJurisdictionName?: string;
+  localTaxRate?: number;
+  effectiveDate: string;
+  endDate?: string | null;
+  createdAt?: string;
 }
 
 export interface MileageLog {
@@ -149,6 +198,21 @@ export interface PayStub {
   achTraceRef?: string;
   paidAt?: string;
   createdAt: string;
+  taxLines?: PayStubTaxLine[];
+}
+
+export interface PayStubTaxLine {
+  id: string;
+  payStubId: string;
+  jurisdictionType: 'FEDERAL' | 'STATE' | 'LOCAL_EIT' | 'LOCAL_LST';
+  jurisdictionCode: string;
+  jurisdictionName: string;
+  taxableWages: number;
+  taxRate: number;
+  taxWithheld: number;
+  startDate?: string | null;
+  endDate?: string | null;
+  createdAt?: string;
 }
 
 export interface PayrollRun {
@@ -181,6 +245,7 @@ export interface ComplianceTask {
   confirmationNumber?: string;
   filedDate?: string;
   boxValues: Record<string, { label: string; value: string | number; helper?: string }>;
+  notes?: string;
 }
 
 export interface GeneralExpense {
@@ -245,5 +310,4 @@ export interface TimesheetEntry {
   linkedPayStubId?: string;
   createdAt: string;
 }
-
 

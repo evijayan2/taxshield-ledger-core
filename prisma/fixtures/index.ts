@@ -102,11 +102,12 @@ export function getAllTaxRuleFixtures(): TaxRulesBundle {
   const jurisdictions: TaxJurisdictionFixture[] = packBundles.flatMap((b) => b.jurisdictions);
   const rules: TaxRuleFixture[] = packBundles.flatMap((b) => b.rules);
 
-  // Deduplicate by ruleCode
+  // Deduplicate by jurisdictionCode:ruleCode
   const uniqueRulesMap = new Map<string, TaxRuleFixture>();
   for (const r of rules) {
-    if (!uniqueRulesMap.has(r.ruleCode)) {
-      uniqueRulesMap.set(r.ruleCode, r);
+    const key = `${r.jurisdictionCode}:${r.ruleCode}`;
+    if (!uniqueRulesMap.has(key)) {
+      uniqueRulesMap.set(key, r);
     }
   }
 

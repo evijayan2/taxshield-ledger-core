@@ -24,7 +24,7 @@ export interface ResolvedRule {
 function buildInitialCache(): Record<string, ResolvedRule> {
   const cache: Record<string, ResolvedRule> = {};
   for (const r of allTaxRuleFixtures.rules) {
-    cache[r.ruleCode] = {
+    cache[`${r.jurisdictionCode}:${r.ruleCode}`] = {
       versionId: `${r.ruleCode.toLowerCase()}_v${r.version.versionNumber}`,
       ruleCode: r.ruleCode,
       ruleType: r.version.ruleType as RuleType,
@@ -55,7 +55,8 @@ export function refreshActiveRuleCache(updatedRules?: Record<string, ResolvedRul
  * Synchronously resolves an active tax rule version from the cache/registry.
  */
 export function resolveActiveRuleSync(jurisdictionCode: string, ruleCode: string): ResolvedRule {
-  const cached = ACTIVE_RULE_CACHE[ruleCode];
+  const cached = ACTIVE_RULE_CACHE[`${jurisdictionCode}:${ruleCode}`] ||
+    Object.values(ACTIVE_RULE_CACHE).find(r => r.ruleCode === ruleCode);
   if (cached) {
     return cached;
   }
@@ -92,14 +93,15 @@ export async function resolveActiveRule(
         ruleType: version.ruleType,
         payload: version.ruleData as unknown as TaxRulePayload,
       };
-      ACTIVE_RULE_CACHE[ruleCode] = resolved;
+      ACTIVE_RULE_CACHE[`${jurisdictionCode}:${ruleCode}`] = resolved;
       return resolved;
     }
   } catch (error) {
-    logWarn('Database lookup failed, returning cached rule version', { jurisdictionCode, ruleCode });
+    logWarn('Database lookup failed while resolving a required tax rule', { jurisdictionCode, ruleCode });
+    throw new Error(`Tax rule resolution failed for jurisdiction=${jurisdictionCode}, code=${ruleCode}`);
   }
 
-  return resolveActiveRuleSync(jurisdictionCode, ruleCode);
+  throw new Error(`No active tax rule found for jurisdiction=${jurisdictionCode}, code=${ruleCode}`);
 }
 
 /**

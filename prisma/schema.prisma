@@ -43,19 +43,22 @@ model Company {
   zip                 String
   ownerName           String            @map("ownerName")
   ownerEmail          String            @map("ownerEmail")
-  ownerTaxBracket     Float             @default(24.0) @map("ownerTaxBracket")
+  ownerTaxBracket     Float?            @map("ownerTaxBracket")
   stateFilingFrequency String           @default("MONTHLY") @map("stateFilingFrequency")
   payFrequency         String?          @default("BI_WEEKLY") @map("payFrequency")
-  standardMileageRate Float?            @default(0.67) @map("standardMileageRate")
+  standardMileageRate Float?            @map("standardMileageRate")
   bankName            String?           @map("bankName")
   routingNumber       String?           @map("routingNumber")
   accountNumber       String?           @map("accountNumber")
   mercuryApiKey       String?           @map("mercuryApiKey")
   mercuryAccountId    String?           @map("mercuryAccountId")
-  mercuryEnvironment  String            @default("SANDBOX") @map("mercuryEnvironment")
+  status              String            @default("ACTIVE")
+  closedAt            DateTime?         @map("closed_at")
+  closureReason       String?           @map("closure_reason")
   createdAt           DateTime          @default(now()) @map("createdAt")
   updatedAt           DateTime          @updatedAt @map("updatedAt")
 
+  addressHistory    CompanyAddressHistory[]
   taxYears          TaxYear[]
   employees         Employee[]
   mileageLogs       MileageLog[]
@@ -66,6 +69,25 @@ model Company {
   auditLogs         AuditLogEntry[]
 
   @@map("companies")
+}
+
+model CompanyAddressHistory {
+  id                   String    @id @default(uuid())
+  companyId            String    @map("company_id")
+  streetAddress        String    @map("street_address")
+  city                 String
+  state                String
+  zip                  String
+  psdCode              String?   @map("psd_code")
+  localJurisdictionName String?  @map("local_jurisdiction_name")
+  workEitRate          Float?    @map("work_eit_rate")
+  effectiveDate        String    @map("effective_date")
+  endDate              String?   @map("end_date")
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  company              Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("company_address_histories")
 }
 
 model TaxYear {
@@ -189,8 +211,10 @@ model Employee {
   stateAllowances     Int             @default(0) @map("state_allowances")
   localTaxJurisdictionCode String?     @map("local_tax_jurisdiction_code")
   localTaxJurisdictionName String?     @map("local_tax_jurisdiction_name")
-  localTaxRate        Float           @default(0) @map("local_tax_rate")
-  localFlatTaxAnnual  Float           @default(52.0) @map("local_flat_tax_annual")
+  // Legacy tax values are retained only for migration/audit visibility. Runtime
+  // calculations must resolve statutory values from TaxRuleVersion instead.
+  localTaxRate        Float?          @map("local_tax_rate")
+  localFlatTaxAnnual  Float?          @map("local_flat_tax_annual")
   localFlatTaxExempt  Boolean         @default(false) @map("local_flat_tax_exempt")
   taxAttributes       Json?           @map("tax_attributes")
   bankName            String?         @map("bank_name")
@@ -201,13 +225,51 @@ model Employee {
   isActive            Boolean         @default(true) @map("is_active")
   createdAt           DateTime        @default(now()) @map("created_at")
 
-  company             Company?        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company             Company?                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  residenceHistory    EmployeeResidenceHistory[]
+  bankHistory         EmployeeBankHistory[]
   mileageLogs         MileageLog[]
   travelExpenses      TravelExpense[]
   payStubs            PayStub[]
   timesheets          Timesheet[]
 
   @@map("employees")
+}
+
+model EmployeeBankHistory {
+  id                String    @id @default(uuid())
+  employeeId        String    @map("employee_id")
+  bankName          String    @map("bank_name")
+  accountType       String    @default("CHECKING") @map("account_type")
+  routingNumber     String    @map("routing_number")
+  accountNumber     String    @map("account_number")
+  bankAccountMasked String    @map("bank_account_masked")
+  effectiveDate     String    @map("effective_date")
+  endDate           String?   @map("end_date")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  employee          Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("employee_bank_histories")
+}
+
+model EmployeeResidenceHistory {
+  id                   String    @id @default(uuid())
+  employeeId           String    @map("employee_id")
+  streetAddress        String    @map("street_address")
+  city                 String
+  state                String
+  zip                  String
+  psdCode              String?   @map("psd_code")
+  localJurisdictionName String?  @map("local_jurisdiction_name")
+  localTaxRate         Float?    @map("local_tax_rate")
+  effectiveDate        String    @map("effective_date")
+  endDate              String?   @map("end_date")
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  employee             Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("employee_residence_histories")
 }
 
 model MileageLog {
@@ -336,10 +398,29 @@ model PayStub {
   paidAt                      DateTime?  @map("paid_at")
   createdAt                   DateTime   @default(now()) @map("created_at")
 
-  payrollRun                  PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
-  employee                    Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  payrollRun                  PayrollRun       @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  employee                    Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  taxLines                    PayStubTaxLine[]
 
   @@map("pay_stubs")
+}
+
+model PayStubTaxLine {
+  id               String   @id @default(uuid())
+  payStubId        String   @map("pay_stub_id")
+  jurisdictionType String   @map("jurisdiction_type")
+  jurisdictionCode String   @map("jurisdiction_code")
+  jurisdictionName String   @map("jurisdiction_name")
+  taxableWages     Float    @map("taxable_wages")
+  taxRate          Float    @map("tax_rate")
+  taxWithheld      Float    @map("tax_withheld")
+  startDate        String?  @map("start_date")
+  endDate          String?  @map("end_date")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  payStub          PayStub  @relation(fields: [payStubId], references: [id], onDelete: Cascade)
+
+  @@map("pay_stub_tax_lines")
 }
 
 model ComplianceTask {

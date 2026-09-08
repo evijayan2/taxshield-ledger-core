@@ -22,7 +22,7 @@ export const SUPPORTED_STATES: readonly SupportedState[] = [
     hasStateIncomeTax: true,
     hasLocalIncomeTax: true,
     defaultFilingFrequency: 'MONTHLY',
-    taxDescription: '3.07% Statutory Flat PIT, PA UC Employer Tax, Act 32 Local EIT & LST',
+    taxDescription: 'Statutory Flat PIT, PA UC Employer Tax, Act 32 Local EIT & LST',
   },
   {
     code: 'DE',
@@ -31,7 +31,7 @@ export const SUPPORTED_STATES: readonly SupportedState[] = [
     hasStateIncomeTax: true,
     hasLocalIncomeTax: true,
     defaultFilingFrequency: 'MONTHLY',
-    taxDescription: 'Graduated SIT (2.2%–6.6%), Delaware SUI, Wilmington City Wage Tax',
+    taxDescription: 'Graduated SIT, Delaware SUI, Wilmington City Wage Tax',
   },
   {
     code: 'FL',
@@ -40,7 +40,7 @@ export const SUPPORTED_STATES: readonly SupportedState[] = [
     hasStateIncomeTax: false,
     hasLocalIncomeTax: false,
     defaultFilingFrequency: 'QUARTERLY',
-    taxDescription: '0% State Personal Income Tax, Florida Reemployment SUTA Tax',
+    taxDescription: 'No Personal Income Tax, Florida Reemployment SUTA Tax',
   },
   {
     code: 'NJ',
@@ -49,7 +49,7 @@ export const SUPPORTED_STATES: readonly SupportedState[] = [
     hasStateIncomeTax: true,
     hasLocalIncomeTax: false,
     defaultFilingFrequency: 'MONTHLY',
-    taxDescription: 'Graduated Gross Income Tax (1.4%–10.75%), NJ SUI/FLI/SDI',
+    taxDescription: 'Graduated Gross Income Tax, NJ SUI/FLI/SDI',
   },
   {
     code: 'NY',

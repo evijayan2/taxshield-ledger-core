@@ -1,6 +1,7 @@
-import { Employee, MileageLog, ComplianceTask } from '../types';
+import { Employee, MileageLog, ComplianceTask, EmployeeResidenceHistory, PayStubTaxLine } from '../types';
 import { resolveActiveRuleSync, computeFederalWithholdingFromRule } from '../server/rules-engine/taxRulesEngine';
 import { findDistrictByPsdCode } from './paSchoolDistricts';
+import { resolvePayPeriodResidences } from '../server/services/residenceHistoryService';
 
 /**
  * Get current system calendar year.
@@ -83,7 +84,7 @@ export function createDefaultComplianceTasks(year: number): ComplianceTask[] {
       amountDue: 0.00,
       boxValues: {
         'box1_gross': { label: 'Total PA Gross Compensation', value: '$0.00', helper: 'Total wages paid to PA residents and for PA work' },
-        'box2_tax_withheld': { label: 'PA Income Tax Withheld (3.07%)', value: '$0.00', helper: 'Exact 3.07% PA statutory withholding' },
+        'box2_tax_withheld': { label: 'PA Income Tax Withheld', value: '$0.00', helper: 'Exact PA statutory withholding resolved from active TaxRuleVersion' },
         'box3_remittance': { label: 'Total Remittance Amount', value: '$0.00', helper: 'Paid via myPATH electronic bank debit / credit' }
       }
     },
@@ -101,8 +102,8 @@ export function createDefaultComplianceTasks(year: number): ComplianceTask[] {
         'box1_employees': { label: '1. Number of employees paid in period', value: '0' },
         'box2_wages': { label: '2. Wages, tips, and other compensation', value: '$0.00' },
         'box3_fed_tax': { label: '3. Federal income tax withheld from wages', value: '$0.00' },
-        'box5a_ss_wages': { label: '5a. Taxable social security wages', value: '$0.00', helper: 'Both employee (6.2%) and employer (6.2%)' },
-        'box5c_med_wages': { label: '5c. Taxable Medicare wages', value: '$0.00', helper: 'Both employee (1.45%) and employer (1.45%)' },
+        'box5a_ss_wages': { label: '5a. Taxable social security wages', value: '$0.00', helper: 'Both employee and employer statutory Social Security rates' },
+        'box5c_med_wages': { label: '5c. Taxable Medicare wages', value: '$0.00', helper: 'Both employee and employer statutory Medicare rates' },
         'box10_total_taxes': { label: '10. Total taxes after adjustments', value: '$0.00' }
       }
     },
@@ -118,8 +119,8 @@ export function createDefaultComplianceTasks(year: number): ComplianceTask[] {
       amountDue: 0.00,
       boxValues: {
         'total_wages': { label: 'Gross PA UC Covered Wages', value: '$0.00' },
-        'employer_contribution': { label: 'Employer UC Contribution (3.822%)', value: '$0.00' },
-        'employee_withholding': { label: 'Employee UC Tax Withholding (0.07%)', value: '$0.00' }
+        'employer_contribution': { label: 'Employer UC Contribution', value: '$0.00' },
+        'employee_withholding': { label: 'Employee UC Tax Withholding', value: '$0.00' }
       }
     },
     {
@@ -140,7 +141,7 @@ export function createDefaultComplianceTasks(year: number): ComplianceTask[] {
         'box5_med_wages': { label: 'Box 5: Medicare wages and tips', value: '$0.00' },
         'box6_med_tax': { label: 'Box 6: Medicare tax withheld', value: '$0.00' },
         'box16_pa_wages': { label: 'Box 16: State wages (PA)', value: '$0.00' },
-        'box17_pa_tax': { label: 'Box 17: State income tax (PA 3.07%)', value: '$0.00' },
+        'box17_pa_tax': { label: 'Box 17: State income tax (PA)', value: '$0.00' },
         'box18_local_wages': { label: 'Box 18: Local wages, tips, etc.', value: '$0.00' },
         'box19_local_tax': { label: 'Box 19: Local income tax (EIT)', value: '$0.00' }
       }
@@ -186,6 +187,41 @@ export const getActiveRates = () => {
   };
 };
 
+function resolveLocalEitRate(localityCode?: string): number {
+  if (!localityCode) return 0;
+  if (localityCode === 'DE-LOCAL-WILMINGTON' || localityCode.includes('WILMINGTON')) {
+    const rule = resolveActiveRuleSync('DE-LOCAL-WILMINGTON', 'DE_WILMINGTON_EIT');
+    if (typeof rule.payload.rate !== 'number') {
+      throw new Error(`Required DE local rule [${rule.ruleCode}] has no rate payload.`);
+    }
+    return rule.payload.rate;
+  }
+  const psdCode = localityCode.replace('PA-PSD-', '').replace('PA_LOCAL_EIT_', '');
+  if (!/^\d{6}$/.test(psdCode)) {
+    throw new Error(`Local tax jurisdiction [${localityCode}] is not mapped to a TaxRuleVersion.`);
+  }
+  const rule = resolveActiveRuleSync('PA-LOCAL', `PA_LOCAL_EIT_${psdCode}`);
+  if (typeof rule.payload.rate !== 'number') {
+    throw new Error(`Required local EIT rule [${rule.ruleCode}] has no rate payload.`);
+  }
+  return rule.payload.rate;
+}
+
+function resolveLocalServicesTaxAnnualAmount(localityCode: string | undefined, applies: boolean, exempt: boolean): number {
+  if (!applies || exempt) return 0;
+  const psdCode = localityCode?.replace('PA-PSD-', '').replace('PA_LOCAL_LST_', '');
+  if (!psdCode || !/^\d{6}$/.test(psdCode)) {
+    return 0;
+  }
+  try {
+    const rule = resolveActiveRuleSync('PA-LOCAL', `PA_LOCAL_LST_${psdCode}`);
+    const amount = rule.payload.rate ?? rule.payload.ratePerMile;
+    return typeof amount === 'number' ? amount : 0;
+  } catch {
+    return 0;
+  }
+}
+
 /**
  * Calculate Federal Income Tax Withholding using dynamic rules engine brackets
  */
@@ -225,7 +261,10 @@ export function calculateGrossToNet(
   hoursWorked: number,
   overtimeHours: number = 0,
   approvedMileageReimbursement: number = 0,
-  approvedTravelReimbursement: number = 0
+  approvedTravelReimbursement: number = 0,
+  residenceHistory: EmployeeResidenceHistory[] = [],
+  periodStart?: string,
+  periodEnd?: string
 ) {
   const regularEarnings = hoursWorked * employee.payRate;
   const overtimeEarnings = overtimeHours * (employee.payRate * 1.5);
@@ -422,17 +461,145 @@ export function calculateGrossToNet(
     throw new Error(`Unsupported state income tax jurisdiction [${stateCode}]. Active tax rule versions are required in the Tax Rules Engine.`);
   }
 
-  const effectiveEitRate = Math.max(
-    employee.localTaxRate || 0,
-    employee.paResidentEitRate || 0,
-    employee.paWorkEitRate || 0
-  );
-  const localIncomeTax = Math.round(grossEarnings * effectiveEitRate * 100) / 100;
+  const effectiveEitRate = resolveLocalEitRate(localityCode);
+
+  let localIncomeTax = Math.round(grossEarnings * effectiveEitRate * 100) / 100;
+  const taxLines: PayStubTaxLine[] = [];
+
+  // Federal & FICA Tax Lines
+  taxLines.push({
+    id: `tl-fed-${Date.now()}-1`,
+    payStubId: '',
+    jurisdictionType: 'FEDERAL',
+    jurisdictionCode: 'US-FED-FIT',
+    jurisdictionName: 'Federal Income Tax',
+    taxableWages: grossEarnings,
+    taxRate: 0,
+    taxWithheld: federalIncomeTax,
+    startDate: periodStart || null,
+    endDate: periodEnd || null,
+  });
+  taxLines.push({
+    id: `tl-fed-${Date.now()}-2`,
+    payStubId: '',
+    jurisdictionType: 'FEDERAL',
+    jurisdictionCode: 'US-FED-SS',
+    jurisdictionName: 'Social Security',
+    taxableWages: isFicaExempt ? 0 : grossEarnings,
+    taxRate: rates.socialSecurityRate,
+    taxWithheld: socialSecurityTax,
+    startDate: periodStart || null,
+    endDate: periodEnd || null,
+  });
+  taxLines.push({
+    id: `tl-fed-${Date.now()}-3`,
+    payStubId: '',
+    jurisdictionType: 'FEDERAL',
+    jurisdictionCode: 'US-FED-MED',
+    jurisdictionName: 'Medicare',
+    taxableWages: isFicaExempt ? 0 : grossEarnings,
+    taxRate: rates.medicareRate,
+    taxWithheld: medicareTax,
+    startDate: periodStart || null,
+    endDate: periodEnd || null,
+  });
+
+  // State Tax Line
+  taxLines.push({
+    id: `tl-state-${Date.now()}`,
+    payStubId: '',
+    jurisdictionType: 'STATE',
+    jurisdictionCode: stateCode,
+    jurisdictionName: stateDisplayName,
+    taxableWages: grossEarnings,
+    taxRate: rates.paSitRate || 0,
+    taxWithheld: stateIncomeTax,
+    startDate: periodStart || null,
+    endDate: periodEnd || null,
+  });
+
+  // Multi-locality / Residence Sub-interval Resolution
+  if (periodStart && periodEnd) {
+    const intervals = resolvePayPeriodResidences(employee, residenceHistory, periodStart, periodEnd);
+    if (intervals.length > 1) {
+      const totalWorkdays = intervals.reduce((sum, i) => sum + i.workdays, 0) || 1;
+      let sumLocalTax = 0;
+
+      for (let idx = 0; idx < intervals.length; idx++) {
+        const interval = intervals[idx];
+        const share = interval.workdays / totalWorkdays;
+        const intervalWages = Math.round(grossEarnings * share * 100) / 100;
+        const intervalRate = resolveLocalEitRate(interval.psdCode || localityCode);
+        const intervalTax = Math.round(intervalWages * intervalRate * 100) / 100;
+        sumLocalTax += intervalTax;
+
+        taxLines.push({
+          id: `tl-local-${Date.now()}-${idx + 1}`,
+          payStubId: '',
+          jurisdictionType: 'LOCAL_EIT',
+          jurisdictionCode: interval.psdCode || localityCode || 'PA-LOCAL',
+          jurisdictionName: interval.localJurisdictionName || localityName || 'Local EIT',
+          taxableWages: intervalWages,
+          taxRate: intervalRate,
+          taxWithheld: intervalTax,
+          startDate: interval.startDate,
+          endDate: interval.endDate,
+        });
+      }
+
+      localIncomeTax = sumLocalTax;
+    } else {
+      taxLines.push({
+        id: `tl-local-${Date.now()}-1`,
+        payStubId: '',
+        jurisdictionType: 'LOCAL_EIT',
+        jurisdictionCode: localityCode || 'PA-LOCAL',
+        jurisdictionName: localityName || 'Local EIT',
+        taxableWages: grossEarnings,
+        taxRate: effectiveEitRate,
+        taxWithheld: localIncomeTax,
+        startDate: periodStart,
+        endDate: periodEnd,
+      });
+    }
+  } else {
+    taxLines.push({
+      id: `tl-local-${Date.now()}-1`,
+      payStubId: '',
+      jurisdictionType: 'LOCAL_EIT',
+      jurisdictionCode: localityCode || 'PA-LOCAL',
+      jurisdictionName: localityName || 'Local EIT',
+      taxableWages: grossEarnings,
+      taxRate: effectiveEitRate,
+      taxWithheld: localIncomeTax,
+      startDate: null,
+      endDate: null,
+    });
+  }
 
   const periodsPerYear = employee.payFrequency === 'WEEKLY' ? 52 : employee.payFrequency === 'BI_WEEKLY' ? 26 : employee.payFrequency === 'SEMI_MONTHLY' ? 24 : 12;
   const isFlatExempt = employee.localFlatTaxExempt ?? employee.paLstExempt ?? false;
-  const flatAnnual = employee.localFlatTaxAnnual ?? employee.paLstAnnual ?? (workState === 'PA' || residentState === 'PA' ? 52 : 0);
+  const flatAnnual = resolveLocalServicesTaxAnnualAmount(
+    localityCode,
+    workState === 'PA' || residentState === 'PA',
+    isFlatExempt,
+  );
   const localFlatTax = (grossEarnings === 0 || isFlatExempt || flatAnnual === 0) ? 0 : Math.round((flatAnnual / periodsPerYear) * 100) / 100;
+
+  if (localFlatTax > 0) {
+    taxLines.push({
+      id: `tl-lst-${Date.now()}`,
+      payStubId: '',
+      jurisdictionType: 'LOCAL_LST',
+      jurisdictionCode: localityCode || 'PA-LST',
+      jurisdictionName: workState === 'PA' || residentState === 'PA' ? 'PA Local Services Tax (LST)' : 'Local Flat Tax',
+      taxableWages: grossEarnings,
+      taxRate: 0,
+      taxWithheld: localFlatTax,
+      startDate: periodStart || null,
+      endDate: periodEnd || null,
+    });
+  }
 
   const paStateTax = stateIncomeTax;
   const paLocalEit = localIncomeTax;
@@ -488,6 +655,7 @@ export function calculateGrossToNet(
     localFlatTax,
     employerStateUnemployment,
     taxBreakdown,
+    taxLines,
     paStateTax,
     paLocalEit,
     effectiveEitRate,
@@ -566,9 +734,12 @@ export function calculatePassThroughSavings(
   totalMileageAllowance: number,
   totalTravelExpenses: number,
   totalGeneralExpenses: number,
-  ownerTaxBracketPercent: number = 24,
+  ownerTaxBracketPercent?: number,
   ownerPaTaxRate?: number
 ) {
+  if (ownerTaxBracketPercent === undefined) {
+    throw new Error('An explicit owner marginal tax-bracket assumption is required for a tax-impact simulation.');
+  }
   const paRate = ownerPaTaxRate ?? getActiveRates().paSitRate;
   const totalBusinessLossExpenses =
     totalGrossWages +
@@ -588,4 +759,3 @@ export function calculatePassThroughSavings(
     totalEstimatedTaxSavings: Math.round(totalEstimatedTaxSavings * 100) / 100
   };
 }
-

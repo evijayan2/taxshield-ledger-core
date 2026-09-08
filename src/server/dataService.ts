@@ -18,10 +18,10 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       const stateTaxId = cRow.statetaxid ?? cRow.state_tax_id ?? cRow.stateTaxId ?? '';
       const ownerName = cRow.ownername ?? cRow.owner_name ?? cRow.ownerName ?? '';
       const ownerEmail = cRow.owneremail ?? cRow.owner_email ?? cRow.ownerEmail ?? '';
-      const rawBracket = cRow.ownertaxbracket ?? cRow.owner_tax_bracket ?? cRow.ownerTaxBracket ?? 24;
+      const rawBracket = cRow.ownertaxbracket ?? cRow.owner_tax_bracket ?? cRow.ownerTaxBracket ?? null;
       const stateFilingFreq = cRow.statefilingfrequency ?? cRow.state_filing_frequency ?? cRow.stateFilingFrequency ?? cRow.filingFrequencyPa ?? 'MONTHLY';
       const payFreq = cRow.payfrequency ?? cRow.pay_frequency ?? cRow.payFrequency ?? 'BI_WEEKLY';
-      const rawMileage = cRow.standardmileagerate ?? cRow.standard_mileage_rate ?? cRow.standardMileageRate ?? 0.67;
+      const rawMileage = cRow.standardmileagerate ?? cRow.standard_mileage_rate ?? cRow.standardMileageRate ?? null;
 
       org = {
         id: cRow.id,
@@ -34,11 +34,11 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
         zip: cRow.zip || '',
         ownerName: ownerName || '',
         ownerEmail: ownerEmail || '',
-        ownerTaxBracket: typeof rawBracket === 'number' ? rawBracket : (parseFloat(rawBracket) || 24),
+        ownerTaxBracket: rawBracket === null ? undefined : (typeof rawBracket === 'number' ? rawBracket : parseFloat(rawBracket)),
         stateFilingFrequency: stateFilingFreq || 'MONTHLY',
         filingFrequencyPA: stateFilingFreq || 'MONTHLY',
         payFrequency: payFreq || 'BI_WEEKLY',
-        standardMileageRate: typeof rawMileage === 'number' ? rawMileage : (parseFloat(rawMileage) || 0.67),
+        standardMileageRate: rawMileage === null ? undefined : (typeof rawMileage === 'number' ? rawMileage : parseFloat(rawMileage)),
       };
     } else {
       org = {
@@ -52,11 +52,11 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
         zip: '',
         ownerName: '',
         ownerEmail: '',
-        ownerTaxBracket: 24,
+        ownerTaxBracket: undefined,
         stateFilingFrequency: 'MONTHLY',
         filingFrequencyPA: 'MONTHLY',
         payFrequency: 'BI_WEEKLY',
-        standardMileageRate: 0.67,
+        standardMileageRate: undefined,
       };
     }
 
@@ -98,8 +98,8 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
     const employees = empRes.rows.map(e => {
       const locCode = e.local_tax_jurisdiction_code || e.pa_psd_code || undefined;
       const locName = e.local_tax_jurisdiction_name || e.pa_psd_name || undefined;
-      const locRate = e.local_tax_rate !== undefined && e.local_tax_rate !== null ? parseFloat(e.local_tax_rate) : (e.pa_resident_eit_rate ? parseFloat(e.pa_resident_eit_rate) : 0);
-      const flatAnn = e.local_flat_tax_annual !== undefined && e.local_flat_tax_annual !== null ? parseFloat(e.local_flat_tax_annual) : (e.pa_lst_annual ? parseFloat(e.pa_lst_annual) : 52);
+      const locRate = e.local_tax_rate !== undefined && e.local_tax_rate !== null ? parseFloat(e.local_tax_rate) : (e.pa_resident_eit_rate ? parseFloat(e.pa_resident_eit_rate) : undefined);
+      const flatAnn = e.local_flat_tax_annual !== undefined && e.local_flat_tax_annual !== null ? parseFloat(e.local_flat_tax_annual) : (e.pa_lst_annual ? parseFloat(e.pa_lst_annual) : undefined);
       const flatExempt = e.local_flat_tax_exempt ?? e.pa_lst_exempt ?? false;
 
       return {
@@ -407,10 +407,10 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
           companyData.zip || '19102',
           companyData.ownerName || 'Managing Member',
           companyData.ownerEmail || 'owner@micro-llc.tax',
-          companyData.ownerTaxBracket || 24,
+          companyData.ownerTaxBracket ?? null,
           companyData.stateFilingFrequency || companyData.filingFrequencyPA || companyData.filingFrequencyPa || 'MONTHLY',
           companyData.payFrequency || 'BI_WEEKLY',
-          companyData.standardMileageRate || 0.67,
+          companyData.standardMileageRate ?? null,
         ]
       );
     }
@@ -421,8 +421,10 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       for (const emp of data.employees) {
         const locCode = emp.localTaxJurisdictionCode || emp.paPsdCode || null;
         const locName = emp.localTaxJurisdictionName || emp.paPsdName || null;
-        const locRate = emp.localTaxRate ?? emp.paResidentEitRate ?? 0;
-        const flatAnn = emp.localFlatTaxAnnual ?? emp.paLstAnnual ?? 52;
+        // Statutory rates are never copied from employee input. They resolve
+        // from TaxRuleVersion at calculation time.
+        const locRate = null;
+        const flatAnn = null;
         const flatExempt = emp.localFlatTaxExempt ?? emp.paLstExempt ?? false;
 
         await client.query(

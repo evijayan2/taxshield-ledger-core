@@ -3,7 +3,7 @@
   "name": "United States Federal Statutory Tax Rules 2026",
   "version": "1.0.0",
   "jurisdictionCode": "US-FED",
-  "generatedAt": "2026-09-06T14:46:08.658Z",
+  "generatedAt": "2026-10-17T23:27:44.489Z",
   "jurisdictions": [
     {
       "code": "US-FED",
@@ -87,7 +87,7 @@
             }
           ],
           "checksum": "sha256:ecccb0fd1372851dab48faa1490ce8a805c843256c71398930c4cd3f2d380e3c",
-          "publishedAt": "2026-09-06T14:46:08.658Z",
+          "publishedAt": "2026-10-17T23:27:44.489Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -150,7 +150,7 @@
             }
           ],
           "checksum": "sha256:8ef2c325943947f01f84402936b1ba013385e88b1f9df04842fbd80f432792c1",
-          "publishedAt": "2026-09-06T14:46:08.658Z",
+          "publishedAt": "2026-10-17T23:27:44.489Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -301,7 +301,7 @@
             }
           ],
           "checksum": "sha256:789bd9ca2fb37a09747adc93fec0bbb6b5c71d12954b114ca0903861cd5e2031",
-          "publishedAt": "2026-09-06T14:46:08.658Z",
+          "publishedAt": "2026-10-17T23:27:44.489Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -353,11 +353,74 @@
             }
           ],
           "checksum": "sha256:41603369fef2359a18542571fa9bead8837f7ec4e11e9e3d0a5470204864f42d",
-          "publishedAt": "2026-09-06T14:46:08.658Z",
+          "publishedAt": "2026-10-17T23:27:44.489Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "FED_1099_NEC_THRESHOLD",
+      "name": "IRS Form 1099-NEC Nonemployee Compensation Reporting Threshold",
+      "category": "COMPLIANCE_REPORTING",
+      "taxType": "INFORMATION_RETURN_1099",
+      "jurisdictionCode": "US-FED",
+      "description": "Statutory threshold for required Form 1099-NEC nonemployee compensation reporting ($600.00).",
+      "versions": [
+        {
+          "versionCode": "FED-1099-NEC-THRESHOLD-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "THRESHOLD",
+          "ruleData": {
+            "threshold": 600
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "IRS",
+              "title": "IRS Instructions for Forms 1099-MISC and 1099-NEC (2026)",
+              "statuteReference": "26 U.S. Code § 6041(a); Treas. Reg. § 1.6041-1",
+              "sourceUrl": "https://www.irs.gov/instructions/i1099msc",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "File Form 1099-NEC for each person in the course of your trade or business to whom you have paid at least $600 in services performed by someone who is not your employee."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-fed-1099-01",
+              "description": "Compensation exactly equals statutory threshold",
+              "inputPayload": {
+                "amount": 600
+              },
+              "expectedOutput": {
+                "thresholdMet": true,
+                "amount": 600,
+                "threshold": 600
+              }
+            },
+            {
+              "id": "tc-fed-1099-02",
+              "description": "Compensation strictly below statutory threshold",
+              "inputPayload": {
+                "amount": 599.99
+              },
+              "expectedOutput": {
+                "thresholdMet": false,
+                "amount": 599.99,
+                "threshold": 600
+              }
+            }
+          ],
+          "checksum": "sha256:a3b39ebf4a38c7b7df10ee82fd47a5a08d4f9ddca89204c6cc1601ae930fba5d",
+          "publishedAt": "2026-10-17T23:27:44.489Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
     }
   ],
-  "manifestChecksum": "sha256:dae866cc83aa39e61741db3949cac0ccd33af83f99545bc597e05b93678827f6"
+  "manifestChecksum": "sha256:3c73b2e9ece2c59fc6f619b00835e3b9574f792151dcfd7816fc6b4212c4d6e3"
 }

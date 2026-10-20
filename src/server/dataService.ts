@@ -67,6 +67,24 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
         snapData.org = { ...snapData.org, ...org };
         snapData.company = snapData.org;
       }
+      const defaultPayFreq = snapData.company?.payFrequency || snapData.org?.payFrequency || 'BI_WEEKLY';
+      if (Array.isArray(snapData.employees)) {
+        for (const emp of snapData.employees) {
+          if (!emp.payFrequency) {
+            emp.payFrequency = defaultPayFreq;
+          }
+          if (emp.payRate === undefined || emp.payRate === null) {
+            emp.payRate = 0;
+          }
+        }
+      }
+      if (Array.isArray(snapData.auditLogs)) {
+        for (const log of snapData.auditLogs) {
+          if (!log.entityId) {
+            log.entityId = log.newState?.id || log.previousState?.id || log.id || 'unknown';
+          }
+        }
+      }
       return snapData;
     }
 
@@ -360,6 +378,58 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
 
   const client = await pool.connect();
   try {
+    const companyData = data.company || data.org;
+    const defaultPayFreq = companyData?.payFrequency || companyData?.filingFrequencyPA || 'BI_WEEKLY';
+    const compId = companyData?.id || 'comp_main';
+    const ownerEmail = companyData?.ownerEmail || 'system';
+
+    // Defensive sanitization of incoming data before saving snapshots & relational tables
+    if (Array.isArray(data.employees)) {
+      for (const emp of data.employees) {
+        if (!emp.payFrequency) {
+          emp.payFrequency = defaultPayFreq;
+        }
+        if (emp.payRate === undefined || emp.payRate === null) {
+          emp.payRate = 0;
+        }
+        if (!emp.employmentType) {
+          emp.employmentType = '1099_CONTRACTOR';
+        }
+        if (!emp.w4FilingStatus) {
+          emp.w4FilingStatus = 'SINGLE';
+        }
+      }
+    }
+
+    if (Array.isArray(data.auditLogs)) {
+      for (const log of data.auditLogs) {
+        if (!log.entityId) {
+          log.entityId = (log.newState && (log.newState as any).id) ||
+                         (log.previousState && (log.previousState as any).id) ||
+                         log.id ||
+                         'unknown';
+        }
+        if (!log.companyId) {
+          log.companyId = compId;
+        }
+        if (!log.entityType) {
+          log.entityType = 'General';
+        }
+        if (!log.action) {
+          log.action = 'UPDATE';
+        }
+        if (!log.actorId) {
+          log.actorId = ownerEmail;
+        }
+        if (!log.id) {
+          log.id = `audit_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        }
+        if (!log.timestamp) {
+          log.timestamp = new Date().toISOString();
+        }
+      }
+    }
+
     await client.query('BEGIN');
 
     // 1. Save state snapshot
@@ -371,10 +441,7 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
     );
 
     // 2. Sync companies & organizations tables
-    const companyData = data.company || data.org;
     if (companyData) {
-      const compId = companyData.id || 'comp_main';
-
       // Save to companies table
       await client.query(
         `INSERT INTO companies (
@@ -409,7 +476,7 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
           companyData.ownerEmail || 'owner@micro-llc.tax',
           companyData.ownerTaxBracket ?? null,
           companyData.stateFilingFrequency || companyData.filingFrequencyPA || companyData.filingFrequencyPa || 'MONTHLY',
-          companyData.payFrequency || 'BI_WEEKLY',
+          companyData.payFrequency || defaultPayFreq,
           companyData.standardMileageRate ?? null,
         ]
       );
@@ -439,15 +506,41 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
             bank_name, account_type, routing_number, account_number, bank_account_masked, is_active
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35)`,
           [
-            emp.id, emp.firstName, emp.lastName, emp.age ?? null, emp.email, emp.phone, emp.ssnLastFour,
-            emp.streetAddress || null, emp.city || null, emp.state || null, emp.zip || null,
-            emp.employmentType, emp.payRate, emp.payFrequency, emp.w4FilingStatus,
-            emp.w4MultipleJobs || false, emp.w4DependentCredit || 0, emp.w4OtherIncome || 0,
-            emp.w4Deductions || 0, emp.w4ExtraWithholding || 0, emp.workState || null,
-            emp.stateW4FilingStatus || null, emp.stateAllowances || 0, locCode, locName,
-            locRate, flatAnn, flatExempt, emp.taxAttributes ? JSON.stringify(emp.taxAttributes) : null,
-            emp.bankName || null, emp.accountType || 'CHECKING', emp.routingNumber || null, emp.accountNumber || null,
-            emp.bankAccountMasked || null, emp.isActive ?? true
+            emp.id,
+            emp.firstName || '',
+            emp.lastName || '',
+            emp.age ?? null,
+            emp.email || '',
+            emp.phone || '',
+            emp.ssnLastFour || '',
+            emp.streetAddress || null,
+            emp.city || null,
+            emp.state || null,
+            emp.zip || null,
+            emp.employmentType || '1099_CONTRACTOR',
+            emp.payRate ?? 0,
+            emp.payFrequency || defaultPayFreq,
+            emp.w4FilingStatus || 'SINGLE',
+            emp.w4MultipleJobs || false,
+            emp.w4DependentCredit || 0,
+            emp.w4OtherIncome || 0,
+            emp.w4Deductions || 0,
+            emp.w4ExtraWithholding || 0,
+            emp.workState || null,
+            emp.stateW4FilingStatus || null,
+            emp.stateAllowances || 0,
+            locCode,
+            locName,
+            locRate,
+            flatAnn,
+            flatExempt,
+            emp.taxAttributes ? JSON.stringify(emp.taxAttributes) : null,
+            emp.bankName || null,
+            emp.accountType || 'CHECKING',
+            emp.routingNumber || null,
+            emp.accountNumber || null,
+            emp.bankAccountMasked || null,
+            emp.isActive ?? true
           ]
         );
       }
@@ -615,22 +708,30 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       try {
         await client.query('DELETE FROM audit_log_entries');
         for (const log of data.auditLogs) {
+          const safeEntityId = log.entityId || (log.newState && (log.newState as any).id) || (log.previousState && (log.previousState as any).id) || log.id || 'unknown';
+          const safeCompanyId = log.companyId || compId;
+          const safeEntityType = log.entityType || 'General';
+          const safeAction = log.action || 'UPDATE';
+          const safeActorId = log.actorId || ownerEmail;
+          const safeId = log.id || `audit_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+          const safeTimestamp = log.timestamp || new Date().toISOString();
+
           await client.query(
             `INSERT INTO audit_log_entries (
               id, "companyId", "entityType", "entityId", action, "actorId",
               "previousState", "newState", reason, timestamp
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
             [
-              log.id,
-              log.companyId || data.org?.id || 'org_main',
-              log.entityType,
-              log.entityId,
-              log.action,
-              log.actorId,
+              safeId,
+              safeCompanyId,
+              safeEntityType,
+              safeEntityId,
+              safeAction,
+              safeActorId,
               log.previousState ? JSON.stringify(log.previousState) : null,
               log.newState ? JSON.stringify(log.newState) : null,
               log.reason || null,
-              log.timestamp || new Date().toISOString()
+              safeTimestamp
             ]
           );
         }

@@ -4,5 +4,6 @@ dist/
 !.env.example
 .DS_Store
 *.pdf
+*.traineddata
 pnpm-lock.yaml
 

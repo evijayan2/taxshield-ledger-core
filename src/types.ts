@@ -46,6 +46,13 @@ export interface CompanyAddressHistory {
 
 export type Organization = Company;
 
+export interface User {
+  id: string;
+  email: string;
+  displayName?: string | null;
+  role?: string;
+}
+
 export interface Employee {
   id: string;
   firstName: string;
@@ -63,8 +70,10 @@ export interface Employee {
   payRate: number;
   payFrequency?: 'WEEKLY' | 'BI_WEEKLY' | 'SEMI_MONTHLY' | 'MONTHLY';
   w4FilingStatus: 'SINGLE' | 'MARRIED_FILING_JOINTLY' | 'HEAD_OF_HOUSEHOLD';
+  taxFilingStatus?: string;
   w4MultipleJobs: boolean;
   w4DependentCredit: number;
+  w4DependentsAmount?: number;
   w4OtherIncome: number;
   w4Deductions: number;
   w4ExtraWithholding: number;
@@ -295,10 +304,46 @@ export interface TaxYear {
 }
 
 export type TimesheetStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+export type WeekendRollRule = 'PREVIOUS_BUSINESS_DAY' | 'NEXT_BUSINESS_DAY' | 'EXACT_DAY';
+export type CalendarPeriodStatus = 'DRAFT' | 'PUBLISHED' | 'OPEN' | 'LOCKED' | 'COMPLETED';
+
+export interface PayScheduleConfig {
+  id?: string;
+  companyId: string;
+  taxYearId?: string | null;
+  payFrequency: PayrollFrequency;
+  paydayDayOfWeek: number;
+  anchorPayDate?: string | null;
+  periodLagDays: number;
+  semiMonthlyDay1: number;
+  semiMonthlyDay2: number;
+  monthlyPayDay: number;
+  timesheetCutoffDays: number;
+  weekendRollRule: WeekendRollRule;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PayrollCalendarPeriod {
+  id: string;
+  companyId: string;
+  taxYearId: string;
+  periodNumber: number;
+  periodStart: string;
+  periodEnd: string;
+  timesheetLockDate: string;
+  scheduledPayDate: string;
+  actualPayDate: string;
+  status: CalendarPeriodStatus;
+  publishedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export interface TimesheetEntry {
   id: string;
   employeeId: string;
+  periodId?: string | null;
   workDate: string;
   startTime: string;
   endTime: string;
@@ -310,4 +355,249 @@ export interface TimesheetEntry {
   linkedPayStubId?: string;
   createdAt: string;
 }
+
+export interface EmployeeWorkLocationHistory {
+  id: string;
+  employeeId: string;
+  streetAddress?: string;
+  city?: string;
+  state: string;
+  zip?: string;
+  psdCode?: string;
+  localJurisdictionName?: string;
+  workEitRate?: number;
+  allocationPercentage: number;
+  effectiveDate: string;
+  endDate?: string | null;
+  createdAt?: string;
+}
+
+export interface CapitalAsset {
+  id: string;
+  companyId: string;
+  assetName: string;
+  category: 'MACHINERY_EQUIPMENT' | 'VEHICLE' | 'FURNITURE_FIXTURES' | 'COMPUTERS_SOFTWARE' | 'BUILDINGS_IMPROVEMENTS';
+  datePlacedInService: string;
+  costBasis: number;
+  businessUsePercent: number;
+  depreciationMethod: 'MACRS_200_DB' | 'MACRS_150_DB' | 'STRAIGHT_LINE' | 'SECTION_179';
+  recoveryPeriodYears: number;
+  section179Claimed: number;
+  priorDepreciation: number;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface HomeOfficeExpense {
+  id: string;
+  companyId: string;
+  taxYearId: string;
+  calculationMethod: 'SIMPLIFIED' | 'ACTUAL';
+  totalHomeSquareFeet: number;
+  officeSquareFeet: number;
+  mortgageInterest: number;
+  realEstateTaxes: number;
+  homeInsurance: number;
+  utilities: number;
+  rent: number;
+  repairsMaintenance: number;
+  otherDirectExpenses: number;
+  otherIndirectExpenses: number;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ResolvedJurisdiction {
+  code: string;
+  name: string;
+  level: 'FEDERAL' | 'STATE' | 'LOCAL';
+  taxType: 'FIT' | 'FICA_SS' | 'FICA_MED' | 'SIT' | 'SUTA' | 'LOCAL_EIT' | 'LOCAL_LST';
+  state?: string;
+  localityCode?: string;
+  localityName?: string;
+  rate?: number;
+  annualFlatAmount?: number;
+  isReciprocalExempt?: boolean;
+  reciprocalExemptionReason?: string;
+}
+
+export interface JurisdictionResolution {
+  employeeId: string;
+  residenceState: string;
+  workState: string;
+  residencePsdCode?: string;
+  workPsdCode?: string;
+  periodStart: string;
+  periodEnd: string;
+  resolvedJurisdictions: ResolvedJurisdiction[];
+}
+
+export interface CoverageMatrixItem {
+  jurisdictionCode: string;
+  jurisdictionName: string;
+  level: 'FEDERAL' | 'STATE' | 'LOCAL';
+  ruleCode: string;
+  ruleCategory: string;
+  requiredForRosterCount: number;
+  status: 'ACTIVE' | 'IN_REVIEW' | 'DRAFT' | 'SUPERSEDED' | 'MISSING';
+  activeVersionNumber?: number;
+  citationTier?: 'TIER_1_OFFICIAL' | 'TIER_2_GOV_DEPT' | 'TIER_3_THIRD_PARTY';
+  effectiveStart?: string;
+  effectiveEnd?: string | null;
+  blocksPayroll: boolean;
+  issueReason?: string;
+}
+
+export interface TaxRuleCoverageReport {
+  companyId: string;
+  taxYear: number;
+  generatedAt: string;
+  readinessPercentage: number;
+  totalRequiredJurisdictions: number;
+  activeCount: number;
+  pendingCount: number;
+  missingCount: number;
+  isPayrollBlocked: boolean;
+  blockingJurisdictions: string[];
+  items: CoverageMatrixItem[];
+}
+
+export interface NewYearRolloverStep {
+  stepNumber: number;
+  title: string;
+  description: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  details?: string;
+}
+
+export interface NewYearRolloverSummary {
+  companyId: string;
+  fromYear: number;
+  toYear: number;
+  taxYearId: string;
+  calendarPeriodsGenerated: number;
+  activeEmployeesMigrated: number;
+  packagesSynced: string[];
+  rulesActivated: number;
+  coverageReadiness: number;
+  completedAt: string;
+}
+
+export interface AssetDepreciationYearSchedule {
+  year: number;
+  beginningBasis: number;
+  section179Deduction: number;
+  regularDepreciation: number;
+  totalAnnualDepreciation: number;
+  endingBasis: number;
+  accumulatedDepreciation: number;
+}
+
+export interface AssetDepreciationSchedule {
+  assetId: string;
+  assetName: string;
+  costBasis: number;
+  businessBasis: number;
+  section179Claimed: number;
+  currentYearDepreciation: number;
+  accumulatedDepreciation: number;
+  remainingBasis: number;
+  scheduleCLine13Amount: number;
+  form4562Part1Section179: number;
+  yearByYear: AssetDepreciationYearSchedule[];
+}
+
+export interface HomeOfficeDeductionResult {
+  companyId: string;
+  taxYearId: string;
+  calculationMethod: 'SIMPLIFIED' | 'ACTUAL';
+  totalHomeSquareFeet: number;
+  officeSquareFeet: number;
+  businessPercentage: number;
+  simplifiedDeduction: number;
+  actualDirectExpenses: number;
+  actualIndirectExpenses: number;
+  allocatedIndirectExpenses: number;
+  actualTotalDeduction: number;
+  allowedDeduction: number;
+  scheduleCLine30Amount: number;
+  netIncomeLimitApplied: boolean;
+  recommendedMethod: 'SIMPLIFIED' | 'ACTUAL';
+}
+
+export interface TaxSimulationScenario {
+  ownerTaxBracketPercent: number;
+  grossRevenue: number;
+  ownerW2Salary: number;
+  ownerDraws: number;
+  section179AssetExpense: number;
+  homeOfficeMethod: 'SIMPLIFIED' | 'ACTUAL';
+  otherDeductibleExpenses: number;
+}
+
+export interface MonthlyFilingItem {
+  month: string;
+  monthNumber: number;
+  dueDate: string;
+  amount: number;
+  paSitAmount: number;
+  federalAmount: number;
+}
+
+export interface TaxSimulationResult {
+  grossRevenue: number;
+  totalExpenses: number;
+  netBusinessProfit: number;
+  w2GrossSalary: number;
+  ownerDraws: number;
+  qbiDeduction: number; // Section 199A QBI (20% of net income)
+  selfEmploymentTax: number;
+  federalIncomeTax: number;
+  stateIncomeTax: number;
+  totalTaxLiability: number;
+  effectiveTaxRatePercent: number;
+  quarterlyEstimatedPayment: number;
+  estimatedPaymentDates: Array<{ quarter: string; dueDate: string; amount: number }>;
+  monthlyFilingSchedule: MonthlyFilingItem[];
+}
+
+export type ReceiptScanStatus = 'unconfirmed' | 'confirmed' | 'rejected';
+export type ReceiptConfidence = 'high' | 'medium' | 'low';
+export type GeneralExpenseCategory = GeneralExpense['category'];
+
+export interface ReceiptOcrField<T> {
+  value: T | null;
+  rawText?: string;
+  confidence: ReceiptConfidence;
+  isEdited?: boolean;
+}
+
+export interface ScheduleCSuggestion {
+  category: GeneralExpenseCategory;
+  scheduleCLine: string;
+  lineDescription: string;
+  confidence: ReceiptConfidence;
+  matchedKeywords: string[];
+}
+
+export interface ExtractedReceiptResult {
+  scanId: string;
+  status: ReceiptScanStatus;
+  vendor: ReceiptOcrField<string>;
+  date: ReceiptOcrField<string>;
+  totalAmount: ReceiptOcrField<number>;
+  subtotal?: ReceiptOcrField<number>;
+  taxAmount?: ReceiptOcrField<number>;
+  suggestedCategory: ReceiptOcrField<GeneralExpenseCategory>;
+  suggestedScheduleCLine: ReceiptOcrField<string>;
+  receiptFileName?: string;
+  receiptFileUrl?: string;
+  rawExtractedText?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+
 

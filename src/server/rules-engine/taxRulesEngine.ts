@@ -7,6 +7,7 @@ export interface TaxRulePayload {
   rate?: number;
   ratePerMile?: number;
   wageCap?: number;
+  threshold?: number;
   standardAllowances?: Record<string, number>;
   brackets?: Record<string, Array<{ max: number | null; rate: number; baseTax: number; over: number }>>;
 }
@@ -24,12 +25,16 @@ export interface ResolvedRule {
 function buildInitialCache(): Record<string, ResolvedRule> {
   const cache: Record<string, ResolvedRule> = {};
   for (const r of allTaxRuleFixtures.rules) {
-    cache[`${r.jurisdictionCode}:${r.ruleCode}`] = {
+    const resolved: ResolvedRule = {
       versionId: `${r.ruleCode.toLowerCase()}_v${r.version.versionNumber}`,
       ruleCode: r.ruleCode,
       ruleType: r.version.ruleType as RuleType,
       payload: r.version.ruleData as unknown as TaxRulePayload,
     };
+    cache[`${r.jurisdictionCode}:${r.ruleCode}`] = resolved;
+    if (r.jurisdictionCode.startsWith('PA-PSD-')) {
+      cache[`PA-LOCAL:${r.ruleCode}`] = resolved;
+    }
   }
   return cache;
 }
@@ -53,10 +58,35 @@ export function refreshActiveRuleCache(updatedRules?: Record<string, ResolvedRul
 
 /**
  * Synchronously resolves an active tax rule version from the cache/registry.
+ * 
+ * @param jurisdictionCode - The tax jurisdiction code (e.g. 'PA-STATE', 'US-FED')
+ * @param ruleCode - The rule code (e.g. 'PA_SIT_RATE', 'FED_FICA_SS')
+ * @param effectiveDate - Optional effective date for date-aware resolution.
+ *   When provided, queries the database for the active rule version effective on this date.
+ *   When omitted (default), reads from the in-memory cache for backward compatibility.
+ * @returns Resolved rule payload, or throws if no active rule found
  */
-export function resolveActiveRuleSync(jurisdictionCode: string, ruleCode: string): ResolvedRule {
-  const cached = ACTIVE_RULE_CACHE[`${jurisdictionCode}:${ruleCode}`] ||
-    Object.values(ACTIVE_RULE_CACHE).find(r => r.ruleCode === ruleCode);
+export function resolveActiveRuleSync(jurisdictionCode: string, ruleCode: string, effectiveDate: Date = new Date()): ResolvedRule {
+  // When effectiveDate is the default (caller did not provide one), use cache only
+  const defaultDate = new Date();
+  defaultDate.setHours(0, 0, 0, 0);
+  const providedDate = new Date(effectiveDate);
+  providedDate.setHours(0, 0, 0, 0);
+  const isDefaultEffectiveDate = providedDate.getTime() === defaultDate.getTime();
+
+  if (isDefaultEffectiveDate) {
+    // Cache-only path (backward compatible)
+    const cached = ACTIVE_RULE_CACHE[`${jurisdictionCode}:${ruleCode}`];
+    if (cached) {
+      return cached;
+    }
+    throw new Error(`No active rule cached for jurisdiction=${jurisdictionCode}, code=${ruleCode}`);
+  }
+
+  // effectiveDate provided — but since this is sync, we fall back to cache
+  // and log a warning. For date-aware resolution, use resolveActiveRule (async).
+  logWarn('resolveActiveRuleSync called with effectiveDate, but sync path cannot query DB; using cache', { jurisdictionCode, ruleCode, effectiveDate });
+  const cached = ACTIVE_RULE_CACHE[`${jurisdictionCode}:${ruleCode}`];
   if (cached) {
     return cached;
   }

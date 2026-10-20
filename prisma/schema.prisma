@@ -32,6 +32,43 @@ enum RuleType {
   PER_MILE_RATE
 }
 
+enum PayFrequency {
+  WEEKLY
+  BI_WEEKLY
+  SEMI_MONTHLY
+  MONTHLY
+}
+
+enum WeekendRollRule {
+  PREVIOUS_BUSINESS_DAY
+  NEXT_BUSINESS_DAY
+  EXACT_DAY
+}
+
+enum CalendarPeriodStatus {
+  DRAFT
+  PUBLISHED
+  OPEN
+  LOCKED
+  COMPLETED
+}
+
+enum BankReconciliationStatus {
+  UNMATCHED
+  NEEDS_REVIEW
+  MATCHED
+  DUPLICATE
+}
+
+enum BankMatchedEntityType {
+  GENERAL_EXPENSE
+  TRAVEL_EXPENSE
+  INVOICE
+  PAYROLL_RUN
+  CONTRACTOR_PAYMENT
+  TRANSFER_INTERNAL
+}
+
 model Company {
   id                  String            @id @default(uuid())
   name                String
@@ -67,6 +104,16 @@ model Company {
   payrollRuns       PayrollRun[]
   complianceTasks   ComplianceTask[]
   auditLogs         AuditLogEntry[]
+  payScheduleConfigs PayScheduleConfig[]
+  calendarPeriods   PayrollCalendarPeriod[]
+  capitalAssets     CapitalAsset[]
+  homeOfficeExpenses HomeOfficeExpense[]
+  customers         Customer[]
+  invoices          Invoice[]
+  formW9Records     FormW9Record[]
+  contractorPayments ContractorPayment[]
+  bankImportBatches  BankImportBatch[]
+  bankTransactions   BankTransaction[]
 
   @@map("companies")
 }
@@ -98,6 +145,10 @@ model TaxYear {
   createdAt DateTime @default(now())
 
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  calendarPeriods PayrollCalendarPeriod[]
+  homeOfficeExpenses HomeOfficeExpense[]
+  invoices        Invoice[]
+  contractorPayments ContractorPayment[]
 
   @@unique([companyId, year])
   @@map("tax_years")
@@ -223,15 +274,19 @@ model Employee {
   accountNumber       String?         @map("account_number")
   bankAccountMasked   String?         @map("bank_account_masked")
   isActive            Boolean         @default(true) @map("is_active")
+  workerClassification String       @default("W2_EMPLOYEE") @map("worker_classification")
   createdAt           DateTime        @default(now()) @map("created_at")
 
   company             Company?                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   residenceHistory    EmployeeResidenceHistory[]
+  workLocationHistory EmployeeWorkLocationHistory[]
   bankHistory         EmployeeBankHistory[]
   mileageLogs         MileageLog[]
   travelExpenses      TravelExpense[]
   payStubs            PayStub[]
   timesheets          Timesheet[]
+  w9Record            FormW9Record?
+  contractorPayments  ContractorPayment[]
 
   @@map("employees")
 }
@@ -334,6 +389,7 @@ model GeneralExpense {
   createdAt       DateTime @default(now()) @map("created_at")
 
   company         Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contractorPayment ContractorPayment?
 
   @@map("general_expenses")
 }
@@ -449,6 +505,7 @@ model ComplianceTask {
 model Timesheet {
   id                 String   @id @default(uuid())
   employeeId         String   @map("employee_id")
+  periodId           String?  @map("period_id")
   workDate           String   @map("work_date")
   startTime          String   @map("start_time")
   endTime            String   @map("end_time")
@@ -461,8 +518,63 @@ model Timesheet {
   createdAt          DateTime @default(now()) @map("created_at")
 
   employee           Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  calendarPeriod     PayrollCalendarPeriod? @relation(fields: [periodId], references: [id], onDelete: SetNull)
 
   @@map("timesheets")
+}
+
+model PayScheduleConfig {
+  id                  String          @id @default(uuid())
+  companyId           String          @map("company_id")
+  taxYearId           String?         @map("tax_year_id")
+  payFrequency        PayFrequency    @default(BI_WEEKLY) @map("pay_frequency")
+
+  // Weekly & Bi-Weekly Anchor Settings
+  paydayDayOfWeek     Int             @default(5) @map("payday_day_of_week") // 1=Mon, 5=Fri
+  anchorPayDate       String?         @map("anchor_pay_date") // Reference payday (YYYY-MM-DD) for Bi-Weekly parity
+  periodLagDays       Int             @default(5) @map("period_lag_days") // Days between period end and payday
+
+  // Semi-Monthly Anchor Settings
+  semiMonthlyDay1     Int             @default(15) @map("semi_monthly_day_1") // First pay day (e.g. 15th)
+  semiMonthlyDay2     Int             @default(0) @map("semi_monthly_day_2")  // Second pay day (0 = Last day of month)
+
+  // Monthly Anchor Settings
+  monthlyPayDay       Int             @default(0) @map("monthly_pay_day")     // Day of month (0 = Last day of month)
+
+  // Cutoff & Weekend Rules
+  timesheetCutoffDays Int             @default(2) @map("timesheet_cutoff_days") // Days prior to payday (or after period end)
+  weekendRollRule     WeekendRollRule @default(PREVIOUS_BUSINESS_DAY) @map("weekend_roll_rule")
+
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  company             Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, taxYearId])
+  @@map("pay_schedule_configs")
+}
+
+model PayrollCalendarPeriod {
+  id                String               @id @default(uuid())
+  companyId         String               @map("company_id")
+  taxYearId         String               @map("tax_year_id")
+  periodNumber      Int                  @map("period_number")
+  periodStart       String               @map("period_start") // YYYY-MM-DD
+  periodEnd         String               @map("period_end")   // YYYY-MM-DD
+  timesheetLockDate String               @map("timesheet_lock_date") // YYYY-MM-DD HH:mm:ss
+  scheduledPayDate  String               @map("scheduled_pay_date") // Unadjusted target payday
+  actualPayDate     String               @map("actual_pay_date")    // Weekend/Holiday adjusted payday
+  status            CalendarPeriodStatus @default(DRAFT)
+  publishedAt       DateTime?            @map("published_at")
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @updatedAt @map("updated_at")
+
+  company           Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  taxYear           TaxYear              @relation(fields: [taxYearId], references: [id], onDelete: Cascade)
+  timesheets        Timesheet[]
+
+  @@unique([companyId, taxYearId, periodNumber])
+  @@map("payroll_calendar_periods")
 }
 
 model AppStateSnapshot {
@@ -472,3 +584,236 @@ model AppStateSnapshot {
 
   @@map("app_state_snapshots")
 }
+
+model EmployeeWorkLocationHistory {
+  id                   String    @id @default(uuid())
+  employeeId           String    @map("employee_id")
+  streetAddress        String?   @map("street_address")
+  city                 String?
+  state                String
+  zip                  String?
+  psdCode              String?   @map("psd_code")
+  localJurisdictionName String?  @map("local_jurisdiction_name")
+  workEitRate          Float?    @map("work_eit_rate")
+  allocationPercentage Float     @default(100.0) @map("allocation_percentage")
+  effectiveDate        String    @map("effective_date")
+  endDate              String?   @map("end_date")
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  employee             Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("employee_work_location_histories")
+}
+
+model CapitalAsset {
+  id                  String   @id @default(uuid())
+  companyId           String   @map("company_id")
+  assetName           String   @map("asset_name")
+  category            String
+  datePlacedInService String   @map("date_placed_in_service")
+  costBasis           Float    @map("cost_basis")
+  businessUsePercent  Float    @default(100.0) @map("business_use_percent")
+  depreciationMethod  String   @default("MACRS_200_DB") @map("depreciation_method")
+  recoveryPeriodYears Float    @default(5.0) @map("recovery_period_years")
+  section179Claimed   Float    @default(0.0) @map("section_179_claimed")
+  priorDepreciation   Float    @default(0.0) @map("prior_depreciation")
+  notes               String?
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  company             Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("capital_assets")
+}
+
+model HomeOfficeExpense {
+  id                   String   @id @default(uuid())
+  companyId            String   @map("company_id")
+  taxYearId            String   @map("tax_year_id")
+  calculationMethod    String   @default("SIMPLIFIED") @map("calculation_method")
+  totalHomeSquareFeet  Float    @map("total_home_square_feet")
+  officeSquareFeet     Float    @map("office_square_feet")
+  mortgageInterest     Float    @default(0.0) @map("mortgage_interest")
+  realEstateTaxes      Float    @default(0.0) @map("real_estate_taxes")
+  homeInsurance        Float    @default(0.0) @map("home_insurance")
+  utilities            Float    @default(0.0) @map("utilities")
+  rent                 Float    @default(0.0) @map("rent")
+  repairsMaintenance   Float    @default(0.0) @map("repairs_maintenance")
+  otherDirectExpenses  Float    @default(0.0) @map("other_direct_expenses")
+  otherIndirectExpenses Float   @default(0.0) @map("other_indirect_expenses")
+  notes                String?
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  company              Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  taxYear              TaxYear  @relation(fields: [taxYearId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, taxYearId])
+  @@map("home_office_expenses")
+}
+
+model Customer {
+  id            String    @id @default(uuid())
+  companyId     String    @map("company_id")
+  name          String
+  contactPerson String?   @map("contact_person")
+  email         String
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  zipCode       String?   @map("zip_code")
+  notes         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoices      Invoice[]
+
+  @@index([companyId])
+  @@map("customers")
+}
+
+model Invoice {
+  id               String            @id @default(uuid())
+  companyId        String            @map("company_id")
+  customerId       String            @map("customer_id")
+  taxYearId        String            @map("tax_year_id")
+  invoiceNumber    String            @map("invoice_number")
+  issueDate        String            @map("issue_date")
+  dueDate          String            @map("due_date")
+  status           String            @default("DRAFT")
+  subtotal         Float
+  taxAmount        Float             @default(0) @map("tax_amount")
+  totalAmount      Float             @map("total_amount")
+  amountPaid       Float             @default(0) @map("amount_paid")
+  stripePaymentId  String?           @map("stripe_payment_id")
+  stripePaymentUrl String?           @map("stripe_payment_url")
+  notes            String?
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer         Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  taxYear          TaxYear           @relation(fields: [taxYearId], references: [id], onDelete: Restrict)
+  lineItems        InvoiceLineItem[]
+
+  @@unique([companyId, invoiceNumber])
+  @@index([companyId, taxYearId])
+  @@map("invoices")
+}
+
+model InvoiceLineItem {
+  id          String   @id @default(uuid())
+  invoiceId   String   @map("invoice_id")
+  description String
+  quantity    Float    @default(1)
+  unitPrice   Float    @map("unit_price")
+  amount      Float
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_line_items")
+}
+
+model FormW9Record {
+  id                 String   @id @default(uuid())
+  companyId          String   @map("company_id")
+  employeeId         String   @unique @map("employee_id")
+  businessName       String?  @map("business_name")
+  taxClassification  String   @map("tax_classification")
+  tinType            String   @map("tin_type")
+  tinMasked          String   @map("tin_masked")
+  tinEncrypted       String   @map("tin_encrypted")
+  exemptPayeeCode    String?  @map("exempt_payee_code")
+  fatcaCode          String?  @map("fatca_code")
+  address            String
+  city               String
+  state              String
+  zipCode            String   @map("zip_code")
+  certifiedSignature String   @map("certified_signature")
+  certifiedAt        DateTime @map("certified_at")
+  ipAddress          String?  @map("ip_address")
+  is1099Eligible     Boolean  @default(true) @map("is_1099_eligible")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee           Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@map("form_w9_records")
+}
+
+model ContractorPayment {
+  id               String          @id @default(uuid())
+  companyId        String          @map("company_id")
+  employeeId       String          @map("employee_id")
+  taxYearId        String          @map("tax_year_id")
+  paymentDate      String          @map("payment_date")
+  amount           Float
+  paymentMethod    String          @default("ACH") @map("payment_method")
+  referenceNumber  String?         @map("reference_number")
+  description      String?
+  generalExpenseId String?         @unique @map("general_expense_id")
+  createdAt        DateTime        @default(now()) @map("created_at")
+
+  company          Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee         Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  taxYear          TaxYear         @relation(fields: [taxYearId], references: [id], onDelete: Cascade)
+  generalExpense   GeneralExpense? @relation(fields: [generalExpenseId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, taxYearId, employeeId])
+  @@map("contractor_payments")
+}
+
+model BankImportBatch {
+  id              String            @id @default(uuid())
+  companyId       String            @map("company_id")
+  fileName        String            @map("file_name")
+  accountName     String?           @map("account_name")
+  accountMask     String?           @map("account_mask")
+  totalRows       Int               @map("total_rows")
+  matchedCount    Int               @default(0) @map("matched_count")
+  reviewCount     Int               @default(0) @map("review_count")
+  unmatchedCount  Int               @default(0) @map("unmatched_count")
+  duplicateCount  Int               @default(0) @map("duplicate_count")
+  netAmount       Float             @map("net_amount")
+  importedAt      DateTime          @default(now()) @map("imported_at")
+
+  company         Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transactions    BankTransaction[]
+
+  @@index([companyId])
+  @@map("bank_import_batches")
+}
+
+model BankTransaction {
+  id                   String                    @id @default(uuid())
+  companyId            String                    @map("company_id")
+  batchId              String                    @map("batch_id")
+  fingerprint          String                    @map("fingerprint")
+  postedDate           String                    @map("posted_date")
+  rawDescription       String                    @map("raw_description")
+  cleanPayee           String                    @map("clean_payee")
+  amount               Float
+  transactionType      String                    @map("transaction_type")
+  reconciliationStatus BankReconciliationStatus  @default(NEEDS_REVIEW) @map("reconciliation_status")
+  matchedEntityType    BankMatchedEntityType?    @map("matched_entity_type")
+  matchedEntityId      String?                   @map("matched_entity_id")
+  confidenceScore      Float?                    @map("confidence_score")
+  matchNotes           String?                   @map("match_notes")
+  reconciledAt         DateTime?                 @map("reconciled_at")
+  reconciledBy         String?                   @map("reconciled_by")
+  createdAt            DateTime                  @default(now()) @map("created_at")
+
+  company              Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  batch                BankImportBatch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, fingerprint])
+  @@index([companyId, reconciliationStatus])
+  @@index([companyId, postedDate])
+  @@map("bank_transactions")
+}
+
+

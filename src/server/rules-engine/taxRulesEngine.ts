@@ -1,4 +1,4 @@
-import { RuleType } from '@prisma/client';
+import type { RuleType } from '../../types';
 import { prisma } from '../../lib/prisma';
 import { logWarn } from '../../lib/logger';
 import { allTaxRuleFixtures } from '../../../prisma/fixtures/index';

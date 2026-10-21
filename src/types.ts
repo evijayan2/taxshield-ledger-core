@@ -599,5 +599,37 @@ export interface ExtractedReceiptResult {
   createdAt: string;
 }
 
+export type RuleType =
+  | 'RATE'
+  | 'BRACKET'
+  | 'THRESHOLD'
+  | 'ALLOWANCE'
+  | 'FORMULA'
+  | 'FLAT_RATE'
+  | 'BRACKET_PERCENTAGE'
+  | 'STANDARD_ALLOWANCE'
+  | 'EXEMPTION'
+  | 'PER_MILE_RATE';
+
+export type RuleStatus =
+  | 'DRAFT'
+  | 'PENDING_REVIEW'
+  | 'ACTIVE'
+  | 'SUPERSEDED'
+  | 'DEPRECATED'
+  | 'DISCOVERED'
+  | 'IN_REVIEW'
+  | 'VALIDATED'
+  | 'APPROVED'
+  | 'ARCHIVED';
+
+export type CitationTier =
+  | 'TIER_1_STATUTORY'
+  | 'TIER_2_ADMINISTRATIVE'
+  | 'TIER_3_THIRD_PARTY'
+  | 'TIER_1_OFFICIAL'
+  | 'TIER_2_GOV_DEPT';
+
+
 
 

@@ -48,10 +48,18 @@ export interface IIngestionOptions {
 }
 
 /**
+ * Default production distribution server URL for sealed regulatory tax packages.
+ */
+export const DEFAULT_TAXPACK_SERVER_URL =
+  process.env.TAXPACK_SERVER_URL ||
+  process.env.TAX_PACKAGE_SERVER_URL ||
+  'https://tax-rule-packaging-engine.vercel.app';
+
+/**
  * Normalizes base server URL by trimming trailing slashes.
  */
 function normalizeServerUrl(url?: string): string {
-  const base = url || process.env.TAX_PACKAGE_SERVER_URL || 'http://localhost:3333';
+  const base = url || DEFAULT_TAXPACK_SERVER_URL;
   return base.replace(/\/+$/, '');
 }
 
@@ -458,7 +466,7 @@ export async function syncAllAvailablePackages(
   let totalVersions = 0;
 
   for (const item of catalogRes.packages) {
-    const fetchRes = await fetchAndVerifyPackage(serverUrl || 'http://localhost:3333', item.fileName);
+    const fetchRes = await fetchAndVerifyPackage(serverUrl || DEFAULT_TAXPACK_SERVER_URL, item.fileName);
     if (!fetchRes.success || !fetchRes.package) {
       results.push({
         success: false,

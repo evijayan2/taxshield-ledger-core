@@ -1,6 +1,7 @@
 import { logInfo, logWarn, logError } from '../../lib/logger';
 import {
   syncAllAvailablePackages,
+  DEFAULT_TAXPACK_SERVER_URL,
   type IBatchIngestionResult,
   type IIngestionOptions,
 } from './taxPackageIngestionService';
@@ -26,7 +27,7 @@ const DEFAULT_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 let timerHandle: NodeJS.Timeout | null = null;
 let lastCheckedAt: string | null = null;
 let lastSyncResult: IBatchIngestionResult | null = null;
-let activeServerUrl = 'http://localhost:3333';
+let activeServerUrl = DEFAULT_TAXPACK_SERVER_URL;
 let activeIntervalMs = DEFAULT_INTERVAL_MS;
 
 /**
@@ -79,7 +80,7 @@ export function startDailyPackageSyncScheduler(options: ISchedulerOptions = {}):
   }
 
   activeIntervalMs = options.intervalMs || DEFAULT_INTERVAL_MS;
-  activeServerUrl = options.serverUrl || process.env.TAX_PACKAGE_SERVER_URL || 'http://localhost:3333';
+  activeServerUrl = options.serverUrl || DEFAULT_TAXPACK_SERVER_URL;
 
   logInfo(
     `[Daily Package Scheduler] Initializing daily scheduler: interval=${activeIntervalMs}ms, server=${activeServerUrl}`

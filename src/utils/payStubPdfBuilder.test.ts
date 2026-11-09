@@ -1,7 +1,29 @@
-import { describe, it, expect, vi } from 'vitest';
+import fs from 'fs';
+import path from 'path';
+import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from 'vitest';
 import jsPDF from 'jspdf';
 import { generatePayStubPdf, printPayStubPdf, savePayStubPdf } from './payStubPdfBuilder';
 import { PayStub, Employee, Organization } from '../types';
+
+/**
+ * Safely removes a generated PDF file from disk after test runs.
+ * @param filename File name to search and remove
+ */
+function removeGeneratedPdf(filename: string): void {
+  const candidatePaths = [
+    path.resolve(process.cwd(), filename),
+    path.resolve(__dirname, filename),
+  ];
+  for (const filePath of candidatePaths) {
+    if (fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch {
+        // Silently ignore if already removed
+      }
+    }
+  }
+}
 
 const mockOrg: Organization = {
   id: 'org1',
@@ -80,6 +102,24 @@ const mockStub: PayStub = {
 };
 
 describe('payStubPdfBuilder', () => {
+  const getExpectedPdfName = (): string => {
+    const cleanOrg = (mockOrg.name || 'Company').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const cleanEmp = `${mockEmployee.lastName}_${mockEmployee.firstName}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+    return `${cleanOrg}_${cleanEmp}_PayStub_${mockStub.payDate}.pdf`;
+  };
+
+  beforeEach(() => {
+    removeGeneratedPdf(getExpectedPdfName());
+  });
+
+  afterEach(() => {
+    removeGeneratedPdf(getExpectedPdfName());
+  });
+
+  afterAll(() => {
+    removeGeneratedPdf(getExpectedPdfName());
+  });
+
   it('should generate a valid jsPDF document for a pay stub with organization title properties', () => {
     const doc = generatePayStubPdf(mockStub, mockEmployee, mockOrg);
     expect(doc).toBeDefined();
@@ -97,12 +137,17 @@ describe('payStubPdfBuilder', () => {
     URL.createObjectURL = originalCreateObjectURL;
   });
 
-  it('should trigger savePayStubPdf with company name in filename', () => {
-    const cleanOrg = (mockOrg.name || 'Company').replace(/[^a-zA-Z0-9_-]/g, '_');
-    const cleanEmp = `${mockEmployee.lastName}_${mockEmployee.firstName}`.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const expectedName = `${cleanOrg}_${cleanEmp}_PayStub_${mockStub.payDate}.pdf`;
+  it('should trigger savePayStubPdf with company name in filename and clean up generated file', () => {
+    const expectedName = getExpectedPdfName();
     expect(expectedName).toBe('Acme_Software_LLC_Doe_John_PayStub_2026-08-15.pdf');
 
-    expect(() => savePayStubPdf(mockStub, mockEmployee, mockOrg)).not.toThrow();
+    try {
+      expect(() => savePayStubPdf(mockStub, mockEmployee, mockOrg)).not.toThrow();
+    } finally {
+      removeGeneratedPdf(expectedName);
+    }
+
+    const filePath = path.resolve(process.cwd(), expectedName);
+    expect(fs.existsSync(filePath)).toBe(false);
   });
 });

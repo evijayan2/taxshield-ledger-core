@@ -32,9 +32,6 @@ function buildInitialCache(): Record<string, ResolvedRule> {
       payload: r.version.ruleData as unknown as TaxRulePayload,
     };
     cache[`${r.jurisdictionCode}:${r.ruleCode}`] = resolved;
-    if (r.jurisdictionCode.startsWith('PA-PSD-')) {
-      cache[`PA-LOCAL:${r.ruleCode}`] = resolved;
-    }
   }
   return cache;
 }

@@ -204,7 +204,7 @@ function resolveLocalEitRate(localityCode?: string, effectiveDate?: Date): numbe
   if (!/^\d{6}$/.test(psdCode)) {
     throw new Error(`Local tax jurisdiction [${localityCode}] is not mapped to a TaxRuleVersion.`);
   }
-  const rule = resolveActiveRuleSync('PA-LOCAL', `PA_LOCAL_EIT_${psdCode}`, defDate);
+  const rule = resolveActiveRuleSync(`PA-PSD-${psdCode}`, `PA_LOCAL_EIT_${psdCode}`, defDate);
   if (typeof rule.payload.rate !== 'number') {
     throw new Error(`Required local EIT rule [${rule.ruleCode}] has no rate payload.`);
   }
@@ -219,7 +219,7 @@ function resolveLocalServicesTaxAnnualAmount(localityCode: string | undefined, a
     return 0;
   }
   try {
-    const rule = resolveActiveRuleSync('PA-LOCAL', `PA_LOCAL_LST_${psdCode}`, defDate);
+    const rule = resolveActiveRuleSync(`PA-PSD-${psdCode}`, `PA_LOCAL_LST_${psdCode}`, defDate);
     const amount = rule.payload.rate ?? rule.payload.ratePerMile;
     return typeof amount === 'number' ? amount : 0;
   } catch {

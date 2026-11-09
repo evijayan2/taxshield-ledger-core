@@ -17,6 +17,10 @@
     "./types": {
       "types": "./src/types.ts",
       "default": "./src/types.ts"
+    },
+    "./fixtures": {
+      "types": "./prisma/fixtures/index.ts",
+      "default": "./prisma/fixtures/index.ts"
     }
   },
   "scripts": {

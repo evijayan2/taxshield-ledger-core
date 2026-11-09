@@ -20,7 +20,12 @@ export * from './server/services/contractorComplianceService';
 export * from './server/services/bankParserService';
 export * from './server/services/reconciliationService';
 export * from './server/services/auditReadinessService';
+export * from './server/rules-engine/taxRulesEngine';
+export * from './utils/localTaxDistricts';
+export * from './utils/paSchoolDistricts';
+export * from './utils/supportedStates';
 export * from './utils/taxEngine';
+export * from '../prisma/fixtures/index';
 
 export const TAXSHIELD_LEDGER_CORE_VERSION = '0.2.0';
 

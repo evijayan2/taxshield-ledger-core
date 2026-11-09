@@ -6,16 +6,20 @@ declare global {
   var globalPrisma: PrismaClient | undefined;
 }
 
+const isBrowser = typeof window !== 'undefined' || typeof process === 'undefined' || !process.env;
+const isDev = !isBrowser && process.env?.NODE_ENV === 'development';
+const isProd = !isBrowser && process.env?.NODE_ENV === 'production';
+
 /**
  * Singleton instance of PrismaClient to prevent connection exhaustion in dev.
  */
 export const prisma: PrismaClient =
   globalThis.globalPrisma ||
   new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    ...(isBrowser ? {} : { log: isDev ? ['query', 'error', 'warn'] : ['error'] }),
   });
 
-if (process.env.NODE_ENV !== 'production') {
+if (!isBrowser && !isProd) {
   globalThis.globalPrisma = prisma;
 }
 
@@ -23,6 +27,9 @@ if (process.env.NODE_ENV !== 'production') {
  * Connect to PostgreSQL via Prisma Client.
  */
 export async function connectDatabase(): Promise<boolean> {
+  if (isBrowser) {
+    return true;
+  }
   try {
     await prisma.$connect();
     logInfo('Successfully connected to PostgreSQL database via Prisma');

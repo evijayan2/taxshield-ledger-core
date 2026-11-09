@@ -29,7 +29,11 @@ function formatLog(level: string, payload: LogPayload): string {
  */
 export function logInfo(message: string, context?: Record<string, unknown>): void {
   const formatted = formatLog('INFO', { message, context });
-  process.stdout.write(`${formatted}\n`);
+  if (typeof process !== 'undefined' && process.stdout?.write) {
+    process.stdout.write(`${formatted}\n`);
+  } else {
+    console.info(formatted);
+  }
 }
 
 /**
@@ -37,7 +41,11 @@ export function logInfo(message: string, context?: Record<string, unknown>): voi
  */
 export function logWarn(message: string, context?: Record<string, unknown>): void {
   const formatted = formatLog('WARN', { message, context });
-  process.stdout.write(`${formatted}\n`);
+  if (typeof process !== 'undefined' && process.stdout?.write) {
+    process.stdout.write(`${formatted}\n`);
+  } else {
+    console.warn(formatted);
+  }
 }
 
 /**
@@ -45,5 +53,9 @@ export function logWarn(message: string, context?: Record<string, unknown>): voi
  */
 export function logError(message: string, error?: Error | unknown, context?: Record<string, unknown>): void {
   const formatted = formatLog('ERROR', { message, error, context });
-  process.stderr.write(`${formatted}\n`);
+  if (typeof process !== 'undefined' && process.stderr?.write) {
+    process.stderr.write(`${formatted}\n`);
+  } else {
+    console.error(formatted);
+  }
 }

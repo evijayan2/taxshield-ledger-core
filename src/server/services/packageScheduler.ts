@@ -36,6 +36,10 @@ let activeIntervalMs = DEFAULT_INTERVAL_MS;
 async function executeScheduledSync(options: ISchedulerOptions): Promise<void> {
   lastCheckedAt = new Date().toISOString();
   const serverUrl = options.serverUrl || activeServerUrl;
+  if (!serverUrl) {
+    logInfo('[Daily Package Scheduler] Skipping scheduled sync: TAXPACK_SERVER_URL is not configured.');
+    return;
+  }
   const ingestionOptions: IIngestionOptions = {
     actorId: options.actorId || 'system_daily_scheduler',
     companyId: options.companyId,
@@ -80,10 +84,10 @@ export function startDailyPackageSyncScheduler(options: ISchedulerOptions = {}):
   }
 
   activeIntervalMs = options.intervalMs || DEFAULT_INTERVAL_MS;
-  activeServerUrl = options.serverUrl || DEFAULT_TAXPACK_SERVER_URL;
+  activeServerUrl = options.serverUrl || DEFAULT_TAXPACK_SERVER_URL || '';
 
   logInfo(
-    `[Daily Package Scheduler] Initializing daily scheduler: interval=${activeIntervalMs}ms, server=${activeServerUrl}`
+    `[Daily Package Scheduler] Initializing daily scheduler: interval=${activeIntervalMs}ms, server=${activeServerUrl || 'not configured'}`
   );
 
   timerHandle = setInterval(() => {

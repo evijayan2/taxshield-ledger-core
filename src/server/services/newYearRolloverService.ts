@@ -76,7 +76,8 @@ export function processNewYearRollover(
   });
 
   // Step 4: Tax Package Sync & Rule Diff Inspection
-  const syncedPackages = ['US-FED-2026', 'PA-STATE-2026', 'PA-LOCAL-2026', 'DE-STATE-2026', 'NJ-STATE-2026', 'NY-STATE-2026', 'OH-STATE-2026', 'FL-STATE-2026', 'TX-STATE-2026'];
+  const basePackages = ['US-FED', 'PA-STATE', 'PA-LOCAL', 'DE-STATE', 'NJ-STATE', 'NY-STATE', 'OH-STATE', 'FL-STATE', 'TX-STATE'];
+  const syncedPackages = basePackages.map((pkg) => `${pkg}-${toYear}`);
   steps.push({
     stepNumber: 4,
     title: 'Tax Package Ingestion & Rule Diff Engine',

@@ -53,14 +53,15 @@ export interface IIngestionOptions {
 export const DEFAULT_TAXPACK_SERVER_URL =
   process.env.TAXPACK_SERVER_URL ||
   process.env.TAX_PACKAGE_SERVER_URL ||
-  'https://tax-rule-packaging-engine.vercel.app';
+  '';
 
 /**
  * Normalizes base server URL by trimming trailing slashes.
  */
 function normalizeServerUrl(url?: string): string {
-  const base = url || DEFAULT_TAXPACK_SERVER_URL;
-  return base.replace(/\/+$/, '');
+  const base = url && url !== 'undefined' ? url : DEFAULT_TAXPACK_SERVER_URL;
+  if (!base || base.trim() === '') return '';
+  return base.trim().replace(/\/+$/, '');
 }
 
 /**
@@ -238,7 +239,15 @@ export function evaluatePackageTestCases(
 export async function fetchRemotePackageCatalog(
   serverUrl?: string
 ): Promise<{ success: boolean; packages: IRemotePackageCatalogItem[]; error?: string }> {
-  const targetUrl = `${normalizeServerUrl(serverUrl)}/packages`;
+  const baseUrl = normalizeServerUrl(serverUrl);
+  if (!baseUrl) {
+    return {
+      success: false,
+      packages: [],
+      error: 'TaxPack server URL is not configured. Set TAXPACK_SERVER_URL in your environment.',
+    };
+  }
+  const targetUrl = `${baseUrl}/packages`;
   try {
     const res = await fetch(targetUrl, {
       signal: AbortSignal.timeout(5000),
@@ -263,10 +272,14 @@ export async function fetchRemotePackageCatalog(
  * @returns Verified package payload or validation error
  */
 export async function fetchAndVerifyPackage(
-  serverUrl: string,
+  serverUrl: string | undefined,
   fileName: string
 ): Promise<{ success: boolean; package?: any; error?: string }> {
-  const targetUrl = `${normalizeServerUrl(serverUrl)}/packages/${encodeURIComponent(fileName)}`;
+  const baseUrl = normalizeServerUrl(serverUrl);
+  if (!baseUrl) {
+    return { success: false, error: 'TaxPack server URL is not configured. Set TAXPACK_SERVER_URL in your environment.' };
+  }
+  const targetUrl = `${baseUrl}/packages/${encodeURIComponent(fileName)}`;
   try {
     const res = await fetch(targetUrl, {
       signal: AbortSignal.timeout(10000),

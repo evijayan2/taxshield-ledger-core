@@ -380,7 +380,13 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
   try {
     const companyData = data.company || data.org;
     const defaultPayFreq = companyData?.payFrequency || companyData?.filingFrequencyPA || 'BI_WEEKLY';
-    const compId = companyData?.id || 'comp_main';
+    const existingComp = await client.query('SELECT id FROM companies LIMIT 1').catch(() => ({ rows: [] }));
+    const compId = (companyData?.id && companyData.id !== 'comp_main')
+      ? companyData.id
+      : (existingComp.rows.length > 0 ? existingComp.rows[0].id : (companyData?.id || 'comp_main'));
+    if (companyData && (!companyData.id || companyData.id === 'comp_main')) {
+      companyData.id = compId;
+    }
     const ownerEmail = companyData?.ownerEmail || 'system';
 
     // Defensive sanitization of incoming data before saving snapshots & relational tables
@@ -481,6 +487,14 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
         ]
       );
     }
+
+    // Query existing company IDs to guarantee foreign key integrity for child tables
+    const compRows = await client.query('SELECT id FROM companies');
+    const validCompIds = new Set(compRows.rows.map((r: any) => r.id));
+    if (companyData && compId) {
+      validCompIds.add(compId);
+    }
+    const fallbackCompId = validCompIds.has(compId) ? compId : (compRows.rows[0]?.id || compId);
 
     // 3. Sync Employees
     if (Array.isArray(data.employees)) {
@@ -685,6 +699,7 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
     // 10. Sync Timesheets
     if (Array.isArray(data.timesheets)) {
       try {
+        await client.query('SAVEPOINT save_timesheets');
         await client.query('DELETE FROM timesheets');
         for (const t of data.timesheets) {
           await client.query(
@@ -698,7 +713,9 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
             ]
           );
         }
+        await client.query('RELEASE SAVEPOINT save_timesheets');
       } catch (tsErr) {
+        await client.query('ROLLBACK TO SAVEPOINT save_timesheets');
         console.warn('Warning: Could not sync timesheets table:', tsErr);
       }
     }
@@ -706,10 +723,11 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
     // 11. Sync Audit Logs
     if (Array.isArray(data.auditLogs)) {
       try {
+        await client.query('SAVEPOINT save_audit_logs');
         await client.query('DELETE FROM audit_log_entries');
         for (const log of data.auditLogs) {
           const safeEntityId = log.entityId || (log.newState && (log.newState as any).id) || (log.previousState && (log.previousState as any).id) || log.id || 'unknown';
-          const safeCompanyId = log.companyId || compId;
+          const safeCompanyId = (log.companyId && validCompIds.has(log.companyId)) ? log.companyId : fallbackCompId;
           const safeEntityType = log.entityType || 'General';
           const safeAction = log.action || 'UPDATE';
           const safeActorId = log.actorId || ownerEmail;
@@ -735,7 +753,9 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
             ]
           );
         }
+        await client.query('RELEASE SAVEPOINT save_audit_logs');
       } catch (auditErr) {
+        await client.query('ROLLBACK TO SAVEPOINT save_audit_logs');
         console.warn('Warning: Could not sync audit_log_entries table:', auditErr);
       }
     }
@@ -743,23 +763,47 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
     // 12. Sync Tax Years
     if (Array.isArray(data.taxYears)) {
       try {
+        await client.query('SAVEPOINT save_tax_years');
+        const seenTaxYears = new Set<string>();
         for (const ty of data.taxYears) {
-          await client.query(
-            `INSERT INTO tax_years (id, "companyId", year, status, "createdAt")
-             VALUES ($1, $2, $3, $4, $5)
-             ON CONFLICT (id) DO UPDATE SET
-               status = EXCLUDED.status,
-               year = EXCLUDED.year`,
-            [
-              ty.id || `ty_${ty.year}`,
-              ty.companyId || companyData?.id || 'comp_main',
-              ty.year,
-              ty.status || 'ACTIVE',
-              ty.createdAt || new Date().toISOString(),
-            ]
+          if (!ty || ty.year === undefined || ty.year === null) continue;
+          const safeTyCompanyId = (ty.companyId && validCompIds.has(ty.companyId)) ? ty.companyId : fallbackCompId;
+          const yearKey = `${safeTyCompanyId}:${ty.year}`;
+          if (seenTaxYears.has(yearKey)) continue;
+          seenTaxYears.add(yearKey);
+
+          const existingTy = await client.query(
+            'SELECT id FROM tax_years WHERE "companyId" = $1 AND year = $2 LIMIT 1',
+            [safeTyCompanyId, ty.year]
           );
+
+          if (existingTy.rows.length > 0) {
+            await client.query(
+              'UPDATE tax_years SET status = $1 WHERE "companyId" = $2 AND year = $3',
+              [ty.status || 'ACTIVE', safeTyCompanyId, ty.year]
+            );
+          } else {
+            const rowId = (ty.id && ty.id.length > 20 && !ty.id.startsWith('ty_'))
+              ? ty.id
+              : `ty_${safeTyCompanyId}_${ty.year}`;
+            await client.query(
+              `INSERT INTO tax_years (id, "companyId", year, status, "createdAt")
+               VALUES ($1, $2, $3, $4, $5)
+               ON CONFLICT ("companyId", year) DO UPDATE SET
+                 status = EXCLUDED.status`,
+              [
+                rowId,
+                safeTyCompanyId,
+                ty.year,
+                ty.status || 'ACTIVE',
+                ty.createdAt || new Date().toISOString(),
+              ]
+            );
+          }
         }
+        await client.query('RELEASE SAVEPOINT save_tax_years');
       } catch (tyErr) {
+        await client.query('ROLLBACK TO SAVEPOINT save_tax_years');
         console.warn('Warning: Could not sync tax_years table:', tyErr);
       }
     }

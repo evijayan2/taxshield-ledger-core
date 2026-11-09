@@ -10,10 +10,11 @@ const TAG_LENGTH = 16; // 128-bit auth tag
  * @returns 32-byte encryption key Buffer.
  */
 function resolveKey(explicitKey?: Buffer | string): Buffer {
+  const hasEnv = typeof process !== 'undefined' && Boolean(process.env);
   const rawKey =
     explicitKey ||
-    process.env.TIN_ENCRYPTION_KEY ||
-    (process.env.NODE_ENV !== 'production'
+    (hasEnv ? process.env.TIN_ENCRYPTION_KEY : undefined) ||
+    (!hasEnv || process.env.NODE_ENV !== 'production'
       ? '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
       : undefined);
 

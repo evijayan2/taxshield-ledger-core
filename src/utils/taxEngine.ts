@@ -1,8 +1,9 @@
-import { Employee, MileageLog, ComplianceTask, EmployeeResidenceHistory, EmployeeWorkLocationHistory, PayStubTaxLine } from '../types';
+import { Employee, MileageLog, ComplianceTask, EmployeeResidenceHistory, EmployeeWorkLocationHistory, PayStubTaxLine, EmployeeBenefitElection } from '../types';
 import { resolveActiveRuleSync, computeFederalWithholdingFromRule } from '../server/rules-engine/taxRulesEngine';
 import { findDistrictByPsdCode } from './paSchoolDistricts';
 import { resolvePayPeriodResidences } from '../server/services/residenceHistoryService';
 import { resolveEmployeeJurisdictions } from '../server/services/jurisdictionResolver';
+import { calculateBenefitDeductions, clampBenefitDeductions } from '../server/services/benefitDeductionEngine';
 
 /**
  * Get current system calendar year.
@@ -273,11 +274,16 @@ export function calculateGrossToNet(
   periodStart?: string,
   periodEnd?: string,
   workLocationHistory: EmployeeWorkLocationHistory[] = [],
-  effectiveDate?: Date
+  effectiveDate?: Date,
+  benefitDeductions?: EmployeeBenefitElection[]
 ) {
   const regularEarnings = hoursWorked * employee.payRate;
   const overtimeEarnings = overtimeHours * (employee.payRate * 1.5);
   const grossEarnings = Math.round((regularEarnings + overtimeEarnings) * 100) / 100;
+
+  const elections = benefitDeductions || employee.benefitElections || [];
+  const rawDeductions = calculateBenefitDeductions(grossEarnings, elections, employee);
+  const wageBases = rawDeductions.wageBases;
 
   const defDate = effectiveDate
     ? new Date(effectiveDate)
@@ -290,7 +296,7 @@ export function calculateGrossToNet(
   const rates = getActiveRates(defDate);
 
   const federalIncomeTax = calculateFederalIncomeTax(
-    grossEarnings,
+    wageBases.fitTaxableWages,
     employee.payFrequency,
     employee.w4FilingStatus,
     employee.w4MultipleJobs,
@@ -305,8 +311,8 @@ export function calculateGrossToNet(
   const isFicaExempt = rel === 'CHILD_UNDER_18';
   const isPaUcExempt = rel === 'CHILD_UNDER_18' || rel === 'CHILD_18_TO_20' || rel === 'SPOUSE' || rel === 'PARENT';
 
-  const socialSecurityTax = isFicaExempt ? 0 : Math.round(grossEarnings * rates.socialSecurityRate * 100) / 100;
-  const medicareTax = isFicaExempt ? 0 : Math.round(grossEarnings * rates.medicareRate * 100) / 100;
+  const socialSecurityTax = isFicaExempt ? 0 : Math.round(wageBases.ssTaxableWages * rates.socialSecurityRate * 100) / 100;
+  const medicareTax = isFicaExempt ? 0 : Math.round(wageBases.medicareTaxableWages * rates.medicareRate * 100) / 100;
 
   const rawWorkState = employee.workState || employee.state || (employee.paPsdCode ? 'PA' : undefined);
   if (!rawWorkState) {
@@ -352,7 +358,7 @@ export function calculateGrossToNet(
     const deSitRule = resolveActiveRuleSync('DE-STATE', 'DE_SIT_BRACKETS', defDate);
     if (deSitRule?.payload?.brackets && Array.isArray(deSitRule.payload.brackets)) {
       const periods = employee.payFrequency === 'WEEKLY' ? 52 : employee.payFrequency === 'BI_WEEKLY' ? 26 : employee.payFrequency === 'SEMI_MONTHLY' ? 24 : 12;
-      const annualizedGross = grossEarnings * periods;
+      const annualizedGross = wageBases.stateTaxableWages * periods;
       let annualTax = 0;
       const matchingBracket = deSitRule.payload.brackets.find((b: any) => {
         const low = b.over ?? b.incomeFrom ?? 0;
@@ -373,14 +379,14 @@ export function calculateGrossToNet(
     if (deRate === undefined) {
       throw new Error('Required tax rate [DE_SUTA_EMPLOYER] missing from Tax Rules Engine payload');
     }
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(grossEarnings * deRate * 100) / 100;
+    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * deRate * 100) / 100;
   } else if (stateCode === 'NJ') {
     stateDisplayName = 'New Jersey Gross Income Tax';
     sutaDisplayName = 'NJ Employer SUI Tax';
     const njSitRule = resolveActiveRuleSync('NJ-STATE', 'NJ_SIT_BRACKETS');
     if (njSitRule?.payload?.brackets && Array.isArray(njSitRule.payload.brackets)) {
       const periods = employee.payFrequency === 'WEEKLY' ? 52 : employee.payFrequency === 'BI_WEEKLY' ? 26 : employee.payFrequency === 'SEMI_MONTHLY' ? 24 : 12;
-      const annualizedGross = grossEarnings * periods;
+      const annualizedGross = wageBases.stateTaxableWages * periods;
       let annualTax = 0;
       const matchingBracket = njSitRule.payload.brackets.find((b: any) => {
         const low = b.over ?? b.incomeFrom ?? 0;
@@ -401,14 +407,14 @@ export function calculateGrossToNet(
     if (njRate === undefined) {
       throw new Error('Required tax rate [NJ_SUI_EMPLOYER] missing from Tax Rules Engine payload');
     }
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(grossEarnings * njRate * 100) / 100;
+    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * njRate * 100) / 100;
   } else if (stateCode === 'NY') {
     stateDisplayName = 'New York State Personal Income Tax';
     sutaDisplayName = 'NY Employer SUTA Tax';
     const nySitRule = resolveActiveRuleSync('NY-STATE', 'NY_SIT_BRACKETS', defDate);
     if (nySitRule?.payload?.brackets && Array.isArray(nySitRule.payload.brackets)) {
       const periods = employee.payFrequency === 'WEEKLY' ? 52 : employee.payFrequency === 'BI_WEEKLY' ? 26 : employee.payFrequency === 'SEMI_MONTHLY' ? 24 : 12;
-      const annualizedGross = grossEarnings * periods;
+      const annualizedGross = wageBases.stateTaxableWages * periods;
       let annualTax = 0;
       const matchingBracket = nySitRule.payload.brackets.find((b: any) => {
         const low = b.over ?? b.incomeFrom ?? 0;
@@ -429,14 +435,14 @@ export function calculateGrossToNet(
     if (nyRate === undefined) {
       throw new Error('Required tax rate [NY_SUTA_EMPLOYER] missing from Tax Rules Engine payload');
     }
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(grossEarnings * nyRate * 100) / 100;
+    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * nyRate * 100) / 100;
   } else if (stateCode === 'OH') {
     stateDisplayName = 'Ohio Personal Income Tax';
     sutaDisplayName = 'OH Employer SUTA Tax';
     const ohSitRule = resolveActiveRuleSync('OH-STATE', 'OH_SIT_BRACKETS', defDate);
     if (ohSitRule?.payload?.brackets && Array.isArray(ohSitRule.payload.brackets)) {
       const periods = employee.payFrequency === 'WEEKLY' ? 52 : employee.payFrequency === 'BI_WEEKLY' ? 26 : employee.payFrequency === 'SEMI_MONTHLY' ? 24 : 12;
-      const annualizedGross = grossEarnings * periods;
+      const annualizedGross = wageBases.stateTaxableWages * periods;
       let annualTax = 0;
       const matchingBracket = ohSitRule.payload.brackets.find((b: any) => {
         const low = b.over ?? b.incomeFrom ?? 0;
@@ -457,7 +463,7 @@ export function calculateGrossToNet(
     if (ohRate === undefined) {
       throw new Error('Required tax rate [OH_SUTA_EMPLOYER] missing from Tax Rules Engine payload');
     }
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(grossEarnings * ohRate * 100) / 100;
+    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * ohRate * 100) / 100;
   } else if (stateCode === 'FL' || stateCode === 'TX') {
     stateDisplayName = `${stateCode} Personal Income Tax (0.00%)`;
     sutaDisplayName = stateCode === 'FL' ? 'FL Reemployment Tax' : 'TX Unemployment SUTA';
@@ -469,19 +475,19 @@ export function calculateGrossToNet(
     if (rate === undefined) {
       throw new Error(`Required tax rate [${sutaRuleCode}] missing from Tax Rules Engine payload`);
     }
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(grossEarnings * rate * 100) / 100;
+    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * rate * 100) / 100;
   } else if (stateCode === 'PA') {
     stateDisplayName = 'PA State Personal Income Tax';
     sutaDisplayName = 'PA Employer UC';
-    stateIncomeTax = Math.round(grossEarnings * rates.paSitRate * 100) / 100;
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(grossEarnings * rates.paEmployerUcRate * 100) / 100;
+    stateIncomeTax = Math.round(wageBases.stateTaxableWages * rates.paSitRate * 100) / 100;
+    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * rates.paEmployerUcRate * 100) / 100;
   } else {
     throw new Error(`Unsupported state income tax jurisdiction [${stateCode}]. Active tax rule versions are required in the Tax Rules Engine.`);
   }
 
   const effectiveEitRate = resolveLocalEitRate(localityCode);
 
-  let localIncomeTax = Math.round(grossEarnings * effectiveEitRate * 100) / 100;
+  let localIncomeTax = Math.round(wageBases.localTaxableWages * effectiveEitRate * 100) / 100;
   const taxLines: PayStubTaxLine[] = [];
 
   // Federal & FICA Tax Lines
@@ -491,7 +497,7 @@ export function calculateGrossToNet(
     jurisdictionType: 'FEDERAL',
     jurisdictionCode: 'US-FED-FIT',
     jurisdictionName: 'Federal Income Tax',
-    taxableWages: grossEarnings,
+    taxableWages: wageBases.fitTaxableWages,
     taxRate: 0,
     taxWithheld: federalIncomeTax,
     startDate: periodStart || null,
@@ -503,7 +509,7 @@ export function calculateGrossToNet(
     jurisdictionType: 'FEDERAL',
     jurisdictionCode: 'US-FED-SS',
     jurisdictionName: 'Social Security',
-    taxableWages: isFicaExempt ? 0 : grossEarnings,
+    taxableWages: isFicaExempt ? 0 : wageBases.ssTaxableWages,
     taxRate: rates.socialSecurityRate,
     taxWithheld: socialSecurityTax,
     startDate: periodStart || null,
@@ -515,7 +521,7 @@ export function calculateGrossToNet(
     jurisdictionType: 'FEDERAL',
     jurisdictionCode: 'US-FED-MED',
     jurisdictionName: 'Medicare',
-    taxableWages: isFicaExempt ? 0 : grossEarnings,
+    taxableWages: isFicaExempt ? 0 : wageBases.medicareTaxableWages,
     taxRate: rates.medicareRate,
     taxWithheld: medicareTax,
     startDate: periodStart || null,
@@ -529,7 +535,7 @@ export function calculateGrossToNet(
     jurisdictionType: 'STATE',
     jurisdictionCode: stateCode,
     jurisdictionName: stateDisplayName,
-    taxableWages: grossEarnings,
+    taxableWages: wageBases.stateTaxableWages,
     taxRate: rates.paSitRate || 0,
     taxWithheld: stateIncomeTax,
     startDate: periodStart || null,
@@ -546,7 +552,7 @@ export function calculateGrossToNet(
       for (let idx = 0; idx < intervals.length; idx++) {
         const interval = intervals[idx];
         const share = interval.workdays / totalWorkdays;
-        const intervalWages = Math.round(grossEarnings * share * 100) / 100;
+        const intervalWages = Math.round(wageBases.localTaxableWages * share * 100) / 100;
         const intervalRate = resolveLocalEitRate(interval.psdCode || localityCode);
         const intervalTax = Math.round(intervalWages * intervalRate * 100) / 100;
         sumLocalTax += intervalTax;
@@ -573,7 +579,7 @@ export function calculateGrossToNet(
         jurisdictionType: 'LOCAL_EIT',
         jurisdictionCode: localityCode || 'PA-LOCAL',
         jurisdictionName: localityName || 'Local EIT',
-        taxableWages: grossEarnings,
+        taxableWages: wageBases.localTaxableWages,
         taxRate: effectiveEitRate,
         taxWithheld: localIncomeTax,
         startDate: periodStart,
@@ -587,7 +593,7 @@ export function calculateGrossToNet(
       jurisdictionType: 'LOCAL_EIT',
       jurisdictionCode: localityCode || 'PA-LOCAL',
       jurisdictionName: localityName || 'Local EIT',
-      taxableWages: grossEarnings,
+      taxableWages: wageBases.localTaxableWages,
       taxRate: effectiveEitRate,
       taxWithheld: localIncomeTax,
       startDate: null,
@@ -625,14 +631,17 @@ export function calculateGrossToNet(
 
   const totalEmployeeTaxes = Math.round((federalIncomeTax + socialSecurityTax + medicareTax + stateIncomeTax + localIncomeTax + localFlatTax) * 100) / 100;
   const totalReimbursements = Math.round((approvedMileageReimbursement + approvedTravelReimbursement) * 100) / 100;
-  const netPay = Math.round((grossEarnings - totalEmployeeTaxes + totalReimbursements) * 100) / 100;
+  const netPayBeforeDeductions = Math.round((grossEarnings - totalEmployeeTaxes + totalReimbursements) * 100) / 100;
+
+  const finalDeductions = clampBenefitDeductions(rawDeductions, netPayBeforeDeductions);
+  const netPay = Math.max(0, Math.round((netPayBeforeDeductions - finalDeductions.clampedDeductions) * 100) / 100);
 
   const employerSocialSecurity = socialSecurityTax;
   const employerMedicare = medicareTax;
   const employerPaUc = employerStateUnemployment;
   const totalEmployerTaxes = Math.round((employerSocialSecurity + employerMedicare + employerStateUnemployment) * 100) / 100;
 
-  const totalCompanyCost = Math.round((grossEarnings + totalEmployerTaxes + totalReimbursements) * 100) / 100;
+  const totalCompanyCost = Math.round((grossEarnings + totalEmployerTaxes + totalReimbursements + finalDeductions.totalEmployerContributions) * 100) / 100;
 
   const taxBreakdown = {
     workState,
@@ -690,7 +699,14 @@ export function calculateGrossToNet(
     totalCompanyCost,
     isFicaExempt,
     isPaUcExempt,
-    relationshipToOwner: rel
+    relationshipToOwner: rel,
+    deductionResult: finalDeductions,
+    totalBenefitDeductions: finalDeductions.clampedDeductions,
+    totalPreTaxDeductions: finalDeductions.totalPreTaxDeductions,
+    totalPostTaxDeductions: finalDeductions.totalPostTaxDeductions,
+    uncollectedDeductions: finalDeductions.uncollectedDeductions,
+    benefitDeductionLines: finalDeductions.itemizedDeductions,
+    statutoryWageBases: wageBases
   };
 }
 

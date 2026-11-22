@@ -99,6 +99,8 @@ export interface Employee {
   accountNumber?: string;
   bankAccountMasked?: string;
   isActive: boolean;
+  isShareholderGreaterThan2Pct?: boolean;
+  benefitElections?: EmployeeBenefitElection[];
   residenceHistory?: EmployeeResidenceHistory[];
   bankHistory?: EmployeeBankHistory[];
 }
@@ -630,6 +632,68 @@ export type CitationTier =
   | 'TIER_1_OFFICIAL'
   | 'TIER_2_GOV_DEPT';
 
+// ==========================================
+// Multi-Vector Benefit & Deduction Engine Types
+// ==========================================
 
+export type BenefitPlanType =
+  | 'SECTION_125_HEALTH'
+  | 'SECTION_125_DENTAL'
+  | 'SECTION_125_VISION'
+  | 'SECTION_125_FSA'
+  | 'HSA_PRETAX'
+  | 'RETIREMENT_401K_TRADITIONAL'
+  | 'RETIREMENT_401K_ROTH'
+  | 'POST_TAX_OTHER';
 
+export type DeductionAmountType = 'FIXED' | 'PERCENTAGE';
+
+export interface EmployeeBenefitElection {
+  id?: string;
+  employeeId?: string;
+  planType: BenefitPlanType;
+  planName?: string;
+  amountType: DeductionAmountType;
+  amount: number;
+  isShareholderGreaterThan2Pct?: boolean;
+  employerContribution?: number;
+  employerContributionType?: DeductionAmountType;
+  annualLimit?: number;
+  ytdDeductions?: number;
+}
+
+export interface CalculatedDeductionItem {
+  planType: BenefitPlanType;
+  planName: string;
+  requestedAmount: number;
+  appliedAmount: number;
+  uncollectedAmount: number;
+  isPreTaxFit: boolean;
+  isPreTaxFica: boolean;
+  isPreTaxState: boolean;
+  isPreTaxLocal: boolean;
+  employerContribution: number;
+}
+
+export interface StatutoryWageBases {
+  fitTaxableWages: number;
+  ssTaxableWages: number;
+  medicareTaxableWages: number;
+  futaTaxableWages: number;
+  sutaTaxableWages: number;
+  stateTaxableWages: number;
+  localTaxableWages: number;
+}
+
+export interface DeductionCalculationResult {
+  wageBases: StatutoryWageBases;
+  totalPreTaxDeductions: number;
+  totalPostTaxDeductions: number;
+  totalDeductions: number;
+  totalEmployeeDeductions: number;
+  totalEmployerContributions: number;
+  clampedDeductions: number;
+  uncollectedDeductions: number;
+  itemizedDeductions: CalculatedDeductionItem[];
+}
 

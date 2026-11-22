@@ -173,4 +173,109 @@ describe('Delaware Multi-State Tax Calculations', () => {
   });
 });
 
+describe('calculateGrossToNet with Benefit Deductions & IRC § 1372', () => {
+  it('reduces FIT, FICA, and PA-PIT wages for Section 125 health deduction', () => {
+    const employee: Employee = {
+      ...baseEmployee,
+      age: 30,
+      relationshipToOwner: 'NONE',
+      payRate: 25, // $2,000 for 80 hours
+      benefitElections: [
+        {
+          planType: 'SECTION_125_HEALTH',
+          planName: 'Health PPO',
+          amountType: 'FIXED',
+          amount: 200,
+        },
+      ],
+    };
+
+    const result = calculateGrossToNet(employee, 80);
+    expect(result.grossEarnings).toBe(2000);
+    expect(result.statutoryWageBases.fitTaxableWages).toBe(1800);
+    expect(result.statutoryWageBases.ssTaxableWages).toBe(1800);
+    expect(result.statutoryWageBases.medicareTaxableWages).toBe(1800);
+    expect(result.statutoryWageBases.stateTaxableWages).toBe(1800);
+    expect(result.totalBenefitDeductions).toBe(200);
+    expect(result.totalPreTaxDeductions).toBe(200);
+    expect(result.uncollectedDeductions).toBe(0);
+  });
+
+  it('reduces FIT but preserves FICA and PA-PIT for Traditional 401(k)', () => {
+    const employee: Employee = {
+      ...baseEmployee,
+      age: 30,
+      relationshipToOwner: 'NONE',
+      payRate: 25, // $2,000 for 80 hours
+      benefitElections: [
+        {
+          planType: 'RETIREMENT_401K_TRADITIONAL',
+          planName: '401(k)',
+          amountType: 'FIXED',
+          amount: 150,
+        },
+      ],
+    };
+
+    const result = calculateGrossToNet(employee, 80);
+    expect(result.grossEarnings).toBe(2000);
+    expect(result.statutoryWageBases.fitTaxableWages).toBe(1850);
+    expect(result.statutoryWageBases.ssTaxableWages).toBe(2000);
+    expect(result.statutoryWageBases.medicareTaxableWages).toBe(2000);
+    expect(result.statutoryWageBases.stateTaxableWages).toBe(2000);
+    expect(result.totalBenefitDeductions).toBe(150);
+  });
+
+  it('enforces IRC § 1372: >2% S-Corp shareholder health is in FIT wages but exempt from FICA and PA-PIT', () => {
+    const employee: Employee = {
+      ...baseEmployee,
+      age: 45,
+      relationshipToOwner: 'NONE',
+      isShareholderGreaterThan2Pct: true,
+      payRate: 50, // $4,000 for 80 hours
+      benefitElections: [
+        {
+          planType: 'SECTION_125_HEALTH',
+          planName: 'Owner Health',
+          amountType: 'FIXED',
+          amount: 400,
+        },
+      ],
+    };
+
+    const result = calculateGrossToNet(employee, 80);
+    expect(result.grossEarnings).toBe(4000);
+    // FIT taxable wages are NOT reduced (W-2 Box 1)
+    expect(result.statutoryWageBases.fitTaxableWages).toBe(4000);
+    // FICA and PA-PIT taxable wages are exempt
+    expect(result.statutoryWageBases.ssTaxableWages).toBe(3600);
+    expect(result.statutoryWageBases.medicareTaxableWages).toBe(3600);
+    expect(result.statutoryWageBases.stateTaxableWages).toBe(3600);
+  });
+
+  it('clamps voluntary deductions so net pay is never negative', () => {
+    const employee: Employee = {
+      ...baseEmployee,
+      age: 22,
+      relationshipToOwner: 'NONE',
+      payRate: 10, // $200 for 20 hours
+      benefitElections: [
+        {
+          planType: 'POST_TAX_OTHER',
+          planName: 'Voluntary Savings',
+          amountType: 'FIXED',
+          amount: 300,
+        },
+      ],
+    };
+
+    const result = calculateGrossToNet(employee, 20);
+    expect(result.grossEarnings).toBe(200);
+    expect(result.netPay).toBe(0);
+    expect(result.totalBenefitDeductions).toBeLessThanOrEqual(200);
+    expect(result.uncollectedDeductions).toBeGreaterThan(0);
+  });
+});
+
+
 

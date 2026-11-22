@@ -143,6 +143,8 @@ model Company {
   payrollTaxLiabilities PayrollTaxLiability[]
   taxPaymentAllocations TaxPaymentAllocation[]
   achBatches         AchBatch[]
+  taxSettings        CompanyTaxSetting[]
+  experienceRateHistories ExperienceRateHistory[]
 
   @@map("companies")
 }
@@ -179,6 +181,7 @@ model TaxYear {
   invoices        Invoice[]
   contractorPayments ContractorPayment[]
   taxLiabilities  PayrollTaxLiability[]
+  experienceRateHistories ExperienceRateHistory[]
 
   @@unique([companyId, year])
   @@map("tax_years")
@@ -959,5 +962,52 @@ model AchBatch {
   @@index([companyId, effectiveEntryDate])
   @@map("ach_batches")
 }
+
+model CompanyTaxSetting {
+  id               String                  @id @default(uuid())
+  companyId        String                  @map("company_id")
+  jurisdiction     String
+  taxKind          String                  @default("SUTA") @map("tax_kind")
+  stateAccountId   String?                 @map("state_account_id")
+  status           String                  @default("ACTIVE")
+  createdAt        DateTime                @default(now()) @map("created_at")
+  updatedAt        DateTime                @updatedAt @map("updated_at")
+
+  company          Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  rateHistories    ExperienceRateHistory[]
+
+  @@unique([companyId, jurisdiction, taxKind])
+  @@index([companyId, jurisdiction])
+  @@map("company_tax_settings")
+}
+
+model ExperienceRateHistory {
+  id                  String            @id @default(uuid())
+  companyId           String            @map("company_id")
+  companyTaxSettingId String            @map("company_tax_setting_id")
+  taxYearId           String?           @map("tax_year_id")
+  rateDecimal         Decimal           @map("rate_decimal") @db.Decimal(10, 5)
+  rateBps             Int               @map("rate_bps")
+  wageBaseOverride    Decimal?          @map("wage_base_override") @db.Decimal(12, 2)
+  effectiveFrom       DateTime          @map("effective_from") @db.Date
+  effectiveTo         DateTime?         @map("effective_to") @db.Date
+  noticeReference     String?           @map("notice_reference")
+  noticeDate          DateTime?         @map("notice_date") @db.Date
+  status              String            @default("ACTIVE")
+  verifiedBy          String?           @map("verified_by")
+  verifiedAt          DateTime?         @map("verified_at")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  company             Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyTaxSetting   CompanyTaxSetting @relation(fields: [companyTaxSettingId], references: [id], onDelete: Cascade)
+  taxYear             TaxYear?          @relation(fields: [taxYearId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, effectiveFrom])
+  @@index([companyTaxSettingId, effectiveFrom])
+  @@index([companyTaxSettingId, status])
+  @@map("experience_rate_histories")
+}
+
 
 

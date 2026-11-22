@@ -277,5 +277,113 @@ describe('calculateGrossToNet with Benefit Deductions & IRC § 1372', () => {
   });
 });
 
+describe('calculateGrossToNet with SUTA Experience Rating', () => {
+  const paEmployee: Employee = {
+    ...baseEmployee,
+    age: 30,
+    relationshipToOwner: 'NONE',
+    payRate: 25, // $2,000 for 80 hours
+    workState: 'PA',
+    state: 'PA',
+  };
+
+  const paSettings = [
+    {
+      id: 'sett-pa-01',
+      companyId: 'comp-1',
+      jurisdiction: 'PA',
+      taxKind: 'SUTA',
+      stateAccountId: 'PA-UC-9988',
+      status: 'ACTIVE' as const,
+      rateHistories: [
+        {
+          id: 'hist-1',
+          companyId: 'comp-1',
+          companyTaxSettingId: 'sett-pa-01',
+          rateDecimal: 0.04125,
+          rateBps: 413,
+          effectiveFrom: '2026-01-01',
+          effectiveTo: null,
+          noticeReference: 'PA Form UC-657 (2026)',
+          status: 'ACTIVE' as const,
+        },
+      ],
+    },
+  ];
+
+  it('uses assigned experience rate when provided', () => {
+    const result = calculateGrossToNet(
+      paEmployee,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      paSettings
+    );
+
+    expect(result.grossEarnings).toBe(2000);
+    expect(result.sutaResolution.source).toBe('ASSIGNED_EXPERIENCE_RATE');
+    expect(result.sutaResolution.rate).toBe(0.04125);
+    // 2000 * 0.04125 = 82.50
+    expect(result.employerStateUnemployment).toBe(82.5);
+    expect(result.taxBreakdown.suta.amount).toBe(82.5);
+    expect(result.taxBreakdown.suta.rate).toBe(0.04125);
+  });
+
+  it('falls back to statutory default when company has no settings', () => {
+    const result = calculateGrossToNet(
+      paEmployee,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15')
+    );
+
+    expect(result.grossEarnings).toBe(2000);
+    expect(result.sutaResolution.source).toBe('STATUTORY_DEFAULT');
+    expect(result.sutaResolution.rate).toBe(0.035);
+    // 2000 * 0.035 = 70.00
+    expect(result.employerStateUnemployment).toBe(70);
+  });
+
+  it('honors family exemption for SUTA even with assigned experience rate', () => {
+    const familyEmp: Employee = {
+      ...paEmployee,
+      relationshipToOwner: 'SPOUSE',
+    };
+
+    const result = calculateGrossToNet(
+      familyEmp,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      paSettings
+    );
+
+    expect(result.isPaUcExempt).toBe(true);
+    expect(result.employerStateUnemployment).toBe(0);
+    expect(result.taxBreakdown.suta.amount).toBe(0);
+  });
+});
+
+
 
 

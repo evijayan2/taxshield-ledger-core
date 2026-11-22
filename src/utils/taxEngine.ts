@@ -1,9 +1,10 @@
-import { Employee, MileageLog, ComplianceTask, EmployeeResidenceHistory, EmployeeWorkLocationHistory, PayStubTaxLine, EmployeeBenefitElection } from '../types';
+import { Employee, MileageLog, ComplianceTask, EmployeeResidenceHistory, EmployeeWorkLocationHistory, PayStubTaxLine, EmployeeBenefitElection, CompanyTaxSetting, SutaRateResolution } from '../types';
 import { resolveActiveRuleSync, computeFederalWithholdingFromRule } from '../server/rules-engine/taxRulesEngine';
 import { findDistrictByPsdCode } from './paSchoolDistricts';
 import { resolvePayPeriodResidences } from '../server/services/residenceHistoryService';
 import { resolveEmployeeJurisdictions } from '../server/services/jurisdictionResolver';
 import { calculateBenefitDeductions, clampBenefitDeductions } from '../server/services/benefitDeductionEngine';
+import { resolveSutaRate } from '../server/services/sutaExperienceService';
 
 /**
  * Get current system calendar year.
@@ -275,7 +276,8 @@ export function calculateGrossToNet(
   periodEnd?: string,
   workLocationHistory: EmployeeWorkLocationHistory[] = [],
   effectiveDate?: Date,
-  benefitDeductions?: EmployeeBenefitElection[]
+  benefitDeductions?: EmployeeBenefitElection[],
+  companyTaxSettings?: CompanyTaxSetting[]
 ) {
   const regularEarnings = hoursWorked * employee.payRate;
   const overtimeEarnings = overtimeHours * (employee.payRate * 1.5);
@@ -348,9 +350,14 @@ export function calculateGrossToNet(
   }
 
   let stateIncomeTax = 0;
-  let employerStateUnemployment = 0;
   let stateDisplayName = `${stateCode} State Income Tax`;
   let sutaDisplayName = `${stateCode} State Unemployment`;
+
+  const sutaResolution = resolveSutaRate({
+    stateCode,
+    companyTaxSettings,
+    effectiveDate: defDate,
+  });
 
   if (stateCode === 'DE') {
     stateDisplayName = 'Delaware State Income Tax';
@@ -373,13 +380,6 @@ export function calculateGrossToNet(
       }
       stateIncomeTax = Math.round((annualTax / periods) * 100) / 100;
     }
-
-    const deSutaRule = resolveActiveRuleSync('DE-STATE', 'DE_SUTA_EMPLOYER', defDate);
-    const deRate = deSutaRule.payload.rate;
-    if (deRate === undefined) {
-      throw new Error('Required tax rate [DE_SUTA_EMPLOYER] missing from Tax Rules Engine payload');
-    }
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * deRate * 100) / 100;
   } else if (stateCode === 'NJ') {
     stateDisplayName = 'New Jersey Gross Income Tax';
     sutaDisplayName = 'NJ Employer SUI Tax';
@@ -401,13 +401,6 @@ export function calculateGrossToNet(
       }
       stateIncomeTax = Math.round((annualTax / periods) * 100) / 100;
     }
-
-    const njSuiRule = resolveActiveRuleSync('NJ-STATE', 'NJ_SUI_EMPLOYER', defDate);
-    const njRate = njSuiRule.payload.rate;
-    if (njRate === undefined) {
-      throw new Error('Required tax rate [NJ_SUI_EMPLOYER] missing from Tax Rules Engine payload');
-    }
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * njRate * 100) / 100;
   } else if (stateCode === 'NY') {
     stateDisplayName = 'New York State Personal Income Tax';
     sutaDisplayName = 'NY Employer SUTA Tax';
@@ -429,13 +422,6 @@ export function calculateGrossToNet(
       }
       stateIncomeTax = Math.round((annualTax / periods) * 100) / 100;
     }
-
-    const nySutaRule = resolveActiveRuleSync('NY-STATE', 'NY_SUTA_EMPLOYER', defDate);
-    const nyRate = nySutaRule.payload.rate;
-    if (nyRate === undefined) {
-      throw new Error('Required tax rate [NY_SUTA_EMPLOYER] missing from Tax Rules Engine payload');
-    }
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * nyRate * 100) / 100;
   } else if (stateCode === 'OH') {
     stateDisplayName = 'Ohio Personal Income Tax';
     sutaDisplayName = 'OH Employer SUTA Tax';
@@ -457,33 +443,21 @@ export function calculateGrossToNet(
       }
       stateIncomeTax = Math.round((annualTax / periods) * 100) / 100;
     }
-
-    const ohSutaRule = resolveActiveRuleSync('OH-STATE', 'OH_SUTA_EMPLOYER', defDate);
-    const ohRate = ohSutaRule.payload.rate;
-    if (ohRate === undefined) {
-      throw new Error('Required tax rate [OH_SUTA_EMPLOYER] missing from Tax Rules Engine payload');
-    }
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * ohRate * 100) / 100;
   } else if (stateCode === 'FL' || stateCode === 'TX') {
     stateDisplayName = `${stateCode} Personal Income Tax (0.00%)`;
     sutaDisplayName = stateCode === 'FL' ? 'FL Reemployment Tax' : 'TX Unemployment SUTA';
     stateIncomeTax = 0;
-    const sutaRuleCode = stateCode === 'FL' ? 'FL_SUTA_EMPLOYER' : 'TX_SUTA_EMPLOYER';
-    const jurisCode = `${stateCode}-STATE`;
-    const sutaRule = resolveActiveRuleSync(jurisCode, sutaRuleCode, defDate);
-    const rate = sutaRule.payload.rate;
-    if (rate === undefined) {
-      throw new Error(`Required tax rate [${sutaRuleCode}] missing from Tax Rules Engine payload`);
-    }
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * rate * 100) / 100;
   } else if (stateCode === 'PA') {
     stateDisplayName = 'PA State Personal Income Tax';
     sutaDisplayName = 'PA Employer UC';
     stateIncomeTax = Math.round(wageBases.stateTaxableWages * rates.paSitRate * 100) / 100;
-    employerStateUnemployment = isPaUcExempt ? 0 : Math.round(wageBases.sutaTaxableWages * rates.paEmployerUcRate * 100) / 100;
   } else {
     throw new Error(`Unsupported state income tax jurisdiction [${stateCode}]. Active tax rule versions are required in the Tax Rules Engine.`);
   }
+
+  const employerStateUnemployment = isPaUcExempt
+    ? 0
+    : Math.round(wageBases.sutaTaxableWages * sutaResolution.rate * 100) / 100;
 
   const effectiveEitRate = resolveLocalEitRate(localityCode);
 
@@ -663,7 +637,12 @@ export function calculateGrossToNet(
     suta: {
       state: stateCode,
       name: sutaDisplayName,
-      amount: employerStateUnemployment
+      amount: employerStateUnemployment,
+      rate: sutaResolution.rate,
+      rateBps: sutaResolution.rateBps,
+      source: sutaResolution.source,
+      noticeReference: sutaResolution.noticeReference,
+      wageCap: sutaResolution.wageCap,
     }
   };
 
@@ -681,6 +660,7 @@ export function calculateGrossToNet(
     localIncomeTax,
     localFlatTax,
     employerStateUnemployment,
+    sutaResolution,
     taxBreakdown,
     taxLines,
     paStateTax,

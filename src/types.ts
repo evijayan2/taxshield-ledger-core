@@ -27,6 +27,7 @@ export interface Company {
   closedAt?: string;
   closureReason?: string;
   addressHistory?: CompanyAddressHistory[];
+  taxSettings?: CompanyTaxSetting[];
 }
 
 export interface CompanyAddressHistory {
@@ -696,4 +697,62 @@ export interface DeductionCalculationResult {
   uncollectedDeductions: number;
   itemizedDeductions: CalculatedDeductionItem[];
 }
+
+export interface ExperienceRateHistory {
+  id: string;
+  companyId: string;
+  companyTaxSettingId: string;
+  taxYearId?: string | null;
+  rateDecimal: number;
+  rateBps: number;
+  wageBaseOverride?: number | null;
+  effectiveFrom: string;
+  effectiveTo?: string | null;
+  noticeReference?: string | null;
+  noticeDate?: string | null;
+  status: 'ACTIVE' | 'SUPERSEDED' | 'EXPIRED';
+  verifiedBy?: string | null;
+  verifiedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CompanyTaxSetting {
+  id: string;
+  companyId: string;
+  jurisdiction: string;
+  taxKind: string;
+  stateAccountId?: string | null;
+  status: 'ACTIVE' | 'INACTIVE';
+  rateHistories?: ExperienceRateHistory[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type SutaRateSource = 'ASSIGNED_EXPERIENCE_RATE' | 'STATUTORY_DEFAULT';
+
+export interface SutaRateResolution {
+  rate: number;
+  rateBps: number;
+  source: SutaRateSource;
+  state: string;
+  wageCap: number;
+  noticeReference?: string | null;
+  settingId?: string;
+  historyId?: string;
+}
+
+export interface CreateSutaRateInput {
+  companyId: string;
+  jurisdiction: string;
+  stateAccountId?: string;
+  rateDecimal: number;
+  effectiveFrom: string;
+  effectiveTo?: string;
+  noticeReference?: string;
+  noticeDate?: string;
+  wageBaseOverride?: number;
+  verifiedBy?: string;
+}
+
 

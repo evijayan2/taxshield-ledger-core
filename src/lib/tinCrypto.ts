@@ -11,15 +11,16 @@ const TAG_LENGTH = 16; // 128-bit auth tag
  */
 function resolveKey(explicitKey?: Buffer | string): Buffer {
   const hasEnv = typeof process !== 'undefined' && Boolean(process.env);
+  const isTest = hasEnv && process.env.NODE_ENV === 'test';
   const rawKey =
     explicitKey ||
     (hasEnv ? process.env.TIN_ENCRYPTION_KEY : undefined) ||
-    (!hasEnv || process.env.NODE_ENV !== 'production'
+    (isTest
       ? '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
       : undefined);
 
   if (!rawKey) {
-    throw new Error('TIN_ENCRYPTION_KEY environment variable is required for TIN encryption/decryption in production.');
+    throw new Error('TIN_ENCRYPTION_KEY environment variable is required for TIN encryption/decryption.');
   }
   if (Buffer.isBuffer(rawKey)) {
     if (rawKey.length !== 32) {

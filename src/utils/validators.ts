@@ -89,3 +89,24 @@ export function isValidZipCode(zip?: string | null): boolean {
   return /^\d{5}(-\d{4})?$/.test(trimmed);
 }
 
+/**
+ * Validates a 9-digit US bank routing transit number using the Federal Reserve Mod-10 algorithm.
+ * Checksum: [3(d1 + d4 + d7) + 7(d2 + d5 + d8) + 1(d3 + d6 + d9)] mod 10 === 0.
+ * @param routing - The routing transit number string to validate.
+ * @returns True if valid 9-digit ABA routing transit number, false otherwise.
+ */
+export function isValidAbaRouting(routing?: string | null): boolean {
+  if (!routing || typeof routing !== 'string') return false;
+  const digits = routing.trim().replace(/\D/g, '');
+  if (digits.length !== 9) return false;
+
+  const d = digits.split('').map(Number);
+  const checksum = (
+    3 * (d[0] + d[3] + d[6]) +
+    7 * (d[1] + d[4] + d[7]) +
+    1 * (d[2] + d[5] + d[8])
+  ) % 10;
+
+  return checksum === 0;
+}
+

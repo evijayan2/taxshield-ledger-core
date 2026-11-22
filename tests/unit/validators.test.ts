@@ -6,6 +6,7 @@ import {
   isValidEin,
   formatEin,
   isValidZipCode,
+  isValidAbaRouting,
 } from '../../src/utils/validators.js';
 
 describe('Shared Core Validators & Formatters', () => {
@@ -55,6 +56,26 @@ describe('Shared Core Validators & Formatters', () => {
       expect(isValidZipCode('19106-1234')).toBe(true);
       expect(isValidZipCode('1910')).toBe(false);
       expect(isValidZipCode('')).toBe(false);
+    });
+  });
+
+  describe('isValidAbaRouting', () => {
+    it('should accept valid Federal Reserve Mod-10 routing numbers', () => {
+      expect(isValidAbaRouting('021000021')).toBe(true); // Chase
+      expect(isValidAbaRouting('121000248')).toBe(true); // Wells Fargo
+      expect(isValidAbaRouting('031000053')).toBe(true); // PNC Bank
+    });
+
+    it('should reject invalid checksum routing numbers', () => {
+      expect(isValidAbaRouting('021000022')).toBe(false);
+      expect(isValidAbaRouting('111111111')).toBe(false);
+    });
+
+    it('should reject wrong-length, empty, or null inputs', () => {
+      expect(isValidAbaRouting('12345')).toBe(false);
+      expect(isValidAbaRouting('1234567890')).toBe(false);
+      expect(isValidAbaRouting('')).toBe(false);
+      expect(isValidAbaRouting(null)).toBe(false);
     });
   });
 });

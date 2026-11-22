@@ -90,6 +90,22 @@ describe('tinCrypto', () => {
       expect(() => decryptTIN(encrypted, wrongKey)).toThrow();
     });
 
+    it('fails closed when NODE_ENV is production and no key is provided', () => {
+      const origEnv = process.env.NODE_ENV;
+      const origKey = process.env.TIN_ENCRYPTION_KEY;
+      try {
+        process.env.NODE_ENV = 'production';
+        delete process.env.TIN_ENCRYPTION_KEY;
+
+        expect(() => encryptTIN(sampleSSN)).toThrow('TIN_ENCRYPTION_KEY environment variable is required');
+      } finally {
+        process.env.NODE_ENV = origEnv;
+        if (origKey !== undefined) {
+          process.env.TIN_ENCRYPTION_KEY = origKey;
+        }
+      }
+    });
+
     it('rejects empty inputs', () => {
       expect(() => encryptTIN('')).toThrow('Cannot encrypt empty');
       expect(() => decryptTIN('')).toThrow('Invalid encrypted TIN payload');

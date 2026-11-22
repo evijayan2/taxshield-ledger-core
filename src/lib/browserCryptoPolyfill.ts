@@ -57,8 +57,24 @@ export const randomUUID = (): string => {
   });
 };
 
+export const createCipheriv = (...args: any[]) => {
+  if (typeof process !== 'undefined' && typeof (process as any).getBuiltinModule === 'function') {
+    return (process as any).getBuiltinModule('crypto').createCipheriv(...args);
+  }
+  throw new Error('createCipheriv is not available in browser environment');
+};
+
+export const createDecipheriv = (...args: any[]) => {
+  if (typeof process !== 'undefined' && typeof (process as any).getBuiltinModule === 'function') {
+    return (process as any).getBuiltinModule('crypto').createDecipheriv(...args);
+  }
+  throw new Error('createDecipheriv is not available in browser environment');
+};
+
 export default {
   createHash,
   randomBytes,
   randomUUID,
+  createCipheriv,
+  createDecipheriv,
 };

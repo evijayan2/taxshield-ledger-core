@@ -755,4 +755,66 @@ export interface CreateSutaRateInput {
   verifiedBy?: string;
 }
 
+export interface AchBatch {
+  id: string;
+  companyId: string;
+  payrollRunId?: string | null;
+  batchType: string;
+  effectiveEntryDate: string;
+  entryCount: number;
+  totalAmount: number;
+  fileContentEncrypted: string;
+  fileHashSha256: string;
+  status: 'GENERATED' | 'TRANSMITTED' | 'SETTLED' | 'CANCELLED';
+  createdAt?: string;
+}
+
+export interface NachaCompanyInfo {
+  companyName: string;
+  ein: string;
+  companyIdPrefix?: string;
+  odfiRoutingNumber: string;
+  discretionaryData?: string;
+  originName?: string;
+  destinationName?: string;
+}
+
+export interface NachaEntryInput {
+  employeeId: string;
+  employeeName: string;
+  routingNumber: string;
+  accountNumber: string;
+  accountType: 'CHECKING' | 'SAVINGS';
+  amount: number;
+  paymentType?: 'CREDIT' | 'PRENOTE';
+  discretionaryData?: string;
+}
+
+export interface NachaBatchOptions {
+  standardEntryClass?: 'PPD';
+  serviceClassCode?: '220' | '200';
+  companyEntryDescription?: string;
+  effectiveEntryDate: string;
+  companyDescriptiveDate?: string;
+  fileIdModifier?: string;
+  fileCreationDate?: string;
+  fileCreationTime?: string;
+  batchNumber?: number;
+  lineTerminator?: '\r\n' | '\n';
+}
+
+export interface NachaGenerationResult {
+  fileContent: string;
+  lines: string[];
+  lineCount: number;
+  entryCount: number;
+  totalCreditCents: number;
+  totalDebitCents: number;
+  entryHash: string;
+  fileHashSha256: string;
+  batchCount: number;
+  blockCount: number;
+}
+
+
 

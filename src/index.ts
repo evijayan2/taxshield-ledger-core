@@ -22,6 +22,8 @@ export * from './server/services/reconciliationService';
 export * from './server/services/auditReadinessService';
 export * from './server/services/benefitDeductionEngine';
 export * from './server/services/sutaExperienceService';
+export * from './server/services/nachaRecordBuilders';
+export * from './server/services/nachaGenerator';
 export * from './server/rules-engine/taxRulesEngine';
 export * from './utils/localTaxDistricts';
 export * from './utils/paSchoolDistricts';

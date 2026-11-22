@@ -56,6 +56,7 @@ export interface User {
 
 export interface Employee {
   id: string;
+  companyId?: string;
   firstName: string;
   lastName: string;
   age?: number;
@@ -101,6 +102,7 @@ export interface Employee {
   bankAccountMasked?: string;
   isActive: boolean;
   isShareholderGreaterThan2Pct?: boolean;
+  isTwoPercentShareholder?: boolean;
   benefitElections?: EmployeeBenefitElection[];
   residenceHistory?: EmployeeResidenceHistory[];
   bankHistory?: EmployeeBankHistory[];
@@ -820,3 +822,4 @@ export interface NachaGenerationResult {
 
 
 export * from './payrollLiabilityTypes';
+export * from './providerAuditTypes';

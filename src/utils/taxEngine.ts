@@ -236,8 +236,8 @@ export function calculateFederalIncomeTax(
   grossPay: number,
   payFrequency: Employee['payFrequency'],
   w4Status: Employee['w4FilingStatus'],
-  multipleJobs: boolean,
-  dependentCredit: number,
+  multipleJobs: boolean = false,
+  dependentCredit: number = 0,
   otherIncome: number = 0,
   deductions: number = 0,
   extraWithholding: number = 0,
@@ -301,11 +301,11 @@ export function calculateGrossToNet(
     wageBases.fitTaxableWages,
     employee.payFrequency,
     employee.w4FilingStatus,
-    employee.w4MultipleJobs,
-    employee.w4DependentCredit,
-    employee.w4OtherIncome,
-    employee.w4Deductions,
-    employee.w4ExtraWithholding,
+    employee.w4MultipleJobs ?? false,
+    employee.w4DependentCredit ?? 0,
+    employee.w4OtherIncome ?? 0,
+    employee.w4Deductions ?? 0,
+    employee.w4ExtraWithholding ?? 0,
     defDate
   );
 

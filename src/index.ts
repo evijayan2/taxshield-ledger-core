@@ -24,6 +24,8 @@ export * from './server/services/benefitDeductionEngine';
 export * from './server/services/sutaExperienceService';
 export * from './server/services/nachaRecordBuilders';
 export * from './server/services/nachaGenerator';
+export * from './server/services/payrollLiabilityService';
+export * from './payrollLiabilityTypes';
 export * from './server/rules-engine/taxRulesEngine';
 export * from './utils/localTaxDistricts';
 export * from './utils/paSchoolDistricts';

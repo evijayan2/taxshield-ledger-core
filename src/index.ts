@@ -29,6 +29,8 @@ export * from './payrollLiabilityTypes';
 export * from './providerAuditTypes';
 export * from './server/services/providerPayrollParser';
 export * from './server/services/providerAuditService';
+export * from './server/services/form941And940Service';
+export * from './server/services/efw2Generator';
 export * from './server/rules-engine/taxRulesEngine';
 export * from './utils/localTaxDistricts';
 export * from './utils/paSchoolDistricts';

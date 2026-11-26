@@ -179,18 +179,38 @@ export const getActiveRates = (effectiveDate?: Date) => {
   const ficaSs = resolveActiveRuleSync('US-FED', 'FED_FICA_SS', now);
   const ficaMed = resolveActiveRuleSync('US-FED', 'FED_FICA_MEDICARE', now);
   const paUc = resolveActiveRuleSync('PA-STATE', 'PA_UC_EMPLOYER', now);
+  const futa = resolveActiveRuleSync('US-FED', 'FED_FUTA', now);
 
-  if (paSit.payload.rate === undefined || ficaSs.payload.rate === undefined || ficaMed.payload.rate === undefined || paUc.payload.rate === undefined) {
+  if (
+    paSit.payload.rate === undefined ||
+    ficaSs.payload.rate === undefined ||
+    ficaMed.payload.rate === undefined ||
+    paUc.payload.rate === undefined ||
+    futa.payload.rate === undefined
+  ) {
     throw new Error('Required tax rate missing from Tax Rules Engine payload');
   }
 
   return {
     paSitRate: paSit.payload.rate,
     socialSecurityRate: ficaSs.payload.rate,
+    socialSecurityWageCap: typeof ficaSs.payload.wageCap === 'number' ? ficaSs.payload.wageCap : undefined,
     medicareRate: ficaMed.payload.rate,
     paEmployerUcRate: paUc.payload.rate,
+    futaRate: futa.payload.rate,
+    futaWageCap: typeof futa.payload.wageCap === 'number' ? futa.payload.wageCap : undefined,
   };
 };
+
+/**
+ * Applies an annual statutory wage cap given prior year-to-date cumulative wages.
+ */
+function applyAnnualWageCap(currentWages: number, priorCumulativeWages: number = 0, wageCap?: number): number {
+  if (currentWages <= 0) return 0;
+  if (wageCap === undefined || wageCap === null || wageCap <= 0) return currentWages;
+  const remainingCap = Math.max(0, wageCap - Math.max(0, priorCumulativeWages));
+  return Math.min(currentWages, remainingCap);
+}
 
 function resolveLocalEitRate(localityCode?: string, effectiveDate?: Date): number {
   if (!localityCode) return 0;
@@ -278,7 +298,8 @@ export function calculateGrossToNet(
   effectiveDate?: Date,
   benefitDeductions?: EmployeeBenefitElection[],
   companyTaxSettings?: CompanyTaxSetting[],
-  companyEntityType?: CompanyEntityType
+  companyEntityType?: CompanyEntityType,
+  priorCumulativeWages: number = 0
 ) {
   const isSalaried = employee.employmentType === 'W2_SALARY';
   const regularEarnings = isSalaried
@@ -317,8 +338,10 @@ export function calculateGrossToNet(
   const rel = employee.relationshipToOwner || (employee.age !== undefined && employee.age < 18 ? 'CHILD_UNDER_18' : 'NONE');
   const isFicaExempt = !isCorporateEntity && rel === 'CHILD_UNDER_18';
   const isPaUcExempt = !isCorporateEntity && (rel === 'CHILD_UNDER_18' || rel === 'CHILD_18_TO_20' || rel === 'SPOUSE' || rel === 'PARENT');
+  const isFutaExempt = !isCorporateEntity && (rel === 'CHILD_UNDER_18' || rel === 'CHILD_18_TO_20' || rel === 'SPOUSE');
 
-  const socialSecurityTax = isFicaExempt ? 0 : Math.round(wageBases.ssTaxableWages * rates.socialSecurityRate * 100) / 100;
+  const cappedSsWages = applyAnnualWageCap(wageBases.ssTaxableWages, priorCumulativeWages, rates.socialSecurityWageCap);
+  const socialSecurityTax = isFicaExempt ? 0 : Math.round(cappedSsWages * rates.socialSecurityRate * 100) / 100;
   const medicareTax = isFicaExempt ? 0 : Math.round(wageBases.medicareTaxableWages * rates.medicareRate * 100) / 100;
 
   const rawWorkState = employee.workState || employee.state || (employee.paPsdCode ? 'PA' : undefined);
@@ -460,9 +483,15 @@ export function calculateGrossToNet(
     throw new Error(`Unsupported state income tax jurisdiction [${stateCode}]. Active tax rule versions are required in the Tax Rules Engine.`);
   }
 
+  const cappedSutaWages = applyAnnualWageCap(wageBases.sutaTaxableWages, priorCumulativeWages, sutaResolution.wageCap);
   const employerStateUnemployment = isPaUcExempt
     ? 0
-    : Math.round(wageBases.sutaTaxableWages * sutaResolution.rate * 100) / 100;
+    : Math.round(cappedSutaWages * sutaResolution.rate * 100) / 100;
+
+  const cappedFutaWages = applyAnnualWageCap(wageBases.futaTaxableWages, priorCumulativeWages, rates.futaWageCap);
+  const employerFuta = isFutaExempt
+    ? 0
+    : Math.round(cappedFutaWages * rates.futaRate * 100) / 100;
 
   let employeePaUc = 0;
   let employeePaUcRate = 0;
@@ -644,7 +673,7 @@ export function calculateGrossToNet(
   const employerSocialSecurity = socialSecurityTax;
   const employerMedicare = medicareTax;
   const employerPaUc = employerStateUnemployment;
-  const totalEmployerTaxes = Math.round((employerSocialSecurity + employerMedicare + employerStateUnemployment) * 100) / 100;
+  const totalEmployerTaxes = Math.round((employerSocialSecurity + employerMedicare + employerStateUnemployment + employerFuta) * 100) / 100;
 
   const totalCompanyCost = Math.round((grossEarnings + totalEmployerTaxes + totalReimbursements + finalDeductions.totalEmployerContributions) * 100) / 100;
 
@@ -707,10 +736,12 @@ export function calculateGrossToNet(
     employerSocialSecurity,
     employerMedicare,
     employerPaUc,
+    employerFuta,
     totalEmployerTaxes,
     totalCompanyCost,
     isFicaExempt,
     isPaUcExempt,
+    isFutaExempt,
     relationshipToOwner: rel,
     deductionResult: finalDeductions,
     totalBenefitDeductions: finalDeductions.clampedDeductions,

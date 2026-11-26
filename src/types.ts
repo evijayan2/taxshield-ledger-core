@@ -72,6 +72,7 @@ export interface Employee {
   email: string;
   phone: string;
   ssnLastFour: string;
+  ssnEncrypted?: string;
   streetAddress?: string;
   city?: string;
   state?: string;
@@ -208,6 +209,7 @@ export interface PayStub {
   employerSocialSecurity: number;
   employerMedicare: number;
   employerStateUnemployment?: number;
+  employerFuta?: number;
   taxBreakdown?: Record<string, unknown>;
   paStateTax?: number;
   paLocalEit?: number;

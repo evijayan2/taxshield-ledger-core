@@ -32,5 +32,15 @@ describe('paSchoolDistricts utility', () => {
     const partialMatch = findDistrictByName('Lower Merion');
     expect(partialMatch).toBeDefined();
     expect(partialMatch?.psdCode).toBe('460401');
+
+    const eastBrandywine = findDistrictByPsdCode('150302');
+    expect(eastBrandywine).toBeDefined();
+    expect(eastBrandywine?.name).toContain('East Brandywine Township');
+    expect(eastBrandywine?.defaultEitRate).toBe(0.01125);
+
+    const downingtownUwchlan = findDistrictByPsdCode('150305');
+    expect(downingtownUwchlan).toBeDefined();
+    expect(downingtownUwchlan?.name).toContain('Downingtown Area SD');
+    expect(downingtownUwchlan?.defaultEitRate).toBe(0.01);
   });
 });

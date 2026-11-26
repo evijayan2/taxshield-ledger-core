@@ -279,6 +279,7 @@ model Employee {
   email               String
   phone               String
   ssnLastFour         String          @map("ssn_last_four")
+  ssnEncrypted        String?         @map("ssn_encrypted")
   streetAddress       String?         @map("street_address")
   city                String?
   state               String?

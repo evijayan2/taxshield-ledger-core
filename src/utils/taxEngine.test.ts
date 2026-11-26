@@ -426,6 +426,85 @@ describe('calculateGrossToNet with SUTA Experience Rating', () => {
     expect(result.employerStateUnemployment).toBe(0);
     expect(result.taxBreakdown.suta.amount).toBe(0);
   });
+
+  it('enforces YTD wage caps for PA UC ($10k) and FUTA ($7k) and respects S-Corp vs Sole Prop family FUTA rules', () => {
+    const standard = calculateGrossToNet(
+      paEmployee,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      undefined,
+      'LLC_SINGLE_MEMBER',
+      6000 // $6,000 prior YTD -> $1,000 remaining under $7k FUTA cap, $2,000 under $10k PA UC cap
+    );
+    expect(standard.employerFuta).toBe(6); // 1000 * 0.006
+    expect(standard.employerStateUnemployment).toBe(70); // 2000 * 0.035
+
+    const overCaps = calculateGrossToNet(
+      paEmployee,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      undefined,
+      'LLC_SINGLE_MEMBER',
+      11000 // Exceeds both $7k FUTA and $10k PA UC caps
+    );
+    expect(overCaps.employerFuta).toBe(0);
+    expect(overCaps.employerStateUnemployment).toBe(0);
+
+    const spouseEmp: Employee = { ...paEmployee, relationshipToOwner: 'SPOUSE' };
+    const solePropSpouse = calculateGrossToNet(
+      spouseEmp,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      undefined,
+      'LLC_SINGLE_MEMBER',
+      0
+    );
+    expect(solePropSpouse.isFutaExempt).toBe(true);
+    expect(solePropSpouse.employerFuta).toBe(0);
+
+    const sCorpSpouse = calculateGrossToNet(
+      spouseEmp,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      undefined,
+      'S_CORP',
+      0
+    );
+    expect(sCorpSpouse.isFutaExempt).toBe(false);
+    expect(sCorpSpouse.employerFuta).toBe(12); // 2000 * 0.006
+  });
 });
 
 

@@ -128,13 +128,14 @@ function aggregateStubTaxes(payStubs: PayStub[]) {
       acc.fit += s.federalIncomeTax || 0;
       acc.ss += (s.socialSecurityTax || 0) + (s.employerSocialSecurity || 0);
       acc.med += (s.medicareTax || 0) + (s.employerMedicare || 0);
+      acc.futa += s.employerFuta || 0;
       acc.sit += s.stateIncomeTax ?? s.paStateTax ?? 0;
       acc.suta += (s.employerStateUnemployment ?? s.employerPaUc ?? 0) + (s.employeePaUc ?? 0);
       acc.eit += s.localIncomeTax ?? s.paLocalEit ?? 0;
       acc.lst += s.localFlatTax ?? s.paLst ?? 0;
       return acc;
     },
-    { fit: 0, ss: 0, med: 0, sit: 0, suta: 0, eit: 0, lst: 0 }
+    { fit: 0, ss: 0, med: 0, futa: 0, sit: 0, suta: 0, eit: 0, lst: 0 }
   );
 }
 
@@ -181,6 +182,7 @@ export function decomposePayStubsToLiabilities(
   if (totals.fit > 0) liabilities.push(createLiability(params, 'IRS', 'FIT', 'US-FED', totals.fit));
   if (totals.ss > 0) liabilities.push(createLiability(params, 'IRS', 'FICA_SS', 'US-FED', totals.ss));
   if (totals.med > 0) liabilities.push(createLiability(params, 'IRS', 'FICA_MED', 'US-FED', totals.med));
+  if (totals.futa > 0) liabilities.push(createLiability(params, 'IRS', 'FUTA', 'US-FED', totals.futa));
   if (totals.sit > 0) {
     const sitAgency = state === 'PA' ? 'PA_DOR' : `${state}_DOR`;
     const sitType = state === 'PA' ? 'PA_PIT' : `${state}_SIT`;

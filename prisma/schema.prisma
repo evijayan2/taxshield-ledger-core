@@ -96,6 +96,7 @@ enum LiabilityStatus {
 model Company {
   id                  String            @id @default(uuid())
   name                String
+  entityType          String            @default("LLC_SINGLE_MEMBER") @map("entity_type")
   ein                 String
   stateTaxId          String            @map("stateTaxId")
   address             String
@@ -481,6 +482,7 @@ model PayStub {
   netPay                      Float      @map("net_pay")
   employerSocialSecurity      Float      @map("employer_social_security")
   employerMedicare            Float      @map("employer_medicare")
+  employeePaUc                Float      @default(0) @map("employee_pa_uc")
   employerStateUnemployment   Float      @default(0) @map("employer_state_unemployment")
   taxBreakdown                Json?      @map("tax_breakdown")
   totalEmployerTaxes          Float      @map("total_employer_taxes")

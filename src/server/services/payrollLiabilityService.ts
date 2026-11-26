@@ -129,7 +129,7 @@ function aggregateStubTaxes(payStubs: PayStub[]) {
       acc.ss += (s.socialSecurityTax || 0) + (s.employerSocialSecurity || 0);
       acc.med += (s.medicareTax || 0) + (s.employerMedicare || 0);
       acc.sit += s.stateIncomeTax ?? s.paStateTax ?? 0;
-      acc.suta += s.employerStateUnemployment ?? s.employerPaUc ?? 0;
+      acc.suta += (s.employerStateUnemployment ?? s.employerPaUc ?? 0) + (s.employeePaUc ?? 0);
       acc.eit += s.localIncomeTax ?? s.paLocalEit ?? 0;
       acc.lst += s.localFlatTax ?? s.paLst ?? 0;
       return acc;

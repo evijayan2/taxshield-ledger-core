@@ -84,6 +84,50 @@ describe('Tax Engine Family Relation Exemptions', () => {
     expect(result.isPaUcExempt).toBe(true);
     expect(result.socialSecurityTax).toBeGreaterThan(0);
     expect(result.employerPaUc).toBe(0);
+    expect(result.employeePaUc).toBe(0);
+  });
+
+  it('should NOT apply family FICA or PA UC exemptions for S-Corp or C-Corp entities', () => {
+    const hours = 40; // $600 gross earnings
+    const result = calculateGrossToNet(
+      baseEmployee,
+      hours,
+      0,
+      0,
+      0,
+      [],
+      undefined,
+      undefined,
+      [],
+      undefined,
+      undefined,
+      undefined,
+      'S_CORP'
+    );
+    const rates = getActiveRates();
+
+    expect(result.isFicaExempt).toBe(false);
+    expect(result.isPaUcExempt).toBe(false);
+    expect(result.socialSecurityTax).toBe(Math.round(600 * rates.socialSecurityRate * 100) / 100);
+    expect(result.medicareTax).toBe(Math.round(600 * rates.medicareRate * 100) / 100);
+    expect(result.employerPaUc).toBeGreaterThan(0);
+    expect(result.employeePaUc).toBe(0.42); // 0.07% of $600
+  });
+
+  it('should calculate per-period salary for W2_SALARY employees without multiplying by hours', () => {
+    const salariedEmp: Employee = {
+      ...baseEmployee,
+      age: 35,
+      relationshipToOwner: 'NONE',
+      employmentType: 'W2_SALARY',
+      payRate: 2500,
+    };
+    const result = calculateGrossToNet(salariedEmp, 40, 5);
+
+    expect(result.grossEarnings).toBe(2500);
+    expect(result.regularEarnings).toBe(2500);
+    expect(result.overtimeEarnings).toBe(0);
+    expect(result.employeePaUc).toBe(1.75); // 0.07% of $2,500
   });
 });
 

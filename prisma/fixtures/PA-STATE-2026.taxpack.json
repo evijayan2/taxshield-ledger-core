@@ -3,7 +3,7 @@
   "name": "Commonwealth of Pennsylvania Statutory Tax Rules 2026",
   "version": "1.0.0",
   "jurisdictionCode": "PA-STATE",
-  "generatedAt": "2026-09-06T14:46:08.660Z",
+  "generatedAt": "2026-11-26T14:35:48.576Z",
   "jurisdictions": [
     {
       "code": "PA-STATE",
@@ -60,7 +60,7 @@
             }
           ],
           "checksum": "sha256:8f07a7894d488ac84718e8b012975abeb5e271422f4975b3b14816a10be36a28",
-          "publishedAt": "2026-09-06T14:46:08.660Z",
+          "publishedAt": "2026-11-26T14:35:48.576Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -111,7 +111,7 @@
             }
           ],
           "checksum": "sha256:66164441966e32df0c7ad8e2d1627c0eb477d727f01ff2df8a0c9dfc8a8e9a7c",
-          "publishedAt": "2026-09-06T14:46:08.660Z",
+          "publishedAt": "2026-11-26T14:35:48.576Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -164,11 +164,62 @@
             }
           ],
           "checksum": "sha256:5038c47f434f55b478fbb260a5353ed0ea64b91f21c4bf424d0dcd9beb9b6f33",
-          "publishedAt": "2026-09-06T14:46:08.660Z",
+          "publishedAt": "2026-11-26T14:35:48.576Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_UC_EMPLOYEE",
+      "name": "Pennsylvania UC Employee Withholding Rate",
+      "category": "WITHHOLDING",
+      "taxType": "STATE_UNEMPLOYMENT_TAX",
+      "jurisdictionCode": "PA-STATE",
+      "description": "Pennsylvania Unemployment Compensation employee withholding tax (0.07% on all gross wages, no cap).",
+      "versions": [
+        {
+          "versionCode": "PA-UC-EE-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.0007
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA Dept of Labor & Industry",
+              "title": "PA UC Employee Withholding Rate 2026",
+              "statuteReference": "43 P.S. § 781.4",
+              "sourceUrl": "https://www.uc.pa.gov",
+              "publicationDate": "2025-12-01",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Pennsylvania Unemployment Compensation employee withholding rate of 0.07% (0.0007) applies to all covered wages with no annual wage cap."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-uc-ee-01",
+              "description": "PA UC employee withholding on $1,000 gross wages",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 0.7,
+                "taxableWages": 1000,
+                "effectiveRate": 0.0007
+              }
+            }
+          ],
+          "checksum": "sha256:4b6f53a5459a7bc120b9031299bbd710b8c570da30fcae0658326238daf5d3e4",
+          "publishedAt": "2026-11-26T14:35:48.576Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
     }
   ],
-  "manifestChecksum": "sha256:cfc0854c5ccfe69cd9ed39e7118a4a5c98f385326cad157d213c01bc0d8a01e1"
+  "manifestChecksum": "sha256:8d975e64af52016e9d1fc84602435f850fc222a6e2c9ef1a2697fc952c5fbfca"
 }

@@ -1,4 +1,4 @@
-import { Employee, MileageLog, ComplianceTask, EmployeeResidenceHistory, EmployeeWorkLocationHistory, PayStubTaxLine, EmployeeBenefitElection, CompanyTaxSetting, SutaRateResolution } from '../types';
+import { Employee, MileageLog, ComplianceTask, EmployeeResidenceHistory, EmployeeWorkLocationHistory, PayStubTaxLine, EmployeeBenefitElection, CompanyTaxSetting, SutaRateResolution, CompanyEntityType } from '../types';
 import { resolveActiveRuleSync, computeFederalWithholdingFromRule } from '../server/rules-engine/taxRulesEngine';
 import { findDistrictByPsdCode } from './paSchoolDistricts';
 import { resolvePayPeriodResidences } from '../server/services/residenceHistoryService';
@@ -277,10 +277,14 @@ export function calculateGrossToNet(
   workLocationHistory: EmployeeWorkLocationHistory[] = [],
   effectiveDate?: Date,
   benefitDeductions?: EmployeeBenefitElection[],
-  companyTaxSettings?: CompanyTaxSetting[]
+  companyTaxSettings?: CompanyTaxSetting[],
+  companyEntityType?: CompanyEntityType
 ) {
-  const regularEarnings = hoursWorked * employee.payRate;
-  const overtimeEarnings = overtimeHours * (employee.payRate * 1.5);
+  const isSalaried = employee.employmentType === 'W2_SALARY';
+  const regularEarnings = isSalaried
+    ? (hoursWorked > 0 ? employee.payRate : 0)
+    : hoursWorked * employee.payRate;
+  const overtimeEarnings = isSalaried ? 0 : overtimeHours * (employee.payRate * 1.5);
   const grossEarnings = Math.round((regularEarnings + overtimeEarnings) * 100) / 100;
 
   const elections = benefitDeductions || employee.benefitElections || [];
@@ -309,9 +313,10 @@ export function calculateGrossToNet(
     defDate
   );
 
+  const isCorporateEntity = companyEntityType === 'S_CORP' || companyEntityType === 'C_CORP';
   const rel = employee.relationshipToOwner || (employee.age !== undefined && employee.age < 18 ? 'CHILD_UNDER_18' : 'NONE');
-  const isFicaExempt = rel === 'CHILD_UNDER_18';
-  const isPaUcExempt = rel === 'CHILD_UNDER_18' || rel === 'CHILD_18_TO_20' || rel === 'SPOUSE' || rel === 'PARENT';
+  const isFicaExempt = !isCorporateEntity && rel === 'CHILD_UNDER_18';
+  const isPaUcExempt = !isCorporateEntity && (rel === 'CHILD_UNDER_18' || rel === 'CHILD_18_TO_20' || rel === 'SPOUSE' || rel === 'PARENT');
 
   const socialSecurityTax = isFicaExempt ? 0 : Math.round(wageBases.ssTaxableWages * rates.socialSecurityRate * 100) / 100;
   const medicareTax = isFicaExempt ? 0 : Math.round(wageBases.medicareTaxableWages * rates.medicareRate * 100) / 100;
@@ -459,6 +464,17 @@ export function calculateGrossToNet(
     ? 0
     : Math.round(wageBases.sutaTaxableWages * sutaResolution.rate * 100) / 100;
 
+  let employeePaUc = 0;
+  let employeePaUcRate = 0;
+  if (stateCode === 'PA' && !isPaUcExempt && grossEarnings > 0) {
+    const paUcEeRule = resolveActiveRuleSync('PA-STATE', 'PA_UC_EMPLOYEE', defDate);
+    if (typeof paUcEeRule.payload.rate !== 'number') {
+      throw new Error('Required PA employee UC rate missing from Tax Rules Engine payload.');
+    }
+    employeePaUcRate = paUcEeRule.payload.rate;
+    employeePaUc = Math.round(grossEarnings * employeePaUcRate * 100) / 100;
+  }
+
   const effectiveEitRate = resolveLocalEitRate(localityCode);
 
   let localIncomeTax = Math.round(wageBases.localTaxableWages * effectiveEitRate * 100) / 100;
@@ -603,7 +619,22 @@ export function calculateGrossToNet(
   const paLocalEit = localIncomeTax;
   const paLst = localFlatTax;
 
-  const totalEmployeeTaxes = Math.round((federalIncomeTax + socialSecurityTax + medicareTax + stateIncomeTax + localIncomeTax + localFlatTax) * 100) / 100;
+  if (employeePaUc > 0) {
+    taxLines.push({
+      id: `tl-pa-uc-ee-${Date.now()}`,
+      payStubId: '',
+      jurisdictionType: 'STATE',
+      jurisdictionCode: 'PA-UC-EE',
+      jurisdictionName: 'PA Employee UC Withholding',
+      taxableWages: grossEarnings,
+      taxRate: employeePaUcRate,
+      taxWithheld: employeePaUc,
+      startDate: periodStart || null,
+      endDate: periodEnd || null,
+    });
+  }
+
+  const totalEmployeeTaxes = Math.round((federalIncomeTax + socialSecurityTax + medicareTax + stateIncomeTax + localIncomeTax + localFlatTax + employeePaUc) * 100) / 100;
   const totalReimbursements = Math.round((approvedMileageReimbursement + approvedTravelReimbursement) * 100) / 100;
   const netPayBeforeDeductions = Math.round((grossEarnings - totalEmployeeTaxes + totalReimbursements) * 100) / 100;
 
@@ -667,6 +698,7 @@ export function calculateGrossToNet(
     paLocalEit,
     effectiveEitRate,
     paLst,
+    employeePaUc,
     totalEmployeeTaxes,
     approvedMileageReimbursement,
     approvedTravelReimbursement,

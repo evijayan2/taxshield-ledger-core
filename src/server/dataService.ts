@@ -22,10 +22,12 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       const stateFilingFreq = cRow.statefilingfrequency ?? cRow.state_filing_frequency ?? cRow.stateFilingFrequency ?? cRow.filingFrequencyPa ?? 'MONTHLY';
       const payFreq = cRow.payfrequency ?? cRow.pay_frequency ?? cRow.payFrequency ?? 'BI_WEEKLY';
       const rawMileage = cRow.standardmileagerate ?? cRow.standard_mileage_rate ?? cRow.standardMileageRate ?? null;
+      const entityType = cRow.entity_type ?? cRow.entityType ?? 'LLC_SINGLE_MEMBER';
 
       org = {
         id: cRow.id,
         name: cRow.name || '',
+        entityType: entityType || 'LLC_SINGLE_MEMBER',
         ein: cRow.ein || '',
         stateTaxId: stateTaxId || '',
         address: cRow.address || '',
@@ -451,11 +453,12 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       // Save to companies table
       await client.query(
         `INSERT INTO companies (
-          id, name, ein, "stateTaxId", address, city, state, zip, 
+          id, name, entity_type, ein, "stateTaxId", address, city, state, zip, 
           "ownerName", "ownerEmail", "ownerTaxBracket", "stateFilingFrequency", "payFrequency", "standardMileageRate", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, CURRENT_TIMESTAMP)
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name,
+          entity_type = EXCLUDED.entity_type,
           ein = EXCLUDED.ein,
           "stateTaxId" = EXCLUDED."stateTaxId",
           address = EXCLUDED.address,
@@ -472,6 +475,7 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
         [
           compId,
           companyData.name || 'Unnamed LLC',
+          companyData.entityType || 'LLC_SINGLE_MEMBER',
           companyData.ein || '00-0000000',
           companyData.stateTaxId || 'PA-00000000',
           companyData.address || 'Address Pending',

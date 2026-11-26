@@ -1,9 +1,17 @@
 export type TaxFilingFrequency = 'SEMI_MONTHLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';
 export type PayrollFrequency = 'WEEKLY' | 'BI_WEEKLY' | 'SEMI_MONTHLY' | 'MONTHLY';
+export type CompanyEntityType =
+  | 'SOLE_PROP'
+  | 'PARTNERSHIP'
+  | 'LLC_SINGLE_MEMBER'
+  | 'LLC_MULTI_MEMBER'
+  | 'S_CORP'
+  | 'C_CORP';
 
 export interface Company {
   id: string;
   name: string;
+  entityType?: CompanyEntityType;
   ein: string;
   stateTaxId: string;
   address: string;
@@ -204,6 +212,7 @@ export interface PayStub {
   paStateTax?: number;
   paLocalEit?: number;
   paLst?: number;
+  employeePaUc?: number;
   employerPaUc?: number;
   totalEmployerTaxes: number;
   totalCompanyCost: number;

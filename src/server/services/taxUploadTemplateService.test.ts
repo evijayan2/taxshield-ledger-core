@@ -385,4 +385,88 @@ describe('taxUploadTemplateService', () => {
       'One or more employees only have last-4 SSN available; verify full 9-digit SSNs before portal upload.'
     );
   });
+
+  it('generates 17-column Keystone LST CSV without an L-record header row', () => {
+    const template: TaxFilingUploadTemplateRecord = {
+      companyId: 'comp-1',
+      portalKey: 'PA_KEYSTONE_LST',
+      portalLabel: 'PA Local LST — Keystone Collections Group',
+      jurisdiction: 'PA-LOCAL',
+      fileFormat: 'CSV',
+      isEnabled: true,
+      templateFileName: 'keystone-lst-template.csv',
+      templateContent: 'L,2026,1,259638527,7001,SAMPLE CO,100 MAIN ST,IRWIN,PA,15642,02180\n',
+      templateHashSha256: 'abc',
+      businessLocationPsd: '150302',
+    };
+
+    const result = generateTaxUploadExport({
+      template,
+      company: {
+        id: 'comp-1',
+        name: 'ImpactFlow Labs LLC',
+        ein: '42-4656601',
+        stateTaxId: '00000000',
+        address: '542 Prizer Ct',
+        city: 'Downingtown',
+        state: 'PA',
+        zip: '19335',
+      },
+      payrollRun: {
+        id: 'run-1',
+        periodStart: '2026-10-01',
+        periodEnd: '2026-10-15',
+        payDate: '2026-10-20',
+      },
+      payStubs: [
+        {
+          id: 'stub-1',
+          payrollRunId: 'run-1',
+          employeeId: 'emp-1',
+          periodStart: '2026-10-01',
+          periodEnd: '2026-10-15',
+          payDate: '2026-10-20',
+          hoursWorked: 40,
+          overtimeHours: 0,
+          hourlyRate: 20,
+          grossEarnings: 800,
+          federalIncomeTax: 0,
+          socialSecurityTax: 49.6,
+          medicareTax: 11.6,
+          stateIncomeTax: 24.56,
+          localIncomeTax: 9,
+          localFlatTax: 10,
+          totalEmployeeTaxes: 104.76,
+          netPay: 695.24,
+          createdAt: '2026-10-20T00:00:00Z',
+        } as any,
+      ],
+      employees: [
+        {
+          id: 'emp-1',
+          firstName: 'Abirami',
+          lastName: 'Natarajan',
+          email: 'abi@example.com',
+          ssnLastFour: '7890',
+          employmentType: 'W2_HOURLY',
+          payRate: 20,
+          streetAddress: '542 Prizer ct',
+          city: 'Downingtown',
+          state: 'PA',
+          zip: '19335',
+          residentPsdCode: '150202',
+          isActive: true,
+        } as any,
+      ],
+    });
+
+    const lines = result.content.split('\r\n');
+    expect(lines).toHaveLength(1);
+    const cols = lines[0].split(',');
+    expect(cols).toHaveLength(17);
+    expect(cols[10]).toBe('PA');
+    expect(lines[0]).toBe(
+      '424656601,2026,4,000007890,Natarajan,Abirami,,542 Prizer ct,,Downingtown,PA,19335,10.00,150302,800.00,,'
+    );
+  });
 });

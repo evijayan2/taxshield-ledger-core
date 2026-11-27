@@ -259,13 +259,11 @@ function mapCsvColumnValue(
 
 function buildKeystoneCsvRows(input: GenerateUploadExportInput, taxYear: string, quarter: string): string[] {
   const { template, company, payStubs, employees } = input;
-  const isLst = template.portalKey === 'PA_KEYSTONE_LST';
-  const recordCode = isLst ? 'L' : 'E';
   const ein9 = digitsOnly(company.ein);
   const psd = digitsOnly(template.businessLocationPsd) || '000000';
 
   const employerLine = [
-    recordCode,
+    'E',
     taxYear,
     quarter,
     ein9,
@@ -281,7 +279,7 @@ function buildKeystoneCsvRows(input: GenerateUploadExportInput, taxYear: string,
   const employeeLines = payStubs.map((stub) => {
     const emp = employees.find((e) => e.id === stub.employeeId) as ExportEmployeeLike | undefined;
     const res = resolveEmployeeResidence(emp);
-    const withheld = isLst ? Number(stub.localFlatTax || 0) : Number(stub.localIncomeTax || 0);
+    const withheld = Number(stub.localIncomeTax || 0);
     const employeeName = stripKeystoneUnsafeChars(
       [emp?.lastName, emp?.firstName].filter(Boolean).join(' ')
     );
@@ -301,6 +299,40 @@ function buildKeystoneCsvRows(input: GenerateUploadExportInput, taxYear: string,
   });
 
   return [employerLine, ...employeeLines];
+}
+
+/**
+ * Builds Keystone LST CSV rows (17-column employee records, no E/L employer header row).
+ */
+function buildKeystoneLstCsvRows(input: GenerateUploadExportInput, taxYear: string, quarter: string): string[] {
+  const { template, company, payStubs, employees } = input;
+  const stateId = digitsOnly(company.stateTaxId);
+  const employerNumber = (stateId && !/^0+$/.test(stateId) ? stateId : digitsOnly(company.ein)).slice(0, 10) || '0';
+  const workPsd = digitsOnly(template.businessLocationPsd) || '000000';
+
+  return payStubs.map((stub) => {
+    const emp = employees.find((e) => e.id === stub.employeeId) as ExportEmployeeLike | undefined;
+    const res = resolveEmployeeResidence(emp);
+    return [
+      employerNumber,
+      taxYear,
+      quarter,
+      resolveEmployeeSsn(emp).ssn,
+      stripKeystoneUnsafeChars(emp?.lastName).slice(0, 35),
+      stripKeystoneUnsafeChars(emp?.firstName).slice(0, 35),
+      '',
+      stripKeystoneUnsafeChars(res.streetAddress).slice(0, 35),
+      '',
+      stripKeystoneUnsafeChars(res.city).slice(0, 35),
+      stripKeystoneUnsafeChars(res.state || company.state).toUpperCase().slice(0, 2),
+      digitsOnly(res.zip || company.zip).slice(0, 5),
+      Number(stub.localFlatTax || 0).toFixed(2),
+      digitsOnly(stub.localityCode || workPsd || res.psdCode).slice(0, 6),
+      Number(stub.grossEarnings || 0).toFixed(2),
+      '',
+      '',
+    ].join(',');
+  });
 }
 
 /**
@@ -340,37 +372,40 @@ export function generateTaxUploadExport(input: GenerateUploadExportInput): Gener
     isKeystone && (firstLineCols[0] === 'E' || firstLineCols[0] === 'L') && firstLineCols.length >= 6;
 
   let outputLines: string[];
-  if (template.fileFormat === 'CSV' && looksLikeKeystoneEmployerRow) {
-    outputLines = buildKeystoneCsvRows(input, taxYear, quarter);
-  } else if (template.fileFormat === 'CSV' && firstLineCols.length > 1) {
-    const headerRow = firstLineCols.map((h) => stripKeystoneUnsafeChars(h)).join(',');
-    const dataRows = payStubs.map((stub) => {
-      const employee = employees.find((e) => e.id === stub.employeeId);
-      return firstLineCols
-        .map((col) =>
-          mapCsvColumnValue(col, { company, employee, stub, taxYear, quarter, psdCode, isLst })
-        )
-        .join(',');
-    });
-    outputLines = [headerRow, ...dataRows];
-  } else {
-    outputLines = lines.map((line) =>
-      line
-        .replace(/\{\{COMPANY_NAME\}\}/g, stripKeystoneUnsafeChars(company.name))
-        .replace(/\{\{EIN\}\}/g, digitsOnly(company.ein))
-        .replace(/\{\{TAX_YEAR\}\}/g, taxYear)
-        .replace(/\{\{QUARTER\}\}/g, quarter)
-        .replace(/\{\{PSD_CODE\}\}/g, psdCode)
-    );
-  }
+    const looksLikeLstTemplate = isLst && (looksLikeKeystoneEmployerRow || firstLineCols.length === 17);
+    if (template.fileFormat === 'CSV' && looksLikeLstTemplate) {
+      outputLines = buildKeystoneLstCsvRows(input, taxYear, quarter);
+    } else if (template.fileFormat === 'CSV' && looksLikeKeystoneEmployerRow) {
+      outputLines = buildKeystoneCsvRows(input, taxYear, quarter);
+    } else if (template.fileFormat === 'CSV' && firstLineCols.length > 1) {
+      const headerRow = firstLineCols.map((h) => stripKeystoneUnsafeChars(h)).join(',');
+      const dataRows = payStubs.map((stub) => {
+        const employee = employees.find((e) => e.id === stub.employeeId);
+        return firstLineCols
+          .map((col) =>
+            mapCsvColumnValue(col, { company, employee, stub, taxYear, quarter, psdCode, isLst })
+          )
+          .join(',');
+      });
+      outputLines = [headerRow, ...dataRows];
+    } else {
+      outputLines = lines.map((line) =>
+        line
+          .replace(/\{\{COMPANY_NAME\}\}/g, stripKeystoneUnsafeChars(company.name))
+          .replace(/\{\{EIN\}\}/g, digitsOnly(company.ein))
+          .replace(/\{\{TAX_YEAR\}\}/g, taxYear)
+          .replace(/\{\{QUARTER\}\}/g, quarter)
+          .replace(/\{\{PSD_CODE\}\}/g, psdCode)
+      );
+    }
 
-  const ext = template.fileFormat === 'CSV' ? 'csv' : 'txt';
-  const safePortal = template.portalKey.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
-  return {
-    fileName: `${safePortal}-${taxYear}-q${quarter}.${ext}`,
-    mimeType: template.fileFormat === 'CSV' ? 'text/csv;charset=utf-8' : 'text/plain;charset=utf-8',
-    content: outputLines.join('\r\n'),
-    rowCount: outputLines.length,
-    warnings,
-  };
-}
+    const ext = template.fileFormat === 'CSV' ? 'csv' : 'txt';
+    const safePortal = template.portalKey.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+    return {
+      fileName: `${safePortal}-${taxYear}-q${quarter}.${ext}`,
+      mimeType: template.fileFormat === 'CSV' ? 'text/csv;charset=utf-8' : 'text/plain;charset=utf-8',
+      content: outputLines.join('\r\n'),
+      rowCount: outputLines.length,
+      warnings,
+    };
+  }

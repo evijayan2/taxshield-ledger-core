@@ -172,11 +172,55 @@ export function parseTaxUploadTemplate(
   return { fileFormat, templateHashSha256, detectedHeaders, warnings };
 }
 
+type ExportEmployeeLike = Employee & {
+  ssn?: string;
+  ssnLast4?: string;
+  address?: string;
+  residentPsdCode?: string;
+  residenceHistory?: Array<{
+    streetAddress?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    psdCode?: string;
+    endDate?: string | null;
+  }>;
+};
+
+function resolveEmployeeSsn(emp?: ExportEmployeeLike): { ssn: string; isFullSsn: boolean } {
+  const fullSsn = digitsOnly(emp?.ssn);
+  if (fullSsn.length === 9) {
+    return { ssn: fullSsn, isFullSsn: true };
+  }
+  const last4 = digitsOnly(emp?.ssnLastFour || emp?.ssnLast4).slice(-4);
+  if (last4.length === 4) {
+    return { ssn: `00000${last4}`, isFullSsn: false };
+  }
+  return { ssn: '', isFullSsn: false };
+}
+
+function resolveEmployeeResidence(emp?: ExportEmployeeLike) {
+  const activeRes =
+    emp?.residenceHistory?.find((r) => !r.endDate) ?? emp?.residenceHistory?.[0];
+  return {
+    streetAddress: emp?.streetAddress || emp?.address || activeRes?.streetAddress || '',
+    city: emp?.city || activeRes?.city || '',
+    state: emp?.state || activeRes?.state || '',
+    zip: emp?.zip || activeRes?.zip || '',
+    psdCode:
+      emp?.residentPsdCode ||
+      emp?.localTaxJurisdictionCode ||
+      emp?.paPsdCode ||
+      activeRes?.psdCode ||
+      '',
+  };
+}
+
 function mapCsvColumnValue(
   header: string,
   ctx: {
     company: GenerateUploadExportInput['company'];
-    employee?: Employee;
+    employee?: ExportEmployeeLike;
     stub?: PayStub;
     taxYear: string;
     quarter: string;
@@ -187,28 +231,29 @@ function mapCsvColumnValue(
   const h = header.toLowerCase().replace(/[^a-z0-9]/g, '');
   const emp = ctx.employee;
   const stub = ctx.stub;
+  const res = resolveEmployeeResidence(emp);
   const taxVal = ctx.isLst ? Number(stub?.localFlatTax || 0) : Number(stub?.localIncomeTax || 0);
 
   if (h === 'year' || h === 'taxyear') return ctx.taxYear;
   if (h === 'quarter' || h === 'taxquarter' || h === 'qtr') return ctx.quarter;
   if (h === 'ein' || h === 'fein' || h === 'employerid') return digitsOnly(ctx.company.ein);
   if (h.includes('company') || h === 'employername') return stripKeystoneUnsafeChars(ctx.company.name);
-  if (h.includes('ssn')) return digitsOnly(emp?.ssnLast4 ? `00000${emp.ssnLast4}` : '');
+  if (h.includes('ssn')) return resolveEmployeeSsn(emp).ssn;
   if (h === 'firstname' || h === 'first') return stripKeystoneUnsafeChars(emp?.firstName);
   if (h === 'lastname' || h === 'last') return stripKeystoneUnsafeChars(emp?.lastName);
   if (h === 'employeename' || h === 'name') {
     return stripKeystoneUnsafeChars(`${emp?.firstName || ''} ${emp?.lastName || ''}`);
   }
   if (h.includes('workpsd') || h.includes('businesspsd')) return ctx.psdCode;
-  if (h.includes('psd')) return stripKeystoneUnsafeChars(emp?.residentPsdCode || ctx.psdCode);
+  if (h.includes('psd')) return stripKeystoneUnsafeChars(res.psdCode || ctx.psdCode);
   if (h.includes('gross') || h.includes('wage')) return Number(stub?.grossEarnings || 0).toFixed(2);
   if (h.includes('eit') || h.includes('lst') || h.includes('local') || h.includes('withheld') || h.includes('tax')) {
     return taxVal.toFixed(2);
   }
-  if (h.includes('address')) return stripKeystoneUnsafeChars(emp?.address || ctx.company.address);
-  if (h === 'city') return stripKeystoneUnsafeChars(emp?.city || ctx.company.city);
-  if (h === 'state') return stripKeystoneUnsafeChars(emp?.state || ctx.company.state);
-  if (h.includes('zip')) return digitsOnly(emp?.zip || ctx.company.zip).slice(0, 5);
+  if (h.includes('address')) return stripKeystoneUnsafeChars(res.streetAddress || ctx.company.address);
+  if (h === 'city') return stripKeystoneUnsafeChars(res.city || ctx.company.city);
+  if (h === 'state') return stripKeystoneUnsafeChars(res.state || ctx.company.state);
+  if (h.includes('zip')) return digitsOnly(res.zip || ctx.company.zip).slice(0, 5);
   return '';
 }
 
@@ -234,23 +279,24 @@ function buildKeystoneCsvRows(input: GenerateUploadExportInput, taxYear: string,
   ].join(',');
 
   const employeeLines = payStubs.map((stub) => {
-    const emp = employees.find((e) => e.id === stub.employeeId);
+    const emp = employees.find((e) => e.id === stub.employeeId) as ExportEmployeeLike | undefined;
+    const res = resolveEmployeeResidence(emp);
     const withheld = isLst ? Number(stub.localFlatTax || 0) : Number(stub.localIncomeTax || 0);
     const employeeName = stripKeystoneUnsafeChars(
       [emp?.lastName, emp?.firstName].filter(Boolean).join(' ')
     );
     return [
-      digitsOnly(emp?.ssnLast4 ? `00000${emp.ssnLast4}` : ''),
+      resolveEmployeeSsn(emp).ssn,
       employeeName,
-      stripKeystoneUnsafeChars(emp?.address),
-      stripKeystoneUnsafeChars(emp?.city),
-      stripKeystoneUnsafeChars(emp?.state || company.state).toUpperCase().slice(0, 2),
-      digitsOnly(emp?.zip || company.zip).slice(0, 5),
+      stripKeystoneUnsafeChars(res.streetAddress),
+      stripKeystoneUnsafeChars(res.city),
+      stripKeystoneUnsafeChars(res.state || company.state).toUpperCase().slice(0, 2),
+      digitsOnly(res.zip || company.zip).slice(0, 5),
       taxYear,
       quarter,
       Number(stub.grossEarnings || 0).toFixed(2),
       withheld.toFixed(2),
-      digitsOnly(emp?.residentPsdCode || stub.localityCode || psd),
+      digitsOnly(res.psdCode || stub.localityCode || psd),
     ].join(',');
   });
 
@@ -276,8 +322,16 @@ export function generateTaxUploadExport(input: GenerateUploadExportInput): Gener
     warnings.push('Business Location PSD code is blank; set it in Company Upload Settings.');
   }
 
-  if (payStubs.some((s) => !employees.find((e) => e.id === s.employeeId)?.ssnLast4)) {
+  const resolvedEmps = payStubs.map((s) =>
+    employees.find((e) => e.id === s.employeeId) as ExportEmployeeLike | undefined
+  );
+  if (resolvedEmps.some((emp) => !resolveEmployeeSsn(emp).ssn)) {
     warnings.push('One or more employees are missing SSN data; verify SSNs before portal upload.');
+  } else if (resolvedEmps.some((emp) => !resolveEmployeeSsn(emp).isFullSsn)) {
+    warnings.push('One or more employees only have last-4 SSN available; verify full 9-digit SSNs before portal upload.');
+  }
+  if (isKeystone && resolvedEmps.some((emp) => !resolveEmployeeResidence(emp).streetAddress)) {
+    warnings.push('One or more employees are missing a street address; update Staff Profiles before Keystone upload.');
   }
 
   const lines = template.templateContent.replace(/\r\n/g, '\n').split('\n').filter(Boolean);

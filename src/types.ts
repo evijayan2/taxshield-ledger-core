@@ -216,6 +216,7 @@ export interface PayStub {
   paLst?: number;
   employeePaUc?: number;
   employerPaUc?: number;
+  isPaUcExempt?: boolean;
   totalEmployerTaxes: number;
   totalCompanyCost: number;
   disbursementMethod: 'ACH' | 'CHECK';

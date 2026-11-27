@@ -146,6 +146,7 @@ model Company {
   achBatches         AchBatch[]
   taxSettings        CompanyTaxSetting[]
   experienceRateHistories ExperienceRateHistory[]
+  taxFilingUploadTemplates TaxFilingUploadTemplate[]
 
   @@map("companies")
 }
@@ -1010,6 +1011,30 @@ model ExperienceRateHistory {
   @@index([companyTaxSettingId, effectiveFrom])
   @@index([companyTaxSettingId, status])
   @@map("experience_rate_histories")
+}
+
+model TaxFilingUploadTemplate {
+  id                  String   @id @default(uuid())
+  companyId           String   @map("company_id")
+  portalKey           String   @map("portal_key")
+  portalLabel         String   @map("portal_label")
+  jurisdiction        String
+  fileFormat          String   @map("file_format")
+  isEnabled           Boolean  @default(true) @map("is_enabled")
+  templateFileName    String   @map("template_file_name")
+  templateContent     String   @map("template_content") @db.Text
+  templateHashSha256  String   @map("template_hash_sha256")
+  detectedHeaders     Json?    @map("detected_headers")
+  businessLocationPsd String?  @map("business_location_psd")
+  notes               String?
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  company             Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, portalKey])
+  @@index([companyId, isEnabled])
+  @@map("tax_filing_upload_templates")
 }
 
 

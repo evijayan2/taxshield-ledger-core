@@ -228,7 +228,7 @@ function buildKeystoneCsvRows(input: GenerateUploadExportInput, taxYear: string,
     stripKeystoneUnsafeChars(company.name),
     stripKeystoneUnsafeChars(company.address),
     stripKeystoneUnsafeChars(company.city),
-    stripKeystoneUnsafeChars(company.state),
+    stripKeystoneUnsafeChars(company.state).toUpperCase().slice(0, 2),
     digitsOnly(company.zip).slice(0, 5),
     psd,
   ].join(',');
@@ -236,17 +236,21 @@ function buildKeystoneCsvRows(input: GenerateUploadExportInput, taxYear: string,
   const employeeLines = payStubs.map((stub) => {
     const emp = employees.find((e) => e.id === stub.employeeId);
     const withheld = isLst ? Number(stub.localFlatTax || 0) : Number(stub.localIncomeTax || 0);
+    const employeeName = stripKeystoneUnsafeChars(
+      [emp?.lastName, emp?.firstName].filter(Boolean).join(' ')
+    );
     return [
       digitsOnly(emp?.ssnLast4 ? `00000${emp.ssnLast4}` : ''),
-      stripKeystoneUnsafeChars(emp?.firstName),
-      stripKeystoneUnsafeChars(emp?.lastName),
+      employeeName,
       stripKeystoneUnsafeChars(emp?.address),
       stripKeystoneUnsafeChars(emp?.city),
-      stripKeystoneUnsafeChars(emp?.state || company.state),
+      stripKeystoneUnsafeChars(emp?.state || company.state).toUpperCase().slice(0, 2),
       digitsOnly(emp?.zip || company.zip).slice(0, 5),
-      digitsOnly(emp?.residentPsdCode || stub.localityCode || psd),
+      taxYear,
+      quarter,
       Number(stub.grossEarnings || 0).toFixed(2),
       withheld.toFixed(2),
+      digitsOnly(emp?.residentPsdCode || stub.localityCode || psd),
     ].join(',');
   });
 

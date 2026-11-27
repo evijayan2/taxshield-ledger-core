@@ -3,6 +3,54 @@ import { Organization } from '../types';
 import { W2EmployeeSummary, W3TransmittalSummary, formatCurrency } from './w2w3Data';
 
 /**
+ * Wraps and scales text to fit within a W-2/W-3 box without overflowing its bounds.
+ */
+function fitBoxLines(
+  doc: jsPDF,
+  val: string,
+  maxWidth: number,
+  maxHeight: number
+): { lines: string[]; fontSize: number; lineHeight: number } {
+  const candidateSizes = [9.5, 8.5, 7.5, 7];
+
+  for (const fontSize of candidateSizes) {
+    doc.setFontSize(fontSize);
+    const lineHeight = fontSize + 1.5;
+    const wrapped: string[] = [];
+
+    for (const paragraph of val.split('\n')) {
+      const split = doc.splitTextToSize(paragraph, maxWidth) as string[];
+      wrapped.push(...(split.length > 0 ? split : ['']));
+    }
+
+    if (wrapped.length * lineHeight <= maxHeight) {
+      return { lines: wrapped, fontSize, lineHeight };
+    }
+  }
+
+  const minFontSize = 7;
+  const lineHeight = minFontSize + 1.5;
+  doc.setFontSize(minFontSize);
+  const allLines: string[] = [];
+  for (const paragraph of val.split('\n')) {
+    const split = doc.splitTextToSize(paragraph, maxWidth) as string[];
+    allLines.push(...(split.length > 0 ? split : ['']));
+  }
+
+  const maxLines = Math.max(1, Math.floor(maxHeight / lineHeight));
+  const clamped = allLines.slice(0, maxLines);
+  if (allLines.length > maxLines) {
+    let last = clamped[clamped.length - 1];
+    while (last.length > 0 && doc.getTextWidth(`${last}...`) > maxWidth) {
+      last = last.slice(0, -1);
+    }
+    clamped[clamped.length - 1] = `${last}...`;
+  }
+
+  return { lines: clamped, fontSize: minFontSize, lineHeight };
+}
+
+/**
  * Draws a standard IRS form box with label and formatted vector text value.
  */
 function drawBox(
@@ -25,21 +73,21 @@ function drawBox(
 
   if (val) {
     doc.setFont('courier', 'bold');
-    doc.setFontSize(9.5);
     doc.setTextColor(0, 0, 0);
 
-    const lines = val.split('\n');
-    if (lines.length > 1) {
-      // Multiline content (e.g. Employer/Employee address blocks)
-      // Render text starting below label with tight line height
-      let lineY = y + 20;
+    const maxWidth = Math.max(10, w - 8);
+    const maxHeight = Math.max(10, h - 14);
+    const { lines, fontSize, lineHeight } = fitBoxLines(doc, val, maxWidth, maxHeight);
+    doc.setFontSize(fontSize);
+
+    if (lines.length === 1 && fontSize === 9.5 && !val.includes('\n')) {
+      doc.text(lines[0], x + 4, y + h - 5);
+    } else {
+      let lineY = y + 12 + fontSize * 0.85;
       for (const line of lines) {
         doc.text(line, x + 4, lineY);
-        lineY += 11;
+        lineY += lineHeight;
       }
-    } else {
-      // Single-line value: position near bottom of box
-      doc.text(val, x + 4, y + h - 5);
     }
   }
 }
@@ -120,8 +168,8 @@ function renderW2Content(doc: jsPDF, w2: W2EmployeeSummary, org: Organization, y
   drawBox(doc, 350, 330 + yOffset, 110, 35, '17 State tax', fmt(b.box17StateTax));
   drawBox(doc, 460, 330 + yOffset, 110, 35, '18 Local wages', fmt(b.box18LocalWages));
 
-  drawBox(doc, 40, 365 + yOffset, 200, 35, '20 Locality name', b.box20Locality);
-  drawBox(doc, 240, 365 + yOffset, 330, 35, '19 Local income tax withheld', fmt(b.box19LocalTax));
+  drawBox(doc, 40, 365 + yOffset, 360, 35, '20 Locality name', b.box20Locality);
+  drawBox(doc, 400, 365 + yOffset, 170, 35, '19 Local income tax withheld', fmt(b.box19LocalTax));
 }
 
 /**

@@ -4,6 +4,7 @@ import {
   fetchMercuryAccounts,
   createMercuryRecipient,
   disburseMercuryTaxPayment,
+  disburseMercurySalaryPayment,
 } from '../../server/services/mercuryService';
 
 describe('Mercury Service', () => {
@@ -93,5 +94,48 @@ describe('Mercury Service', () => {
     expect(result.success).toBe(true);
     expect(result.transferId).toBe('tr_777');
     expect(result.amount).toBe(13.00);
+  });
+
+  it('should fail closed when recipientId and routing/account numbers are missing in non-demo mode', async () => {
+    await expect(
+      disburseMercuryTaxPayment('secret-token:api-prod:key', 'PRODUCTION', {
+        accountId: 'acc_123',
+        amount: 100.00,
+      })
+    ).rejects.toThrow('Mercury recipientId or explicit recipientRoutingNumber and recipientAccountNumber are required.');
+  });
+
+  it('should disburse employee salary via Mercury API in demo and live modes', async () => {
+    const demoRes = await disburseMercurySalaryPayment('test', 'SANDBOX', {
+      accountId: 'acc_123',
+      amount: 1250.50,
+      recipientName: 'Jane Doe',
+    });
+    expect(demoRes.success).toBe(true);
+    expect(demoRes.status).toBe('SENT_SANDBOX_DEMO');
+    expect(demoRes.amount).toBe(1250.50);
+
+    const fetchSpy = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'rec_emp_1', name: 'Jane Doe' }),
+      } as any)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'tr_sal_1', status: 'PROCESSING', amount: 1250.50 }),
+      } as any);
+    globalThis.fetch = fetchSpy;
+
+    const liveRes = await disburseMercurySalaryPayment('secret-token:api-sandbox:valid', 'SANDBOX', {
+      accountId: 'acc_123',
+      amount: 1250.50,
+      recipientName: 'Jane Doe',
+      recipientRoutingNumber: '031000053',
+      recipientAccountNumber: '1234567890',
+    });
+    expect(liveRes.success).toBe(true);
+    expect(liveRes.transferId).toBe('tr_sal_1');
+    const recBody = JSON.parse(fetchSpy.mock.calls[0][1].body);
+    expect(recBody.electronicRoutingInfo.electronicAccountType).toBe('personalChecking');
   });
 });

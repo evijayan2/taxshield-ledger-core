@@ -8,6 +8,10 @@ export interface TaxRulePayload {
   ratePerMile?: number;
   wageCap?: number;
   threshold?: number;
+  minRate?: number;
+  maxRate?: number;
+  statutoryCeiling?: number;
+  statutoryFloor?: number;
   standardAllowances?: Record<string, number>;
   brackets?: Record<string, Array<{ max: number | null; rate: number; baseTax: number; over: number }>>;
 }

@@ -1,9 +1,17 @@
 export type TaxFilingFrequency = 'SEMI_MONTHLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';
 export type PayrollFrequency = 'WEEKLY' | 'BI_WEEKLY' | 'SEMI_MONTHLY' | 'MONTHLY';
+export type CompanyEntityType =
+  | 'SOLE_PROP'
+  | 'PARTNERSHIP'
+  | 'LLC_SINGLE_MEMBER'
+  | 'LLC_MULTI_MEMBER'
+  | 'S_CORP'
+  | 'C_CORP';
 
 export interface Company {
   id: string;
   name: string;
+  entityType?: CompanyEntityType;
   ein: string;
   stateTaxId: string;
   address: string;
@@ -27,6 +35,7 @@ export interface Company {
   closedAt?: string;
   closureReason?: string;
   addressHistory?: CompanyAddressHistory[];
+  taxSettings?: CompanyTaxSetting[];
 }
 
 export interface CompanyAddressHistory {
@@ -55,6 +64,7 @@ export interface User {
 
 export interface Employee {
   id: string;
+  companyId?: string;
   firstName: string;
   lastName: string;
   age?: number;
@@ -62,6 +72,7 @@ export interface Employee {
   email: string;
   phone: string;
   ssnLastFour: string;
+  ssnEncrypted?: string;
   streetAddress?: string;
   city?: string;
   state?: string;
@@ -99,6 +110,9 @@ export interface Employee {
   accountNumber?: string;
   bankAccountMasked?: string;
   isActive: boolean;
+  isShareholderGreaterThan2Pct?: boolean;
+  isTwoPercentShareholder?: boolean;
+  benefitElections?: EmployeeBenefitElection[];
   residenceHistory?: EmployeeResidenceHistory[];
   bankHistory?: EmployeeBankHistory[];
 }
@@ -195,10 +209,12 @@ export interface PayStub {
   employerSocialSecurity: number;
   employerMedicare: number;
   employerStateUnemployment?: number;
+  employerFuta?: number;
   taxBreakdown?: Record<string, unknown>;
   paStateTax?: number;
   paLocalEit?: number;
   paLst?: number;
+  employeePaUc?: number;
   employerPaUc?: number;
   totalEmployerTaxes: number;
   totalCompanyCost: number;
@@ -630,6 +646,191 @@ export type CitationTier =
   | 'TIER_1_OFFICIAL'
   | 'TIER_2_GOV_DEPT';
 
+// ==========================================
+// Multi-Vector Benefit & Deduction Engine Types
+// ==========================================
+
+export type BenefitPlanType =
+  | 'SECTION_125_HEALTH'
+  | 'SECTION_125_DENTAL'
+  | 'SECTION_125_VISION'
+  | 'SECTION_125_FSA'
+  | 'HSA_PRETAX'
+  | 'RETIREMENT_401K_TRADITIONAL'
+  | 'RETIREMENT_401K_ROTH'
+  | 'POST_TAX_OTHER';
+
+export type DeductionAmountType = 'FIXED' | 'PERCENTAGE';
+
+export interface EmployeeBenefitElection {
+  id?: string;
+  employeeId?: string;
+  planType: BenefitPlanType;
+  planName?: string;
+  amountType: DeductionAmountType;
+  amount: number;
+  isShareholderGreaterThan2Pct?: boolean;
+  employerContribution?: number;
+  employerContributionType?: DeductionAmountType;
+  annualLimit?: number;
+  ytdDeductions?: number;
+}
+
+export interface CalculatedDeductionItem {
+  planType: BenefitPlanType;
+  planName: string;
+  requestedAmount: number;
+  appliedAmount: number;
+  uncollectedAmount: number;
+  isPreTaxFit: boolean;
+  isPreTaxFica: boolean;
+  isPreTaxState: boolean;
+  isPreTaxLocal: boolean;
+  employerContribution: number;
+}
+
+export interface StatutoryWageBases {
+  fitTaxableWages: number;
+  ssTaxableWages: number;
+  medicareTaxableWages: number;
+  futaTaxableWages: number;
+  sutaTaxableWages: number;
+  stateTaxableWages: number;
+  localTaxableWages: number;
+}
+
+export interface DeductionCalculationResult {
+  wageBases: StatutoryWageBases;
+  totalPreTaxDeductions: number;
+  totalPostTaxDeductions: number;
+  totalDeductions: number;
+  totalEmployeeDeductions: number;
+  totalEmployerContributions: number;
+  clampedDeductions: number;
+  uncollectedDeductions: number;
+  itemizedDeductions: CalculatedDeductionItem[];
+}
+
+export interface ExperienceRateHistory {
+  id: string;
+  companyId: string;
+  companyTaxSettingId: string;
+  taxYearId?: string | null;
+  rateDecimal: number;
+  rateBps: number;
+  wageBaseOverride?: number | null;
+  effectiveFrom: string;
+  effectiveTo?: string | null;
+  noticeReference?: string | null;
+  noticeDate?: string | null;
+  status: 'ACTIVE' | 'SUPERSEDED' | 'EXPIRED';
+  verifiedBy?: string | null;
+  verifiedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CompanyTaxSetting {
+  id: string;
+  companyId: string;
+  jurisdiction: string;
+  taxKind: string;
+  stateAccountId?: string | null;
+  status: 'ACTIVE' | 'INACTIVE';
+  rateHistories?: ExperienceRateHistory[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type SutaRateSource = 'ASSIGNED_EXPERIENCE_RATE' | 'STATUTORY_DEFAULT';
+
+export interface SutaRateResolution {
+  rate: number;
+  rateBps: number;
+  source: SutaRateSource;
+  state: string;
+  wageCap: number;
+  noticeReference?: string | null;
+  settingId?: string;
+  historyId?: string;
+}
+
+export interface CreateSutaRateInput {
+  companyId: string;
+  jurisdiction: string;
+  stateAccountId?: string;
+  rateDecimal: number;
+  effectiveFrom: string;
+  effectiveTo?: string;
+  noticeReference?: string;
+  noticeDate?: string;
+  wageBaseOverride?: number;
+  verifiedBy?: string;
+}
+
+export interface AchBatch {
+  id: string;
+  companyId: string;
+  payrollRunId?: string | null;
+  batchType: string;
+  effectiveEntryDate: string;
+  entryCount: number;
+  totalAmount: number;
+  fileContentEncrypted: string;
+  fileHashSha256: string;
+  status: 'GENERATED' | 'TRANSMITTED' | 'SETTLED' | 'CANCELLED';
+  createdAt?: string;
+}
+
+export interface NachaCompanyInfo {
+  companyName: string;
+  ein: string;
+  companyIdPrefix?: string;
+  odfiRoutingNumber: string;
+  discretionaryData?: string;
+  originName?: string;
+  destinationName?: string;
+}
+
+export interface NachaEntryInput {
+  employeeId: string;
+  employeeName: string;
+  routingNumber: string;
+  accountNumber: string;
+  accountType: 'CHECKING' | 'SAVINGS';
+  amount: number;
+  paymentType?: 'CREDIT' | 'PRENOTE';
+  discretionaryData?: string;
+}
+
+export interface NachaBatchOptions {
+  standardEntryClass?: 'PPD';
+  serviceClassCode?: '220' | '200';
+  companyEntryDescription?: string;
+  effectiveEntryDate: string;
+  companyDescriptiveDate?: string;
+  fileIdModifier?: string;
+  fileCreationDate?: string;
+  fileCreationTime?: string;
+  batchNumber?: number;
+  lineTerminator?: '\r\n' | '\n';
+}
+
+export interface NachaGenerationResult {
+  fileContent: string;
+  lines: string[];
+  lineCount: number;
+  entryCount: number;
+  totalCreditCents: number;
+  totalDebitCents: number;
+  entryHash: string;
+  fileHashSha256: string;
+  batchCount: number;
+  blockCount: number;
+}
 
 
 
+
+export * from './payrollLiabilityTypes';
+export * from './providerAuditTypes';

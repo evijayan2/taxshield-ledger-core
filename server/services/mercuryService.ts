@@ -39,6 +39,7 @@ export interface MercuryPaymentInput {
   recipientId?: string;
   recipientRoutingNumber?: string;
   recipientAccountNumber?: string;
+  recipientAccountType?: MercuryRecipientInput['accountType'];
   recipientName?: string;
   amount: number;
   paymentMethod?: 'ach' | 'wire';
@@ -225,57 +226,40 @@ async function resolveAccountId(apiKey: string, env: 'SANDBOX' | 'PRODUCTION', a
 }
 
 /**
- * Disburses a tax payment via Mercury API.
+ * Executes a validated ACH/wire transfer via Mercury API.
  */
-export async function disburseMercuryTaxPayment(
-  apiKey: string,
-  env: 'SANDBOX' | 'PRODUCTION' = 'SANDBOX',
-  payment: MercuryPaymentInput
+async function executeMercuryTransfer(
+  cleanKey: string,
+  env: 'SANDBOX' | 'PRODUCTION',
+  payment: MercuryPaymentInput,
+  defaultReference: string,
+  successPrefix: string
 ): Promise<MercuryPaymentResult> {
-  const cleanKey = (apiKey || '').trim();
-  if (!cleanKey) {
-    throw new Error('Mercury API key is required.');
-  }
-  if (payment.amount <= 0) {
-    throw new Error('Payment amount must be greater than zero.');
-  }
-
-  // Handle Demo Mode
-  if (env === 'SANDBOX' && isDemoKey(cleanKey)) {
-    const mockId = `tr_sbx_${Date.now()}`;
-    return {
-      success: true,
-      transferId: mockId,
-      status: 'SENT_SANDBOX_DEMO',
-      amount: payment.amount,
-      txpAddenda: payment.txpAddenda,
-      message: `Demo Mercury ACH tax payment simulated successfully (${mockId}).`,
-      createdAt: new Date().toISOString(),
-    };
-  }
-
   const baseUrl = getMercuryBaseUrl(env);
   const targetAccountId = await resolveAccountId(cleanKey, env, payment.accountId);
 
-  // Step 1: Create Recipient in Mercury
   let recipientId = payment.recipientId;
   if (!recipientId) {
+    if (!payment.recipientRoutingNumber || !payment.recipientAccountNumber) {
+      throw new Error(
+        'Mercury recipientId or explicit recipientRoutingNumber and recipientAccountNumber are required.'
+      );
+    }
     const recResult = await createMercuryRecipient(cleanKey, env, {
-      name: payment.recipientName || 'PA Department of Revenue',
-      routingNumber: payment.recipientRoutingNumber || '021000021',
-      accountNumber: payment.recipientAccountNumber || '987654321',
+      name: payment.recipientName || defaultReference,
+      routingNumber: payment.recipientRoutingNumber,
+      accountNumber: payment.recipientAccountNumber,
+      accountType: payment.recipientAccountType,
     });
     recipientId = recResult.id;
   }
 
-  // Step 2: Issue Transfer via Mercury API
   const idempotencyKey = `tx_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
   const transferPayload = {
     recipientId,
     amount: payment.amount,
     paymentMethod: payment.paymentMethod || 'ach',
-    paymentReference: payment.txpAddenda || payment.paymentReference || 'Tax Remittance',
+    paymentReference: payment.txpAddenda || payment.paymentReference || defaultReference,
     idempotencyKey,
   };
 
@@ -335,7 +319,85 @@ export async function disburseMercuryTaxPayment(
     status: data.status || 'SENT',
     amount: data.amount || payment.amount,
     txpAddenda: payment.txpAddenda,
-    message: `Tax payment successfully transmitted to Mercury API. Transfer ID: ${data.id || 'tr_created'}`,
+    message: `${successPrefix} Transfer ID: ${data.id || 'tr_created'}`,
     createdAt: data.createdAt || new Date().toISOString(),
   };
+}
+
+/**
+ * Disburses a tax payment via Mercury API.
+ */
+export async function disburseMercuryTaxPayment(
+  apiKey: string,
+  env: 'SANDBOX' | 'PRODUCTION' = 'SANDBOX',
+  payment: MercuryPaymentInput
+): Promise<MercuryPaymentResult> {
+  const cleanKey = (apiKey || '').trim();
+  if (!cleanKey) {
+    throw new Error('Mercury API key is required.');
+  }
+  if (payment.amount <= 0) {
+    throw new Error('Payment amount must be greater than zero.');
+  }
+
+  if (env === 'SANDBOX' && isDemoKey(cleanKey)) {
+    const mockId = `tr_sbx_${Date.now()}`;
+    return {
+      success: true,
+      transferId: mockId,
+      status: 'SENT_SANDBOX_DEMO',
+      amount: payment.amount,
+      txpAddenda: payment.txpAddenda,
+      message: `Demo Mercury ACH tax payment simulated successfully (${mockId}).`,
+      createdAt: new Date().toISOString(),
+    };
+  }
+
+  return executeMercuryTransfer(
+    cleanKey,
+    env,
+    payment,
+    'Tax Remittance',
+    'Tax payment successfully transmitted to Mercury API.'
+  );
+}
+
+/**
+ * Disburses employee net salary via Mercury API (ACH transfer to employee personal checking/savings).
+ */
+export async function disburseMercurySalaryPayment(
+  apiKey: string,
+  env: 'SANDBOX' | 'PRODUCTION' = 'SANDBOX',
+  payment: MercuryPaymentInput
+): Promise<MercuryPaymentResult> {
+  const cleanKey = (apiKey || '').trim();
+  if (!cleanKey) {
+    throw new Error('Mercury API key is required.');
+  }
+  if (payment.amount <= 0) {
+    throw new Error('Salary payment amount must be greater than zero.');
+  }
+
+  if (env === 'SANDBOX' && isDemoKey(cleanKey)) {
+    const mockId = `tr_sal_sbx_${Date.now()}`;
+    return {
+      success: true,
+      transferId: mockId,
+      status: 'SENT_SANDBOX_DEMO',
+      amount: payment.amount,
+      message: `Demo Mercury ACH salary payment simulated successfully (${mockId}).`,
+      createdAt: new Date().toISOString(),
+    };
+  }
+
+  return executeMercuryTransfer(
+    cleanKey,
+    env,
+    {
+      ...payment,
+      recipientAccountType: payment.recipientAccountType || 'personalChecking',
+    },
+    'Payroll Salary',
+    'Salary payment successfully transmitted to Mercury API.'
+  );
 }

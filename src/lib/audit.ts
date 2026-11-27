@@ -5,11 +5,42 @@ export interface AuditParams {
   companyId: string;
   entityType: string;
   entityId: string;
-  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'LOCK' | 'ACTIVATE' | 'SUPERSEDE';
+  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'LOCK' | 'ACTIVATE' | 'SUPERSEDE' | string;
   actorId: string;
   previousState?: Record<string, unknown> | null;
   newState?: Record<string, unknown> | null;
   reason?: string;
+}
+
+const SENSITIVE_KEY_PATTERN = /^(ssn|tin|accountnumber|routingnumber|password|passwordhash|secret|token|accesstoken|refreshtoken)$/i;
+
+/**
+ * Recursively redacts sensitive PII and credential keys from audit state payloads.
+ * @param obj Unknown state payload to scrub.
+ * @returns Cleaned state object with sensitive values masked.
+ */
+export function sanitizeAuditPayload(obj: unknown): unknown {
+  if (obj === null || obj === undefined || typeof obj !== 'object') {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeAuditPayload(item));
+  }
+
+  const record = obj as Record<string, unknown>;
+  const sanitized: Record<string, unknown> = {};
+
+  for (const [key, val] of Object.entries(record)) {
+    if (SENSITIVE_KEY_PATTERN.test(key)) {
+      sanitized[key] = '••••';
+    } else if (typeof val === 'object' && val !== null) {
+      sanitized[key] = sanitizeAuditPayload(val);
+    } else {
+      sanitized[key] = val;
+    }
+  }
+
+  return sanitized;
 }
 
 /**
@@ -17,8 +48,11 @@ export interface AuditParams {
  */
 export async function recordAuditLog(params: AuditParams): Promise<void> {
   try {
-    const previousStateJson = params.previousState ? JSON.parse(JSON.stringify(params.previousState)) : null;
-    const newStateJson = params.newState ? JSON.parse(JSON.stringify(params.newState)) : null;
+    const cleanedPrev = params.previousState ? sanitizeAuditPayload(params.previousState) : null;
+    const cleanedNew = params.newState ? sanitizeAuditPayload(params.newState) : null;
+
+    const previousStateJson = cleanedPrev ? JSON.parse(JSON.stringify(cleanedPrev)) : null;
+    const newStateJson = cleanedNew ? JSON.parse(JSON.stringify(cleanedNew)) : null;
 
     await prisma.auditLogEntry.create({
       data: {

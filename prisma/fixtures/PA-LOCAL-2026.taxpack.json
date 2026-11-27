@@ -3,7 +3,7 @@
   "name": "Commonwealth of Pennsylvania Act 32 Local EIT School District Tax Rules 2026",
   "version": "1.0.0",
   "jurisdictionCode": "PA",
-  "generatedAt": "2026-09-06T14:46:08.663Z",
+  "generatedAt": "2026-11-26T17:05:03.170Z",
   "jurisdictions": [
     {
       "code": "PA-PSD-460401",
@@ -174,6 +174,55 @@
       "parentJurisdictionCode": "PA"
     },
     {
+      "code": "PA-PSD-150302",
+      "name": "East Brandywine Township (Downingtown Area SD - DCED 150302)",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150303",
+      "name": "East Caln Township (Downingtown Area SD)",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150304",
+      "name": "Upper Uwchlan Township (Downingtown Area SD)",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150305",
+      "name": "Uwchlan Township (Downingtown Area SD)",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150306",
+      "name": "Wallace Township (Downingtown Area SD)",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150307",
+      "name": "West Bradford Township (Downingtown Area SD)",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
+      "code": "PA-PSD-150308",
+      "name": "West Pikeland Township (Downingtown Area SD)",
+      "level": "SCHOOL_DISTRICT",
+      "state": "PA",
+      "parentJurisdictionCode": "PA"
+    },
+    {
       "code": "PA-PSD-150501",
       "name": "Phoenixville Area School District",
       "level": "SCHOOL_DISTRICT",
@@ -305,7 +354,7 @@
             }
           ],
           "checksum": "sha256:230cfe048ec500275f7fb3757a55ff969fddd31b550b0dcc8eb1664fb4dcc1f3",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -356,7 +405,7 @@
             }
           ],
           "checksum": "sha256:69a11d19f115c95be0c396f2353d3838584591891071ca9e37b75e48fe224ff3",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -407,7 +456,7 @@
             }
           ],
           "checksum": "sha256:d46cddff89d0f2f73ae17e72722924bb1fa487b495cd21e1db9b2b80bf862b95",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -458,7 +507,7 @@
             }
           ],
           "checksum": "sha256:c20807eb2b50d0bc074367469d7b1b395779880a6cd58b14fa869588643bea2e",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -509,7 +558,7 @@
             }
           ],
           "checksum": "sha256:49e19803cba939c1afb92dec65b1a64495e62d5dde31b16ef9b754f027ac0532",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -560,7 +609,7 @@
             }
           ],
           "checksum": "sha256:94aa3ab876fd59e5d90b46eb1047f812d18f1c7a5ba4698a6345af1ad78a2869",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -611,7 +660,7 @@
             }
           ],
           "checksum": "sha256:a67419e5f9a9fe8c7f951a879172b6d098cc89d223b01a8b1c6126c96fb782f2",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -662,7 +711,7 @@
             }
           ],
           "checksum": "sha256:7c4d8b0197f4944b9956f6af9f8f9909bd836d8d99a9e67083594cb3cb6631ce",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -713,7 +762,7 @@
             }
           ],
           "checksum": "sha256:cbeab963a12619ebf22cdde1e7d79784b896e49e46569f7993b73cf4866d15f4",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -764,7 +813,7 @@
             }
           ],
           "checksum": "sha256:7f852f96cd82bc35a20d37c3919bb328afdcfc9f7de6a8b7da530646fb23a969",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -815,7 +864,7 @@
             }
           ],
           "checksum": "sha256:e8ffa4acbc0c630fd9cd2b24c2b9b9108376e9835823f89c336d445c283c0f4d",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -866,7 +915,7 @@
             }
           ],
           "checksum": "sha256:c7cf9c1f0bdbad0ae6d93b0bfb62c195dea393caead4b26c7987889be4d1a79e",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -917,7 +966,7 @@
             }
           ],
           "checksum": "sha256:9856c6bacaa64c5bf59c1aa881498092948535b3970dabafab6bf14c40a94548",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -968,7 +1017,7 @@
             }
           ],
           "checksum": "sha256:162e100feddaff1c51f9b21bcd5b374729a355973ffd92ac01b928803e4e5473",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1019,7 +1068,7 @@
             }
           ],
           "checksum": "sha256:cc9e8c1723a67c79ce244f33e98b07f9274570c5e28c263992cc3459432fa8c6",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1070,7 +1119,7 @@
             }
           ],
           "checksum": "sha256:56b8195cfa8c199c26371859a0e867be54b9d500a9cda373e100f31c4438e68e",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1121,7 +1170,7 @@
             }
           ],
           "checksum": "sha256:fec2f599f3972442b31b02d5a5d49a84feed952e3d16a26b10b83bdcb1808ef7",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1172,7 +1221,7 @@
             }
           ],
           "checksum": "sha256:ad82047e3d6f4c1ad73e6733a96f058c4b8625ec3e41471628eb77cd207f1e2f",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1223,7 +1272,7 @@
             }
           ],
           "checksum": "sha256:dca8b23410341c70af776dce3b334ba98747509f3605946a086cc3abc299b443",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1274,7 +1323,7 @@
             }
           ],
           "checksum": "sha256:08f858af179ff6ab092d427f6468f92622e7e1ba21f687d6bcf4bf48a14544a9",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1325,7 +1374,7 @@
             }
           ],
           "checksum": "sha256:60fdcd25aee3997e8b73f5f1d47994967c1649f40e6a08350c2057bc2fc09215",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1376,7 +1425,7 @@
             }
           ],
           "checksum": "sha256:c43dd1aff56904a505ceae4a17fa655fb7ec52a591cfcf21686057b4a102de76",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1427,7 +1476,7 @@
             }
           ],
           "checksum": "sha256:e318f71a58e31e27a0d142d7716db69e7b33cd27079352ad73a79d849a67b1e6",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1478,7 +1527,364 @@
             }
           ],
           "checksum": "sha256:302ae2b14ad3099ac33af305f56c78b2d3d284b89b678fa297b102fb3ed25f95",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150302",
+      "name": "PA Act 32 Local EIT Rate - East Brandywine Township (Downingtown Area SD - DCED 150302)",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150302",
+      "description": "Local Earned Income Tax (EIT) rate for East Brandywine Township (Downingtown Area SD - DCED 150302) (PSD Code 150302).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150302-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01125,
+            "psdCode": "150302",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150302: 1.1250%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150302-01",
+              "description": "Calculation check for East Brandywine Township (Downingtown Area SD - DCED 150302)",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 11.25
+              }
+            }
+          ],
+          "checksum": "sha256:b97c62c1c3d3d90e9cb39d8b224c475b85903211928556118ae1b92707844586",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150303",
+      "name": "PA Act 32 Local EIT Rate - East Caln Township (Downingtown Area SD)",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150303",
+      "description": "Local Earned Income Tax (EIT) rate for East Caln Township (Downingtown Area SD) (PSD Code 150303).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150303-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "150303",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150303: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150303-01",
+              "description": "Calculation check for East Caln Township (Downingtown Area SD)",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:103bf123f91fb25648d671789ad857cc68f459eb9f62ddb2f6034799e12b66db",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150304",
+      "name": "PA Act 32 Local EIT Rate - Upper Uwchlan Township (Downingtown Area SD)",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150304",
+      "description": "Local Earned Income Tax (EIT) rate for Upper Uwchlan Township (Downingtown Area SD) (PSD Code 150304).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150304-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "150304",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150304: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150304-01",
+              "description": "Calculation check for Upper Uwchlan Township (Downingtown Area SD)",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:9b6c66a9dcc80668260ff6a6b83d23ca1174e3842502e93b869bdfff57e503ec",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150305",
+      "name": "PA Act 32 Local EIT Rate - Uwchlan Township (Downingtown Area SD)",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150305",
+      "description": "Local Earned Income Tax (EIT) rate for Uwchlan Township (Downingtown Area SD) (PSD Code 150305).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150305-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "150305",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150305: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150305-01",
+              "description": "Calculation check for Uwchlan Township (Downingtown Area SD)",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:4460425d622eef8a92a9cb04484ff9078315ed7326503131b17474fe4db0b1c8",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150306",
+      "name": "PA Act 32 Local EIT Rate - Wallace Township (Downingtown Area SD)",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150306",
+      "description": "Local Earned Income Tax (EIT) rate for Wallace Township (Downingtown Area SD) (PSD Code 150306).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150306-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "150306",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150306: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150306-01",
+              "description": "Calculation check for Wallace Township (Downingtown Area SD)",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:d5dcfc1c90dacbbf39fb62009c2b44128d42a96ac1b45d1fa24459d090b1a923",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150307",
+      "name": "PA Act 32 Local EIT Rate - West Bradford Township (Downingtown Area SD)",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150307",
+      "description": "Local Earned Income Tax (EIT) rate for West Bradford Township (Downingtown Area SD) (PSD Code 150307).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150307-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "150307",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150307: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150307-01",
+              "description": "Calculation check for West Bradford Township (Downingtown Area SD)",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:775794f143cf363f21639ae4a44870d66f6a7869f1a4f04f344dd6f4ed8d9548",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
+          "publishedBy": "SYSTEM_GOV_SEALER"
+        }
+      ]
+    },
+    {
+      "ruleCode": "PA_LOCAL_EIT_150308",
+      "name": "PA Act 32 Local EIT Rate - West Pikeland Township (Downingtown Area SD)",
+      "category": "WITHHOLDING",
+      "taxType": "LOCAL_INCOME_TAX",
+      "jurisdictionCode": "PA-PSD-150308",
+      "description": "Local Earned Income Tax (EIT) rate for West Pikeland Township (Downingtown Area SD) (PSD Code 150308).",
+      "versions": [
+        {
+          "versionCode": "PA-LOCAL-EIT-150308-2026-v1",
+          "versionNumber": 1,
+          "status": "PUBLISHED",
+          "ruleType": "FLAT_RATE",
+          "ruleData": {
+            "rate": 0.01,
+            "psdCode": "150308",
+            "county": "Chester"
+          },
+          "effectiveFrom": "2026-01-01T00:00:00.000Z",
+          "effectiveTo": null,
+          "createdAt": "2026-01-01T00:00:00.000Z",
+          "createdBy": "SYSTEM_GOV_INGESTION",
+          "citations": [
+            {
+              "authority": "PA_DEPT_OF_COMMUNITY_ECONOMIC_DEV",
+              "title": "PA Act 32 Local Tax Register 2026",
+              "statuteReference": "Act 32 of 2008; 53 P.S. § 6924.501",
+              "sourceUrl": "https://dced.pa.gov/local-government/local-income-tax-information/",
+              "publicationDate": "2025-12-15",
+              "citationTier": "TIER_1_OFFICIAL",
+              "excerpt": "Official Act 32 EIT withholding rate for PSD Code 150308: 1.0000%."
+            }
+          ],
+          "testCases": [
+            {
+              "id": "tc-pa-local-eit-150308-01",
+              "description": "Calculation check for West Pikeland Township (Downingtown Area SD)",
+              "inputPayload": {
+                "grossWages": 1000
+              },
+              "expectedOutput": {
+                "taxAmount": 10
+              }
+            }
+          ],
+          "checksum": "sha256:0b6579b0a82c81761f149f6c173aa7b7bb84378517a406657584e26a07dc86d9",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1529,7 +1935,7 @@
             }
           ],
           "checksum": "sha256:9452f681f9086a64cf7817383d448c4419a02442f4c01e26d7bd45276fcb59a8",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1580,7 +1986,7 @@
             }
           ],
           "checksum": "sha256:9507a489f007ddc0eae6e151e0a2e18da97e350bd43d2f6a9ab76c067e32df17",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1631,7 +2037,7 @@
             }
           ],
           "checksum": "sha256:885a813c194f820fa2f1867a36451fa9796aa97461623c796ab9190d7072e31f",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1682,7 +2088,7 @@
             }
           ],
           "checksum": "sha256:b85091a5c819c2cea21799c5f69c1b0d8d3e16ed220f3d29e8ebe7a53fc53e52",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1733,7 +2139,7 @@
             }
           ],
           "checksum": "sha256:02044d43f518fb2d3b05989a5050090d4550b5780cb14d37a988aa163f3f4004",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1784,7 +2190,7 @@
             }
           ],
           "checksum": "sha256:033640b00510bb2e7d03babe08cf1130a64a61413233fbd4b33deac4ab2a1ec9",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1835,7 +2241,7 @@
             }
           ],
           "checksum": "sha256:9271475595e4caccf937a1febb9f2c2b9088b7e6c767182ea5cd57f61e1d7ebb",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1886,7 +2292,7 @@
             }
           ],
           "checksum": "sha256:562dac7571dda391e89fec675a8e9883868a67b905c532bc5f039d255b929af5",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1937,7 +2343,7 @@
             }
           ],
           "checksum": "sha256:cc70613074833d26cad7dfbd38a689fa2521e81ec98338046b25e5dd016bfcc0",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -1988,7 +2394,7 @@
             }
           ],
           "checksum": "sha256:0ff2df454eff7011babdec868e0b344afdf783158b6998b5bf8aa18be843307f",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -2039,7 +2445,7 @@
             }
           ],
           "checksum": "sha256:909a966d90b3427400d8b3b0dadf035e8cc37938343ec3f8d449e768554ab400",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
@@ -2090,11 +2496,11 @@
             }
           ],
           "checksum": "sha256:2fd23194af7688153b6f3702d885c33f48205b30a076fdaeb9e695dacd3031d5",
-          "publishedAt": "2026-09-06T14:46:08.663Z",
+          "publishedAt": "2026-11-26T17:05:03.170Z",
           "publishedBy": "SYSTEM_GOV_SEALER"
         }
       ]
     }
   ],
-  "manifestChecksum": "sha256:e1cfc0237595d08d743d38ffdee8a521d39d0b3f0dac3bdb37346e83f80d451c"
+  "manifestChecksum": "sha256:d0bc9e936542e9a43b9c9f20a62927a96d2ff6f66bae4dc217d0a767da136065"
 }

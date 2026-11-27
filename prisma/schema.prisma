@@ -70,9 +70,33 @@ enum BankMatchedEntityType {
   TRANSFER_INTERNAL
 }
 
+enum BenefitPlanType {
+  SECTION_125_HEALTH
+  SECTION_125_DENTAL_VISION
+  SECTION_125_FSA
+  SECTION_223_HSA
+  SECTION_401K_TRADITIONAL
+  SECTION_401K_ROTH
+  COMMUTER_TRANSIT
+  CUSTOM_POST_TAX
+}
+
+enum DeductionAmountType {
+  FIXED_AMOUNT
+  PERCENT_GROSS
+}
+
+enum LiabilityStatus {
+  UNPAID
+  ALLOCATED
+  SETTLED
+  RECONCILED
+}
+
 model Company {
   id                  String            @id @default(uuid())
   name                String
+  entityType          String            @default("LLC_SINGLE_MEMBER") @map("entity_type")
   ein                 String
   stateTaxId          String            @map("stateTaxId")
   address             String
@@ -115,6 +139,14 @@ model Company {
   contractorPayments ContractorPayment[]
   bankImportBatches  BankImportBatch[]
   bankTransactions   BankTransaction[]
+  benefitPlans       BenefitPlan[]
+  employeeDeductions EmployeeDeduction[]
+  payrollTaxLiabilities PayrollTaxLiability[]
+  taxPaymentAllocations TaxPaymentAllocation[]
+  achBatches         AchBatch[]
+  taxSettings        CompanyTaxSetting[]
+  experienceRateHistories ExperienceRateHistory[]
+  taxFilingUploadTemplates TaxFilingUploadTemplate[]
 
   @@map("companies")
 }
@@ -150,6 +182,8 @@ model TaxYear {
   homeOfficeExpenses HomeOfficeExpense[]
   invoices        Invoice[]
   contractorPayments ContractorPayment[]
+  taxLiabilities  PayrollTaxLiability[]
+  experienceRateHistories ExperienceRateHistory[]
 
   @@unique([companyId, year])
   @@map("tax_years")
@@ -164,6 +198,7 @@ model TaxJurisdiction {
   createdAt DateTime  @default(now())
 
   rules     TaxRule[]
+  taxLiabilities PayrollTaxLiability[]
 
   @@map("tax_jurisdictions")
 }
@@ -245,6 +280,7 @@ model Employee {
   email               String
   phone               String
   ssnLastFour         String          @map("ssn_last_four")
+  ssnEncrypted        String?         @map("ssn_encrypted")
   streetAddress       String?         @map("street_address")
   city                String?
   state               String?
@@ -288,6 +324,7 @@ model Employee {
   timesheets          Timesheet[]
   w9Record            FormW9Record?
   contractorPayments  ContractorPayment[]
+  deductions          EmployeeDeduction[]
 
   @@map("employees")
 }
@@ -414,6 +451,8 @@ model PayrollRun {
 
   company             Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   payStubs            PayStub[]
+  taxLiabilities      PayrollTaxLiability[]
+  achBatches          AchBatch[]
 
   @@map("payroll_runs")
 }
@@ -445,6 +484,7 @@ model PayStub {
   netPay                      Float      @map("net_pay")
   employerSocialSecurity      Float      @map("employer_social_security")
   employerMedicare            Float      @map("employer_medicare")
+  employeePaUc                Float      @default(0) @map("employee_pa_uc")
   employerStateUnemployment   Float      @default(0) @map("employer_state_unemployment")
   taxBreakdown                Json?      @map("tax_breakdown")
   totalEmployerTaxes          Float      @map("total_employer_taxes")
@@ -816,5 +856,186 @@ model BankTransaction {
   @@index([companyId, postedDate])
   @@map("bank_transactions")
 }
+
+model BenefitPlan {
+  id           String              @id @default(uuid())
+  companyId    String              @map("company_id")
+  name         String
+  planType     BenefitPlanType     @map("plan_type")
+  treatmentKey String              @map("treatment_key")
+  employerMode String              @default("NONE") @map("employer_mode")
+  employerRate Decimal?            @map("employer_rate") @db.Decimal(10, 4)
+  isActive     Boolean             @default(true) @map("is_active")
+  createdAt    DateTime            @default(now()) @map("created_at")
+  updatedAt    DateTime            @updatedAt @map("updated_at")
+
+  company      Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  deductions   EmployeeDeduction[]
+
+  @@index([companyId])
+  @@map("benefit_plans")
+}
+
+model EmployeeDeduction {
+  id             String              @id @default(uuid())
+  companyId      String              @map("company_id")
+  employeeId     String              @map("employee_id")
+  planId         String              @map("plan_id")
+  amountType     DeductionAmountType @default(FIXED_AMOUNT) @map("amount_type")
+  employeeAmount Decimal             @map("employee_amount") @db.Decimal(12, 2)
+  employerAmount Decimal?            @map("employer_amount") @db.Decimal(12, 2)
+  annualLimit    Decimal?            @map("annual_limit") @db.Decimal(12, 2)
+  effectiveFrom  DateTime            @map("effective_from") @db.Date
+  effectiveTo    DateTime?           @map("effective_to") @db.Date
+  isActive       Boolean             @default(true) @map("is_active")
+  createdAt      DateTime            @default(now()) @map("created_at")
+  updatedAt      DateTime            @updatedAt @map("updated_at")
+
+  company        Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee       Employee            @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  plan           BenefitPlan         @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([companyId, employeeId, isActive])
+  @@index([companyId, planId])
+  @@map("employee_deductions")
+}
+
+model PayrollTaxLiability {
+  id                 String                 @id @default(uuid())
+  companyId          String                 @map("company_id")
+  payrollRunId       String?                @map("payroll_run_id")
+  taxYearId          String                 @map("tax_year_id")
+  jurisdictionId     String?                @map("jurisdiction_id")
+  agencyCode         String                 @map("agency_code")
+  taxType            String                 @map("tax_type")
+  amount             Decimal                @db.Decimal(12, 2)
+  liabilityPeriodEnd DateTime               @map("liability_period_end") @db.Date
+  statutoryDueDate   DateTime               @map("statutory_due_date") @db.Date
+  status             LiabilityStatus        @default(UNPAID) @map("status")
+  confirmationNumber String?                @map("confirmation_number")
+  paidAt             DateTime?              @map("paid_at")
+  notes              String?
+  createdAt          DateTime               @default(now()) @map("created_at")
+  updatedAt          DateTime               @updatedAt @map("updated_at")
+
+  company            Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payrollRun         PayrollRun?            @relation(fields: [payrollRunId], references: [id], onDelete: SetNull)
+  taxYear            TaxYear                @relation(fields: [taxYearId], references: [id], onDelete: Restrict)
+  jurisdiction       TaxJurisdiction?       @relation(fields: [jurisdictionId], references: [id], onDelete: SetNull)
+  allocations        TaxPaymentAllocation[]
+
+  @@index([companyId, status, statutoryDueDate])
+  @@index([companyId, taxYearId])
+  @@map("payroll_tax_liabilities")
+}
+
+model TaxPaymentAllocation {
+  id          String              @id @default(uuid())
+  companyId   String              @map("company_id")
+  liabilityId String              @map("liability_id")
+  achBatchId  String?             @map("ach_batch_id")
+  amount      Decimal             @db.Decimal(12, 2)
+  allocatedAt DateTime            @default(now()) @map("allocated_at")
+
+  company     Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  liability   PayrollTaxLiability @relation(fields: [liabilityId], references: [id], onDelete: Cascade)
+  achBatch    AchBatch?           @relation(fields: [achBatchId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, liabilityId])
+  @@map("tax_payment_allocations")
+}
+
+model AchBatch {
+  id                   String                 @id @default(uuid())
+  companyId            String                 @map("company_id")
+  payrollRunId         String?                @map("payroll_run_id")
+  batchType            String                 @map("batch_type")
+  effectiveEntryDate   DateTime               @map("effective_entry_date") @db.Date
+  entryCount           Int                    @map("entry_count")
+  totalAmount          Decimal                @map("total_amount") @db.Decimal(12, 2)
+  fileContentEncrypted String                 @map("file_content_encrypted") @db.Text
+  fileHashSha256       String                 @map("file_hash_sha256")
+  status               String                 @default("GENERATED") @map("status")
+  createdAt            DateTime               @default(now()) @map("created_at")
+
+  company              Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  payrollRun           PayrollRun?            @relation(fields: [payrollRunId], references: [id], onDelete: SetNull)
+  allocations          TaxPaymentAllocation[]
+
+  @@unique([companyId, fileHashSha256])
+  @@index([companyId, effectiveEntryDate])
+  @@map("ach_batches")
+}
+
+model CompanyTaxSetting {
+  id               String                  @id @default(uuid())
+  companyId        String                  @map("company_id")
+  jurisdiction     String
+  taxKind          String                  @default("SUTA") @map("tax_kind")
+  stateAccountId   String?                 @map("state_account_id")
+  status           String                  @default("ACTIVE")
+  createdAt        DateTime                @default(now()) @map("created_at")
+  updatedAt        DateTime                @updatedAt @map("updated_at")
+
+  company          Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  rateHistories    ExperienceRateHistory[]
+
+  @@unique([companyId, jurisdiction, taxKind])
+  @@index([companyId, jurisdiction])
+  @@map("company_tax_settings")
+}
+
+model ExperienceRateHistory {
+  id                  String            @id @default(uuid())
+  companyId           String            @map("company_id")
+  companyTaxSettingId String            @map("company_tax_setting_id")
+  taxYearId           String?           @map("tax_year_id")
+  rateDecimal         Decimal           @map("rate_decimal") @db.Decimal(10, 5)
+  rateBps             Int               @map("rate_bps")
+  wageBaseOverride    Decimal?          @map("wage_base_override") @db.Decimal(12, 2)
+  effectiveFrom       DateTime          @map("effective_from") @db.Date
+  effectiveTo         DateTime?         @map("effective_to") @db.Date
+  noticeReference     String?           @map("notice_reference")
+  noticeDate          DateTime?         @map("notice_date") @db.Date
+  status              String            @default("ACTIVE")
+  verifiedBy          String?           @map("verified_by")
+  verifiedAt          DateTime?         @map("verified_at")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  company             Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyTaxSetting   CompanyTaxSetting @relation(fields: [companyTaxSettingId], references: [id], onDelete: Cascade)
+  taxYear             TaxYear?          @relation(fields: [taxYearId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, effectiveFrom])
+  @@index([companyTaxSettingId, effectiveFrom])
+  @@index([companyTaxSettingId, status])
+  @@map("experience_rate_histories")
+}
+
+model TaxFilingUploadTemplate {
+  id                  String   @id @default(uuid())
+  companyId           String   @map("company_id")
+  portalKey           String   @map("portal_key")
+  portalLabel         String   @map("portal_label")
+  jurisdiction        String
+  fileFormat          String   @map("file_format")
+  isEnabled           Boolean  @default(true) @map("is_enabled")
+  templateFileName    String   @map("template_file_name")
+  templateContent     String   @map("template_content") @db.Text
+  templateHashSha256  String   @map("template_hash_sha256")
+  detectedHeaders     Json?    @map("detected_headers")
+  businessLocationPsd String?  @map("business_location_psd")
+  notes               String?
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  company             Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, portalKey])
+  @@index([companyId, isEnabled])
+  @@map("tax_filing_upload_templates")
+}
+
 
 

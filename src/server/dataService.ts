@@ -22,10 +22,12 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       const stateFilingFreq = cRow.statefilingfrequency ?? cRow.state_filing_frequency ?? cRow.stateFilingFrequency ?? cRow.filingFrequencyPa ?? 'MONTHLY';
       const payFreq = cRow.payfrequency ?? cRow.pay_frequency ?? cRow.payFrequency ?? 'BI_WEEKLY';
       const rawMileage = cRow.standardmileagerate ?? cRow.standard_mileage_rate ?? cRow.standardMileageRate ?? null;
+      const entityType = cRow.entity_type ?? cRow.entityType ?? 'LLC_SINGLE_MEMBER';
 
       org = {
         id: cRow.id,
         name: cRow.name || '',
+        entityType: entityType || 'LLC_SINGLE_MEMBER',
         ein: cRow.ein || '',
         stateTaxId: stateTaxId || '',
         address: cRow.address || '',
@@ -128,6 +130,7 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
         email: e.email,
         phone: e.phone,
         ssnLastFour: e.ssn_last_four,
+        ssnEncrypted: e.ssn_encrypted || undefined,
         streetAddress: e.street_address || undefined,
         city: e.city || undefined,
         state: e.state || undefined,
@@ -411,9 +414,9 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       for (const log of data.auditLogs) {
         if (!log.entityId) {
           log.entityId = (log.newState && (log.newState as any).id) ||
-                         (log.previousState && (log.previousState as any).id) ||
-                         log.id ||
-                         'unknown';
+            (log.previousState && (log.previousState as any).id) ||
+            log.id ||
+            'unknown';
         }
         if (!log.companyId) {
           log.companyId = compId;
@@ -451,11 +454,12 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       // Save to companies table
       await client.query(
         `INSERT INTO companies (
-          id, name, ein, "stateTaxId", address, city, state, zip, 
+          id, name, entity_type, ein, "stateTaxId", address, city, state, zip, 
           "ownerName", "ownerEmail", "ownerTaxBracket", "stateFilingFrequency", "payFrequency", "standardMileageRate", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, CURRENT_TIMESTAMP)
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name,
+          entity_type = EXCLUDED.entity_type,
           ein = EXCLUDED.ein,
           "stateTaxId" = EXCLUDED."stateTaxId",
           address = EXCLUDED.address,
@@ -472,6 +476,7 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
         [
           compId,
           companyData.name || 'Unnamed LLC',
+          companyData.entityType || 'LLC_SINGLE_MEMBER',
           companyData.ein || '00-0000000',
           companyData.stateTaxId || 'PA-00000000',
           companyData.address || 'Address Pending',
@@ -510,7 +515,7 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
 
         await client.query(
           `INSERT INTO employees (
-            id, first_name, last_name, age, email, phone, ssn_last_four, 
+            id, company_id, first_name, last_name, age, email, phone, ssn_last_four, ssn_encrypted,
             street_address, city, state, zip,
             employment_type, pay_rate, pay_frequency, w4_filing_status, 
             w4_multiple_jobs, w4_dependent_credit, w4_other_income, 
@@ -518,15 +523,17 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
             state_allowances, local_tax_jurisdiction_code, local_tax_jurisdiction_name,
             local_tax_rate, local_flat_tax_annual, local_flat_tax_exempt, tax_attributes,
             bank_name, account_type, routing_number, account_number, bank_account_masked, is_active
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35)`,
+        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37)`,
           [
             emp.id,
+            (emp.companyId && validCompIds.has(emp.companyId)) ? emp.companyId : fallbackCompId,
             emp.firstName || '',
             emp.lastName || '',
             emp.age ?? null,
             emp.email || '',
             emp.phone || '',
             emp.ssnLastFour || '',
+            emp.ssnEncrypted || null,
             emp.streetAddress || null,
             emp.city || null,
             emp.state || null,
@@ -565,12 +572,12 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       await client.query('DELETE FROM mileage_logs');
       for (const m of data.mileageLogs) {
         await client.query(
-          `INSERT INTO mileage_logs (
-            id, employee_id, trip_date, origin_location, destination_location,
-            business_purpose, start_odometer, end_odometer, calculated_miles,
-            rate_applied, mileage_allowance, is_reimbursable_accountable_plan,
-            status, linked_pay_stub_id, notes
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+          `INSERT INTO mileage_logs(
+          id, employee_id, trip_date, origin_location, destination_location,
+          business_purpose, start_odometer, end_odometer, calculated_miles,
+          rate_applied, mileage_allowance, is_reimbursable_accountable_plan,
+          status, linked_pay_stub_id, notes
+        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
           [
             m.id, m.employeeId, m.tripDate, m.originLocation, m.destinationLocation,
             m.businessPurpose, m.startOdometer, m.endOdometer, m.calculatedMiles,
@@ -586,11 +593,11 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       await client.query('DELETE FROM travel_expenses');
       for (const t of data.travelExpenses) {
         await client.query(
-          `INSERT INTO travel_expenses (
-            id, employee_id, mileage_log_id, expense_date, category,
-            description, amount, payment_source, receipt_note, receipt_url,
-            is_reimbursable, status, linked_pay_stub_id
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+          `INSERT INTO travel_expenses(
+          id, employee_id, mileage_log_id, expense_date, category,
+          description, amount, payment_source, receipt_note, receipt_url,
+          is_reimbursable, status, linked_pay_stub_id
+        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
           [
             t.id, t.employeeId, t.mileageLogId || null, t.expenseDate, t.category,
             t.description, t.amount, t.paymentSource, t.receiptNote || null,
@@ -605,13 +612,14 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       await client.query('DELETE FROM payroll_runs');
       for (const r of data.payrollRuns) {
         await client.query(
-          `INSERT INTO payroll_runs (
-            id, period_start, period_end, pay_date, status,
-            total_gross, total_employee_taxes, total_reimbursements,
-            total_net_pay, total_employer_taxes, total_company_cost, stubs_count
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+          `INSERT INTO payroll_runs(
+          id, company_id, period_start, period_end, pay_date, status,
+          total_gross, total_employee_taxes, total_reimbursements,
+          total_net_pay, total_employer_taxes, total_company_cost, stubs_count
+        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
           [
-            r.id, r.periodStart, r.periodEnd, r.payDate, r.status,
+            r.id, (r.companyId && validCompIds.has(r.companyId)) ? r.companyId : fallbackCompId,
+            r.periodStart, r.periodEnd, r.payDate, r.status,
             r.totalGross, r.totalEmployeeTaxes, r.totalReimbursements,
             r.totalNetPay, r.totalEmployerTaxes, r.totalCompanyCost, r.stubsCount
           ]
@@ -632,17 +640,17 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
         const employerSuta = s.employerStateUnemployment ?? s.employerPaUc ?? 0;
 
         await client.query(
-          `INSERT INTO pay_stubs (
-            id, payroll_run_id, employee_id, period_start, period_end, pay_date,
-            hours_worked, overtime_hours, hourly_rate, gross_earnings,
-            federal_income_tax, social_security_tax, medicare_tax,
-            state_code, locality_code, locality_name, state_income_tax,
-            local_income_tax, local_flat_tax, total_employee_taxes, mileage_reimbursement,
-            travel_expenses_reimbursement, total_reimbursements, net_pay,
-            employer_social_security, employer_medicare, employer_state_unemployment,
-            tax_breakdown, total_employer_taxes, total_company_cost, disbursement_method,
-            disbursement_status, ach_trace_ref
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)`,
+          `INSERT INTO pay_stubs(
+          id, payroll_run_id, employee_id, period_start, period_end, pay_date,
+          hours_worked, overtime_hours, hourly_rate, gross_earnings,
+          federal_income_tax, social_security_tax, medicare_tax,
+          state_code, locality_code, locality_name, state_income_tax,
+          local_income_tax, local_flat_tax, total_employee_taxes, mileage_reimbursement,
+          travel_expenses_reimbursement, total_reimbursements, net_pay,
+          employer_social_security, employer_medicare, employer_state_unemployment,
+          tax_breakdown, total_employer_taxes, total_company_cost, disbursement_method,
+          disbursement_status, ach_trace_ref
+        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)`,
           [
             s.id, s.payrollRunId, s.employeeId, s.periodStart, s.periodEnd, s.payDate,
             s.hoursWorked, s.overtimeHours, s.hourlyRate, s.grossEarnings,
@@ -664,11 +672,11 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       await client.query('DELETE FROM compliance_tasks');
       for (const c of data.complianceTasks) {
         await client.query(
-          `INSERT INTO compliance_tasks (
-            id, jurisdiction, form_identifier, title, tax_period_label,
-            due_date, filing_method, portal_url, status, amount_due,
-            box_values, confirmation_number, filed_date, notes
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+          `INSERT INTO compliance_tasks(
+          id, jurisdiction, form_identifier, title, tax_period_label,
+          due_date, filing_method, portal_url, status, amount_due,
+          box_values, confirmation_number, filed_date, notes
+        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
           [
             c.id, c.jurisdiction, c.formIdentifier, c.title, c.taxPeriodLabel,
             c.dueDate, c.filingMethod || null, c.portalUrl || null, c.status || 'PENDING', c.amountDue ?? 0,
@@ -684,10 +692,10 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       await client.query('DELETE FROM general_expenses');
       for (const g of data.generalExpenses) {
         await client.query(
-          `INSERT INTO general_expenses (
-            id, expense_date, category, payee, description, amount,
-            schedule_c_line, is_tax_deductible, notes
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          `INSERT INTO general_expenses(
+          id, expense_date, category, payee, description, amount,
+          schedule_c_line, is_tax_deductible, notes
+        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           [
             g.id, g.expenseDate, g.category, g.payee, g.description, g.amount,
             g.scheduleCLine || null, g.isTaxDeductible ?? true, g.notes || null
@@ -703,10 +711,10 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
         await client.query('DELETE FROM timesheets');
         for (const t of data.timesheets) {
           await client.query(
-            `INSERT INTO timesheets (
-              id, employee_id, work_date, start_time, end_time, unpaid_break_minutes,
-              regular_hours, overtime_hours, notes, status, linked_pay_stub_id
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+            `INSERT INTO timesheets(
+          id, employee_id, work_date, start_time, end_time, unpaid_break_minutes,
+          regular_hours, overtime_hours, notes, status, linked_pay_stub_id
+        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
             [
               t.id, t.employeeId, t.workDate, t.startTime, t.endTime, t.unpaidBreakMinutes || 0,
               t.regularHours, t.overtimeHours, t.notes || null, t.status || 'SUBMITTED', t.linkedPayStubId || null
@@ -731,14 +739,14 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
           const safeEntityType = log.entityType || 'General';
           const safeAction = log.action || 'UPDATE';
           const safeActorId = log.actorId || ownerEmail;
-          const safeId = log.id || `audit_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+          const safeId = log.id || `audit_${ Date.now() }_${ Math.random().toString(36).substring(2, 7) } `;
           const safeTimestamp = log.timestamp || new Date().toISOString();
 
           await client.query(
-            `INSERT INTO audit_log_entries (
-              id, "companyId", "entityType", "entityId", action, "actorId",
-              "previousState", "newState", reason, timestamp
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+            `INSERT INTO audit_log_entries(
+          id, "companyId", "entityType", "entityId", action, "actorId",
+          "previousState", "newState", reason, timestamp
+        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
             [
               safeId,
               safeCompanyId,
@@ -768,7 +776,7 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
         for (const ty of data.taxYears) {
           if (!ty || ty.year === undefined || ty.year === null) continue;
           const safeTyCompanyId = (ty.companyId && validCompIds.has(ty.companyId)) ? ty.companyId : fallbackCompId;
-          const yearKey = `${safeTyCompanyId}:${ty.year}`;
+          const yearKey = `${ safeTyCompanyId }:${ ty.year } `;
           if (seenTaxYears.has(yearKey)) continue;
           seenTaxYears.add(yearKey);
 
@@ -785,12 +793,12 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
           } else {
             const rowId = (ty.id && ty.id.length > 20 && !ty.id.startsWith('ty_'))
               ? ty.id
-              : `ty_${safeTyCompanyId}_${ty.year}`;
+              : `ty_${ safeTyCompanyId }_${ ty.year } `;
             await client.query(
-              `INSERT INTO tax_years (id, "companyId", year, status, "createdAt")
-               VALUES ($1, $2, $3, $4, $5)
-               ON CONFLICT ("companyId", year) DO UPDATE SET
-                 status = EXCLUDED.status`,
+              `INSERT INTO tax_years(id, "companyId", year, status, "createdAt")
+        VALUES($1, $2, $3, $4, $5)
+               ON CONFLICT("companyId", year) DO UPDATE SET
+        status = EXCLUDED.status`,
               [
                 rowId,
                 safeTyCompanyId,

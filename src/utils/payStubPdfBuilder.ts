@@ -44,6 +44,21 @@ function drawHeaderBox(
 }
 
 /**
+ * Splits text to fit within maxWidth and truncates with ellipsis if it exceeds maxLines.
+ */
+function fitLabelLines(doc: jsPDF, text: string, maxWidth: number, maxLines: number = 2): string[] {
+  const lines = doc.splitTextToSize(text, maxWidth) as string[];
+  if (lines.length <= maxLines) return lines;
+  const trimmed = lines.slice(0, maxLines);
+  let last = trimmed[maxLines - 1];
+  while (last.length > 1 && doc.getTextWidth(`${last}…`) > maxWidth) {
+    last = last.slice(0, -1);
+  }
+  trimmed[maxLines - 1] = `${last.trimEnd()}…`;
+  return trimmed;
+}
+
+/**
  * Generates an official, PA & IRS compliant itemized Pay Stub PDF document.
  * @param stub Pay stub details
  * @param employee Employee profile
@@ -100,15 +115,21 @@ export function generatePayStubPdf(
   // EMPLOYER & EMPLOYEE DETAILS BOXES
   // ==========================================
   const colW = (contentWidth - 12) / 2; // 260 pt each
+  const empState = stub.stateCode || employee.state || org.state || 'PA';
+  const locName = stub.localityName || employee.localTaxJurisdictionName || employee.paPsdName || 'State Tax Resident';
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  const locLines = fitLabelLines(doc, `${empState} - ${locName}`, colW - 93, 2);
+  const profileBoxHeight = 90 + (locLines.length - 1) * 10;
 
   // Employer Info Box
-  drawHeaderBox(doc, margin, y, colW, 90, 'Employer & Tax Identification');
+  drawHeaderBox(doc, margin, y, colW, profileBoxHeight, 'Employer & Tax Identification');
   doc.setFontSize(8.5);
   doc.setTextColor(40, 40, 40);
   doc.setFont('helvetica', 'bold');
   doc.text('Employer Name:', margin + 8, y + 32);
   doc.setFont('helvetica', 'normal');
-  doc.text(org.name, margin + 85, y + 32);
+  doc.text(fitLabelLines(doc, org.name || 'Company LLC', colW - 93, 1)[0], margin + 85, y + 32);
 
   doc.setFont('helvetica', 'bold');
   doc.text('Federal EIN:', margin + 8, y + 46);
@@ -127,13 +148,13 @@ export function generatePayStubPdf(
 
   // Employee Info Box
   const empX = margin + colW + 12;
-  drawHeaderBox(doc, empX, y, colW, 90, 'Employee & Tax Profile');
+  drawHeaderBox(doc, empX, y, colW, profileBoxHeight, 'Employee & Tax Profile');
   doc.setFontSize(8.5);
 
   doc.setFont('helvetica', 'bold');
   doc.text('Employee Name:', empX + 8, y + 32);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${employee.firstName} ${employee.lastName}`, empX + 85, y + 32);
+  doc.text(fitLabelLines(doc, `${employee.firstName} ${employee.lastName}`, colW - 93, 1)[0], empX + 85, y + 32);
 
   doc.setFont('helvetica', 'bold');
   doc.text('SSN (Last 4):', empX + 8, y + 46);
@@ -146,15 +167,12 @@ export function generatePayStubPdf(
   const w4Text = employee.w4FilingStatus ? employee.w4FilingStatus.replace(/_/g, ' ') : 'SINGLE';
   doc.text(w4Text + (employee.w4ExtraWithholding ? ` (+$${employee.w4ExtraWithholding}/pay)` : ''), empX + 85, y + 60);
 
-  const empState = stub.stateCode || employee.state || org.state || 'PA';
-  const locName = stub.localityName || employee.localTaxJurisdictionName || employee.paPsdName || 'State Tax Resident';
-
   doc.setFont('helvetica', 'bold');
   doc.text('State / Locality:', empX + 8, y + 74);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${empState} - ${locName}`, empX + 85, y + 74);
+  doc.text(locLines, empX + 85, y + 74, { lineHeightFactor: 1.15 });
 
-  y += 102;
+  y += profileBoxHeight + 12;
 
   // Disbursement note line
   doc.setFillColor(241, 245, 249);
@@ -170,17 +188,18 @@ export function generatePayStubPdf(
   y += 28;
 
   // ==========================================
-  // EARNINGS & HOURS TABLE
+  // EARNINGS & HOURS / COMPENSATION TABLE
   // ==========================================
-  drawHeaderBox(doc, margin, y, contentWidth, 75, 'Earnings & Hours Worked');
+  const isSalaried = employee.employmentType === 'W2_SALARY';
+  drawHeaderBox(doc, margin, y, contentWidth, 75, isSalaried ? 'Earnings & Compensation' : 'Earnings & Hours Worked');
 
   // Table columns
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   doc.setTextColor(71, 85, 105);
   doc.text('Earnings Description', margin + 10, y + 32);
-  doc.text('Hours', margin + 260, y + 32, { align: 'right' });
-  doc.text('Hourly Rate', margin + 370, y + 32, { align: 'right' });
+  doc.text(isSalaried ? 'Pay Basis' : 'Hours', margin + 260, y + 32, { align: 'right' });
+  doc.text(isSalaried ? 'Period Salary' : 'Hourly Rate', margin + 370, y + 32, { align: 'right' });
   doc.text('Gross Amount', margin + contentWidth - 10, y + 32, { align: 'right' });
 
   doc.setDrawColor(226, 232, 240);
@@ -190,15 +209,21 @@ export function generatePayStubPdf(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(30, 41, 59);
-  doc.text('Regular Base Wages', margin + 10, y + 50);
-  doc.setFont('courier', 'normal');
-  doc.text(stub.hoursWorked.toFixed(2), margin + 260, y + 50, { align: 'right' });
-  doc.text(fmtCurr(stub.hourlyRate), margin + 370, y + 50, { align: 'right' });
+  doc.text(isSalaried ? 'Regular Base Salary' : 'Regular Base Wages', margin + 10, y + 50);
+  if (isSalaried) {
+    doc.text('Fixed Salary', margin + 260, y + 50, { align: 'right' });
+    doc.setFont('courier', 'normal');
+    doc.text(fmtCurr(stub.grossEarnings), margin + 370, y + 50, { align: 'right' });
+  } else {
+    doc.setFont('courier', 'normal');
+    doc.text(stub.hoursWorked.toFixed(2), margin + 260, y + 50, { align: 'right' });
+    doc.text(fmtCurr(stub.hourlyRate), margin + 370, y + 50, { align: 'right' });
+  }
   doc.setFont('courier', 'bold');
   doc.text(fmtCurr(stub.grossEarnings), margin + contentWidth - 10, y + 50, { align: 'right' });
 
-  // Overtime Row (if applicable)
-  if (stub.overtimeHours > 0) {
+  // Overtime Row (if applicable, hourly employees)
+  if (!isSalaried && stub.overtimeHours > 0) {
     doc.setFont('helvetica', 'normal');
     doc.text('Overtime Wages (1.5x)', margin + 10, y + 64);
     doc.setFont('courier', 'normal');
@@ -214,7 +239,7 @@ export function generatePayStubPdf(
   // ==========================================
   // STATUTORY TAX DEDUCTIONS (EMPLOYEE)
   // ==========================================
-  drawHeaderBox(doc, margin, y, contentWidth, 115, 'Statutory Tax Deductions (Employee Withholding)');
+  drawHeaderBox(doc, margin, y, contentWidth, 123, 'Statutory Tax Deductions (Employee Withholding)');
 
   const taxColW = (contentWidth - 16) / 3;
 
@@ -238,40 +263,45 @@ export function generatePayStubPdf(
     const r = Math.floor(idx / 3);
     const c = idx % 3;
     const boxX = margin + 6 + c * (taxColW + 2);
-    const boxY = y + 25 + r * 26;
+    const boxY = y + 25 + r * 30;
+    const amtStr = fmtCurr(t.val);
 
     doc.setFillColor(255, 255, 255);
-    doc.rect(boxX, boxY, taxColW - 4, 22, 'F');
+    doc.rect(boxX, boxY, taxColW - 4, 26, 'F');
     doc.setDrawColor(226, 232, 240);
-    doc.rect(boxX, boxY, taxColW - 4, 22, 'S');
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.setTextColor(71, 85, 105);
-    doc.text(t.label, boxX + 6, boxY + 14);
+    doc.rect(boxX, boxY, taxColW - 4, 26, 'S');
 
     doc.setFont('courier', 'bold');
     doc.setFontSize(8.5);
     doc.setTextColor(30, 41, 59);
-    doc.text(fmtCurr(t.val), boxX + taxColW - 10, boxY + 14, { align: 'right' });
+    const amtWidth = doc.getTextWidth(amtStr);
+    doc.text(amtStr, boxX + taxColW - 10, boxY + 15.5, { align: 'right' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(71, 85, 105);
+    const maxLabelW = taxColW - 4 - 12 - amtWidth - 8;
+    const labelLines = fitLabelLines(doc, t.label, maxLabelW, 2);
+    const labelY = labelLines.length > 1 ? boxY + 11 : boxY + 15.5;
+    doc.text(labelLines, boxX + 6, labelY, { lineHeightFactor: 1.15 });
   });
 
   // Total Employee Tax Summary Bar
   doc.setFillColor(254, 242, 242); // Rose tint
-  doc.rect(margin + 6, y + 83, contentWidth - 12, 22, 'F');
+  doc.rect(margin + 6, y + 91, contentWidth - 12, 22, 'F');
   doc.setDrawColor(254, 202, 202);
-  doc.rect(margin + 6, y + 83, contentWidth - 12, 22, 'S');
+  doc.rect(margin + 6, y + 91, contentWidth - 12, 22, 'S');
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
   doc.setTextColor(153, 27, 27);
-  doc.text('TOTAL STATUTORY TAXES WITHHELD:', margin + 12, y + 97);
+  doc.text('TOTAL STATUTORY TAXES WITHHELD:', margin + 12, y + 105);
 
   doc.setFont('courier', 'bold');
   doc.setFontSize(9.5);
-  doc.text(`-${fmtCurr(stub.totalEmployeeTaxes)}`, margin + contentWidth - 14, y + 97, { align: 'right' });
+  doc.text(`-${fmtCurr(stub.totalEmployeeTaxes)}`, margin + contentWidth - 14, y + 105, { align: 'right' });
 
-  y += 125;
+  y += 133;
 
   // ==========================================
   // ACCOUNTABLE PLAN REIMBURSEMENTS (IF ANY)

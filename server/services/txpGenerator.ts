@@ -49,9 +49,10 @@ function formatYYMMDD(dateStr: string): string {
  * TXP Syntax: TXP*{TaxID}*{TaxTypeCode}*{YYMMDD}*{AmountInCents}*{Qualifier}*~
  *
  * @param params Details of the tax remittance
+ * @param pad80 Whether to pad with trailing spaces to 80 characters for NACHA record type 7 compatibility
  * @returns Standardized TXP addenda string
  */
-export function generateTXPAddenda(params: TXPParams): string {
+export function generateTXPAddenda(params: TXPParams, pad80 = false): string {
   const cleanId = cleanDigits(params.taxId);
   const periodEndYYMMDD = formatYYMMDD(params.taxPeriodEnd);
   const amountCents = Math.round(params.amount * 100);
@@ -62,6 +63,9 @@ export function generateTXPAddenda(params: TXPParams): string {
     segment += `**${checkNum}*`;
   }
   segment += '~';
+  if (pad80 && segment.length < 80) {
+    segment = segment.padEnd(80, ' ');
+  }
   return segment;
 }
 

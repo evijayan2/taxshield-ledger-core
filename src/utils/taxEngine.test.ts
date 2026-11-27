@@ -84,6 +84,50 @@ describe('Tax Engine Family Relation Exemptions', () => {
     expect(result.isPaUcExempt).toBe(true);
     expect(result.socialSecurityTax).toBeGreaterThan(0);
     expect(result.employerPaUc).toBe(0);
+    expect(result.employeePaUc).toBe(0);
+  });
+
+  it('should NOT apply family FICA or PA UC exemptions for S-Corp or C-Corp entities', () => {
+    const hours = 40; // $600 gross earnings
+    const result = calculateGrossToNet(
+      baseEmployee,
+      hours,
+      0,
+      0,
+      0,
+      [],
+      undefined,
+      undefined,
+      [],
+      undefined,
+      undefined,
+      undefined,
+      'S_CORP'
+    );
+    const rates = getActiveRates();
+
+    expect(result.isFicaExempt).toBe(false);
+    expect(result.isPaUcExempt).toBe(false);
+    expect(result.socialSecurityTax).toBe(Math.round(600 * rates.socialSecurityRate * 100) / 100);
+    expect(result.medicareTax).toBe(Math.round(600 * rates.medicareRate * 100) / 100);
+    expect(result.employerPaUc).toBeGreaterThan(0);
+    expect(result.employeePaUc).toBe(0.42); // 0.07% of $600
+  });
+
+  it('should calculate per-period salary for W2_SALARY employees without multiplying by hours', () => {
+    const salariedEmp: Employee = {
+      ...baseEmployee,
+      age: 35,
+      relationshipToOwner: 'NONE',
+      employmentType: 'W2_SALARY',
+      payRate: 2500,
+    };
+    const result = calculateGrossToNet(salariedEmp, 40, 5);
+
+    expect(result.grossEarnings).toBe(2500);
+    expect(result.regularEarnings).toBe(2500);
+    expect(result.overtimeEarnings).toBe(0);
+    expect(result.employeePaUc).toBe(1.75); // 0.07% of $2,500
   });
 });
 
@@ -172,5 +216,297 @@ describe('Delaware Multi-State Tax Calculations', () => {
     expect((result.taxBreakdown as any).suta.name).toContain('DE');
   });
 });
+
+describe('calculateGrossToNet with Benefit Deductions & IRC § 1372', () => {
+  it('reduces FIT, FICA, and PA-PIT wages for Section 125 health deduction', () => {
+    const employee: Employee = {
+      ...baseEmployee,
+      age: 30,
+      relationshipToOwner: 'NONE',
+      payRate: 25, // $2,000 for 80 hours
+      benefitElections: [
+        {
+          planType: 'SECTION_125_HEALTH',
+          planName: 'Health PPO',
+          amountType: 'FIXED',
+          amount: 200,
+        },
+      ],
+    };
+
+    const result = calculateGrossToNet(employee, 80);
+    expect(result.grossEarnings).toBe(2000);
+    expect(result.statutoryWageBases.fitTaxableWages).toBe(1800);
+    expect(result.statutoryWageBases.ssTaxableWages).toBe(1800);
+    expect(result.statutoryWageBases.medicareTaxableWages).toBe(1800);
+    expect(result.statutoryWageBases.stateTaxableWages).toBe(1800);
+    expect(result.totalBenefitDeductions).toBe(200);
+    expect(result.totalPreTaxDeductions).toBe(200);
+    expect(result.uncollectedDeductions).toBe(0);
+  });
+
+  it('reduces FIT but preserves FICA and PA-PIT for Traditional 401(k)', () => {
+    const employee: Employee = {
+      ...baseEmployee,
+      age: 30,
+      relationshipToOwner: 'NONE',
+      payRate: 25, // $2,000 for 80 hours
+      benefitElections: [
+        {
+          planType: 'RETIREMENT_401K_TRADITIONAL',
+          planName: '401(k)',
+          amountType: 'FIXED',
+          amount: 150,
+        },
+      ],
+    };
+
+    const result = calculateGrossToNet(employee, 80);
+    expect(result.grossEarnings).toBe(2000);
+    expect(result.statutoryWageBases.fitTaxableWages).toBe(1850);
+    expect(result.statutoryWageBases.ssTaxableWages).toBe(2000);
+    expect(result.statutoryWageBases.medicareTaxableWages).toBe(2000);
+    expect(result.statutoryWageBases.stateTaxableWages).toBe(2000);
+    expect(result.totalBenefitDeductions).toBe(150);
+  });
+
+  it('enforces IRC § 1372: >2% S-Corp shareholder health is in FIT wages but exempt from FICA and PA-PIT', () => {
+    const employee: Employee = {
+      ...baseEmployee,
+      age: 45,
+      relationshipToOwner: 'NONE',
+      isShareholderGreaterThan2Pct: true,
+      payRate: 50, // $4,000 for 80 hours
+      benefitElections: [
+        {
+          planType: 'SECTION_125_HEALTH',
+          planName: 'Owner Health',
+          amountType: 'FIXED',
+          amount: 400,
+        },
+      ],
+    };
+
+    const result = calculateGrossToNet(employee, 80);
+    expect(result.grossEarnings).toBe(4000);
+    // FIT taxable wages are NOT reduced (W-2 Box 1)
+    expect(result.statutoryWageBases.fitTaxableWages).toBe(4000);
+    // FICA and PA-PIT taxable wages are exempt
+    expect(result.statutoryWageBases.ssTaxableWages).toBe(3600);
+    expect(result.statutoryWageBases.medicareTaxableWages).toBe(3600);
+    expect(result.statutoryWageBases.stateTaxableWages).toBe(3600);
+  });
+
+  it('clamps voluntary deductions so net pay is never negative', () => {
+    const employee: Employee = {
+      ...baseEmployee,
+      age: 22,
+      relationshipToOwner: 'NONE',
+      payRate: 10, // $200 for 20 hours
+      benefitElections: [
+        {
+          planType: 'POST_TAX_OTHER',
+          planName: 'Voluntary Savings',
+          amountType: 'FIXED',
+          amount: 300,
+        },
+      ],
+    };
+
+    const result = calculateGrossToNet(employee, 20);
+    expect(result.grossEarnings).toBe(200);
+    expect(result.netPay).toBe(0);
+    expect(result.totalBenefitDeductions).toBeLessThanOrEqual(200);
+    expect(result.uncollectedDeductions).toBeGreaterThan(0);
+  });
+});
+
+describe('calculateGrossToNet with SUTA Experience Rating', () => {
+  const paEmployee: Employee = {
+    ...baseEmployee,
+    age: 30,
+    relationshipToOwner: 'NONE',
+    payRate: 25, // $2,000 for 80 hours
+    workState: 'PA',
+    state: 'PA',
+  };
+
+  const paSettings = [
+    {
+      id: 'sett-pa-01',
+      companyId: 'comp-1',
+      jurisdiction: 'PA',
+      taxKind: 'SUTA',
+      stateAccountId: 'PA-UC-9988',
+      status: 'ACTIVE' as const,
+      rateHistories: [
+        {
+          id: 'hist-1',
+          companyId: 'comp-1',
+          companyTaxSettingId: 'sett-pa-01',
+          rateDecimal: 0.04125,
+          rateBps: 413,
+          effectiveFrom: '2026-01-01',
+          effectiveTo: null,
+          noticeReference: 'PA Form UC-657 (2026)',
+          status: 'ACTIVE' as const,
+        },
+      ],
+    },
+  ];
+
+  it('uses assigned experience rate when provided', () => {
+    const result = calculateGrossToNet(
+      paEmployee,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      paSettings
+    );
+
+    expect(result.grossEarnings).toBe(2000);
+    expect(result.sutaResolution.source).toBe('ASSIGNED_EXPERIENCE_RATE');
+    expect(result.sutaResolution.rate).toBe(0.04125);
+    // 2000 * 0.04125 = 82.50
+    expect(result.employerStateUnemployment).toBe(82.5);
+    expect(result.taxBreakdown.suta.amount).toBe(82.5);
+    expect(result.taxBreakdown.suta.rate).toBe(0.04125);
+  });
+
+  it('falls back to statutory default when company has no settings', () => {
+    const result = calculateGrossToNet(
+      paEmployee,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15')
+    );
+
+    expect(result.grossEarnings).toBe(2000);
+    expect(result.sutaResolution.source).toBe('STATUTORY_DEFAULT');
+    expect(result.sutaResolution.rate).toBe(0.035);
+    // 2000 * 0.035 = 70.00
+    expect(result.employerStateUnemployment).toBe(70);
+  });
+
+  it('honors family exemption for SUTA even with assigned experience rate', () => {
+    const familyEmp: Employee = {
+      ...paEmployee,
+      relationshipToOwner: 'SPOUSE',
+    };
+
+    const result = calculateGrossToNet(
+      familyEmp,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      paSettings
+    );
+
+    expect(result.isPaUcExempt).toBe(true);
+    expect(result.employerStateUnemployment).toBe(0);
+    expect(result.taxBreakdown.suta.amount).toBe(0);
+  });
+
+  it('enforces YTD wage caps for PA UC ($10k) and FUTA ($7k) and respects S-Corp vs Sole Prop family FUTA rules', () => {
+    const standard = calculateGrossToNet(
+      paEmployee,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      undefined,
+      'LLC_SINGLE_MEMBER',
+      6000 // $6,000 prior YTD -> $1,000 remaining under $7k FUTA cap, $2,000 under $10k PA UC cap
+    );
+    expect(standard.employerFuta).toBe(6); // 1000 * 0.006
+    expect(standard.employerStateUnemployment).toBe(70); // 2000 * 0.035
+
+    const overCaps = calculateGrossToNet(
+      paEmployee,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      undefined,
+      'LLC_SINGLE_MEMBER',
+      11000 // Exceeds both $7k FUTA and $10k PA UC caps
+    );
+    expect(overCaps.employerFuta).toBe(0);
+    expect(overCaps.employerStateUnemployment).toBe(0);
+
+    const spouseEmp: Employee = { ...paEmployee, relationshipToOwner: 'SPOUSE' };
+    const solePropSpouse = calculateGrossToNet(
+      spouseEmp,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      undefined,
+      'LLC_SINGLE_MEMBER',
+      0
+    );
+    expect(solePropSpouse.isFutaExempt).toBe(true);
+    expect(solePropSpouse.employerFuta).toBe(0);
+
+    const sCorpSpouse = calculateGrossToNet(
+      spouseEmp,
+      80,
+      0,
+      0,
+      0,
+      [],
+      '2026-03-01',
+      '2026-03-15',
+      [],
+      new Date('2026-03-15'),
+      [],
+      undefined,
+      'S_CORP',
+      0
+    );
+    expect(sCorpSpouse.isFutaExempt).toBe(false);
+    expect(sCorpSpouse.employerFuta).toBe(12); // 2000 * 0.006
+  });
+});
+
+
 
 

@@ -230,6 +230,7 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
       const localIncTax = parseFloat(s.local_income_tax ?? s.pa_local_eit ?? 0);
       const localFlat = parseFloat(s.local_flat_tax ?? s.pa_lst ?? 0);
       const employerSuta = parseFloat(s.employer_state_unemployment ?? s.employer_pa_uc ?? 0);
+      const employeePaUc = parseFloat(s.employee_pa_uc ?? 0);
 
       return {
         id: s.id,
@@ -263,6 +264,8 @@ export async function loadAllDataFromPostgres(): Promise<any | null> {
         employerMedicare: parseFloat(s.employer_medicare),
         employerStateUnemployment: employerSuta,
         employerPaUc: employerSuta,
+        employeePaUc,
+        isPaUcExempt: Boolean((s.tax_breakdown as any)?.isPaUcExempt),
         taxBreakdown: s.tax_breakdown || undefined,
         totalEmployerTaxes: parseFloat(s.total_employer_taxes),
         totalCompanyCost: parseFloat(s.total_company_cost),
@@ -638,6 +641,10 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
         const localInc = s.localIncomeTax ?? s.paLocalEit ?? 0;
         const localFlat = s.localFlatTax ?? s.paLst ?? 0;
         const employerSuta = s.employerStateUnemployment ?? s.employerPaUc ?? 0;
+        const employeePaUc = s.employeePaUc ?? 0;
+        const serializedBreakdown = s.taxBreakdown
+          ? JSON.stringify({ ...s.taxBreakdown, ...(s.isPaUcExempt !== undefined ? { isPaUcExempt: s.isPaUcExempt } : {}) })
+          : (s.isPaUcExempt !== undefined ? JSON.stringify({ isPaUcExempt: s.isPaUcExempt }) : null);
 
         await client.query(
           `INSERT INTO pay_stubs(
@@ -647,10 +654,10 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
           state_code, locality_code, locality_name, state_income_tax,
           local_income_tax, local_flat_tax, total_employee_taxes, mileage_reimbursement,
           travel_expenses_reimbursement, total_reimbursements, net_pay,
-          employer_social_security, employer_medicare, employer_state_unemployment,
+          employer_social_security, employer_medicare, employee_pa_uc, employer_state_unemployment,
           tax_breakdown, total_employer_taxes, total_company_cost, disbursement_method,
           disbursement_status, ach_trace_ref
-        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)`,
+        ) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34)`,
           [
             s.id, s.payrollRunId, s.employeeId, s.periodStart, s.periodEnd, s.payDate,
             s.hoursWorked, s.overtimeHours, s.hourlyRate, s.grossEarnings,
@@ -658,8 +665,8 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
             stateCode, localityCode, localityName, stateInc,
             localInc, localFlat, s.totalEmployeeTaxes, s.mileageReimbursement,
             s.travelExpensesReimbursement, s.totalReimbursements, s.netPay,
-            s.employerSocialSecurity, s.employerMedicare, employerSuta,
-            s.taxBreakdown ? JSON.stringify(s.taxBreakdown) : null,
+            s.employerSocialSecurity, s.employerMedicare, employeePaUc, employerSuta,
+            serializedBreakdown,
             s.totalEmployerTaxes, s.totalCompanyCost, s.disbursementMethod || 'ACH',
             s.disbursementStatus, s.achTraceRef || (s as any).zelleConfirmationRef || null
           ]

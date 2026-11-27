@@ -29,6 +29,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@midlandsbank/node-nacha": "^2.1.1",
     "@prisma/client": "^6.19.3",
     "dotenv": "^17.2.3",
     "jspdf": "^4.2.1",

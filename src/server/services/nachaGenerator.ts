@@ -1,3 +1,4 @@
+import Nacha from '@midlandsbank/node-nacha';
 import {
   NachaCompanyInfo,
   NachaEntryInput,
@@ -8,120 +9,147 @@ import {
   Employee,
 } from '../../types';
 import { sha256Hex } from '../../lib/isomorphicCrypto';
+import { isValidAbaRouting } from '../../utils/validators';
 import { resolveActiveBankAccount } from './bankHistoryService';
 import {
   NachaValidationError,
   cleanDigits,
   formatField,
-  buildFileHeaderRecord,
-  buildBatchHeaderRecord,
-  buildEntryDetailRecord,
-  buildBatchControlRecord,
-  buildFileControlRecord,
 } from './nachaRecordBuilders';
 
 export { NachaValidationError };
 
 /**
- * Calculates the 10-digit entry hash (modulo 10^10) from the cumulative addends.
+ * Parses a YYYY-MM-DD date string into a local Date without UTC day-shift.
  */
-function compute10DigitHash(cumulativeSum: number): string {
-  const mod10Billion = cumulativeSum % 10000000000;
-  return formatField(mod10Billion, 10, 'right', '0');
+function parseLocalDate(dateVal?: string | Date | null): Date {
+  if (dateVal instanceof Date) return dateVal;
+  if (typeof dateVal === 'string') {
+    const match = dateVal.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+    const parsed = new Date(dateVal);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+  }
+  return new Date();
 }
 
 /**
- * Iterates through entry inputs and constructs 94-character Type 6 records with accumulators.
+ * Formats a 9-digit EIN into a 10-character NACHA Company ID.
  */
-function assembleEntryRecords(
+function formatNachaCompanyId(ein?: string): string {
+  const digits = cleanDigits(ein);
+  if (digits.length === 9) return `1${digits}`;
+  return formatField(digits, 10, 'right', '0');
+}
+
+/**
+ * Validates company ODFI routing and all receiving entry fields before NACHA generation.
+ */
+function validateNachaInputs(company: NachaCompanyInfo, entries: NachaEntryInput[]): string {
+  const odfi = cleanDigits(company.odfiRoutingNumber);
+  if (!isValidAbaRouting(odfi)) {
+    throw new NachaValidationError(`Invalid ODFI routing transit: ${company.odfiRoutingNumber}`);
+  }
+  if (!entries || entries.length === 0) {
+    throw new NachaValidationError('At least one NACHA entry is required');
+  }
+  for (const entry of entries) {
+    const rdfi = cleanDigits(entry.routingNumber);
+    if (!isValidAbaRouting(rdfi)) {
+      throw new NachaValidationError(`Invalid receiving routing transit: ${entry.routingNumber}`);
+    }
+    if (!cleanDigits(entry.accountNumber)) {
+      throw new NachaValidationError(`Missing account number for ${entry.employeeName}`);
+    }
+    if (entry.amount <= 0) {
+      throw new NachaValidationError(`Entry amount must be positive for ${entry.employeeName}`);
+    }
+  }
+  return odfi;
+}
+
+/**
+ * Builds a configured @midlandsbank/node-nacha PPD file instance.
+ */
+function buildNachaInstance(
+  company: NachaCompanyInfo,
   entries: NachaEntryInput[],
+  options: NachaBatchOptions,
   odfi: string
-): { entryLines: string[]; hashSum: number; totalCredits: number; totalDebits: number } {
-  const entryLines: string[] = [];
-  let hashSum = 0;
-  let totalCredits = 0;
-  let totalDebits = 0;
+): Nacha {
+  const odfi8 = odfi.slice(0, 8);
+  const nacha = new Nacha({
+    origin: {
+      name: (company.originName || company.companyName || 'COMPANY').slice(0, 23),
+      routing: odfi,
+    },
+    destination: {
+      name: (company.destinationName || 'ORIGINATING DFI').slice(0, 23),
+      routing: odfi,
+    },
+    fileIdModifier: (options.fileIdModifier || 'A').slice(0, 1).toUpperCase(),
+    creationDate: parseLocalDate(options.fileCreationDate),
+  });
+
+  const batch = nacha.ppd({
+    company: {
+      name: (company.companyName || 'COMPANY').slice(0, 16),
+      id: formatNachaCompanyId(company.ein),
+    },
+    entryDescription: (options.companyEntryDescription || 'PAYROLL').slice(0, 10),
+    effectiveDate: parseLocalDate(options.effectiveEntryDate),
+  });
 
   for (let i = 0; i < entries.length; i++) {
-    const seq = i + 1;
-    const { line, hashAddend, creditCents, debitCents } = buildEntryDetailRecord(entries[i], odfi, seq);
-    entryLines.push(line);
-    hashSum += hashAddend;
-    totalCredits += creditCents;
-    totalDebits += debitCents;
+    const entry = entries[i];
+    const traceNumber = `${odfi8}${formatField(i + 1, 7, 'right', '0')}`;
+    batch.addEntry({
+      direction: 'credit',
+      accountType: entry.accountType === 'SAVINGS' ? 'Savings' : 'Checking',
+      amount: entry.amount,
+      routingNumber: cleanDigits(entry.routingNumber),
+      accountNumber: entry.accountNumber.trim(),
+      name: entry.employeeName.slice(0, 22),
+      idNumber: entry.employeeId.slice(0, 15),
+      traceNumber,
+    });
   }
 
-  return { entryLines, hashSum, totalCredits, totalDebits };
+  return batch.done();
 }
 
 /**
- * Computes lines of fill padding and block count required for Blocking Factor 10.
- */
-function computeBlockingFactor(recordsWithFileControl: number): { padLines: number; blockCount: number } {
-  const rem = recordsWithFileControl % 10;
-  const padLines = rem === 0 ? 0 : 10 - rem;
-  const blockCount = (recordsWithFileControl + padLines) / 10;
-  return { padLines, blockCount };
-}
-
-/**
- * Assembles and hashes the final file string and generation result structure.
- */
-function buildNachaResult(
-  lines: string[],
-  entryCount: number,
-  totalCredits: number,
-  totalDebits: number,
-  entryHash: string,
-  blockCount: number,
-  lineTerminator: string
-): NachaGenerationResult {
-  const fileContent = lines.join(lineTerminator) + lineTerminator;
-  return {
-    fileContent,
-    lines,
-    lineCount: lines.length,
-    entryCount,
-    totalCreditCents: totalCredits,
-    totalDebitCents: totalDebits,
-    entryHash,
-    fileHashSha256: sha256Hex(fileContent),
-    batchCount: 1,
-    blockCount,
-  };
-}
-
-/**
- * Generates an official 94-character fixed-width NACHA PPD direct deposit file.
+ * Generates an official 94-character fixed-width NACHA PPD direct deposit file
+ * using @midlandsbank/node-nacha.
  */
 export function generateNachaFile(
   company: NachaCompanyInfo,
   entries: NachaEntryInput[],
   options: NachaBatchOptions
 ): NachaGenerationResult {
-  const odfi = cleanDigits(company.odfiRoutingNumber);
+  const odfi = validateNachaInputs(company, entries);
+  const nacha = buildNachaInstance(company, entries, options, odfi);
   const lineTerminator = options.lineTerminator || '\r\n';
-  const batchNum = options.batchNumber || 1;
-  const serviceClass = options.serviceClassCode || '220';
+  const rawLines = nacha.toString().split(/\r?\n/).filter(line => line.length > 0);
+  // @midlandsbank/node-nacha appends 10 fill lines when record count is an exact multiple of 10
+  const lines = rawLines.slice(0, nacha.blockCount * 10);
+  const fileContent = lines.join(lineTerminator) + lineTerminator;
+  const entryHash = formatField(nacha.entryHash % 10000000000, 10, 'right', '0');
 
-  const lines: string[] = [
-    buildFileHeaderRecord(company, options),
-    buildBatchHeaderRecord(company, options, batchNum),
-  ];
-
-  const { entryLines, hashSum, totalCredits, totalDebits } = assembleEntryRecords(entries, odfi);
-  lines.push(...entryLines);
-
-  const entryHash = compute10DigitHash(hashSum);
-  lines.push(buildBatchControlRecord(company, entries.length, entryHash, totalCredits, totalDebits, odfi, batchNum, serviceClass));
-
-  const { padLines, blockCount } = computeBlockingFactor(lines.length + 1);
-  lines.push(buildFileControlRecord(1, blockCount, entries.length, entryHash, totalCredits, totalDebits));
-
-  const fillRecord = '9'.repeat(94);
-  for (let p = 0; p < padLines; p++) lines.push(fillRecord);
-
-  return buildNachaResult(lines, entries.length, totalCredits, totalDebits, entryHash, blockCount, lineTerminator);
+  return {
+    fileContent,
+    lines,
+    lineCount: lines.length,
+    entryCount: nacha.entryAndAddendaCount,
+    totalCreditCents: Math.round(nacha.totalCredits),
+    totalDebitCents: Math.round(nacha.totalDebits),
+    entryHash,
+    fileHashSha256: sha256Hex(fileContent),
+    batchCount: nacha.batchCount,
+    blockCount: nacha.blockCount,
+  };
 }
 
 /**
@@ -240,7 +268,8 @@ function validateNachaLineLengths(lines: string[]): void {
 }
 
 /**
- * Parses and verifies summary metrics from a raw 94-character NACHA file string.
+ * Parses and verifies summary metrics from a raw 94-character NACHA file string
+ * using @midlandsbank/node-nacha.
  */
 export function parseNachaFileSummary(fileContent: string): {
   isValid: boolean;
@@ -254,16 +283,20 @@ export function parseNachaFileSummary(fileContent: string): {
   const lines = fileContent.split(/\r?\n/).filter(line => line.length > 0);
   validateNachaLineLengths(lines);
 
-  const fileControl = lines.find(l => l.startsWith('9') && l !== '9'.repeat(94));
-  if (!fileControl) throw new NachaValidationError('File Control Record (Record Type 9) not found');
+  let parsed: ReturnType<typeof Nacha.parse>;
+  try {
+    parsed = Nacha.parse(lines.join('\n'));
+  } catch (err: any) {
+    throw new NachaValidationError(err?.message || 'Invalid NACHA file format');
+  }
 
   return {
     isValid: true,
     lineCount: lines.length,
-    blockCount: parseInt(fileControl.slice(7, 13), 10),
-    entryCount: parseInt(fileControl.slice(13, 21), 10),
-    entryHash: fileControl.slice(21, 31),
-    totalDebitCents: parseInt(fileControl.slice(31, 43), 10),
-    totalCreditCents: parseInt(fileControl.slice(43, 55), 10),
+    blockCount: parsed.footer.blockCount,
+    entryCount: parsed.footer.entryAndAddendaCount,
+    entryHash: formatField(parsed.footer.entryHash % 10000000000, 10, 'right', '0'),
+    totalCreditCents: Math.round(parsed.footer.totalCredits),
+    totalDebitCents: Math.round(parsed.footer.totalDebits),
   };
 }

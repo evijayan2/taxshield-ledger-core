@@ -514,7 +514,7 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
 
         await client.query(
           `INSERT INTO employees (
-            id, first_name, last_name, age, email, phone, ssn_last_four, 
+            id, company_id, first_name, last_name, age, email, phone, ssn_last_four, 
             street_address, city, state, zip,
             employment_type, pay_rate, pay_frequency, w4_filing_status, 
             w4_multiple_jobs, w4_dependent_credit, w4_other_income, 
@@ -522,9 +522,10 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
             state_allowances, local_tax_jurisdiction_code, local_tax_jurisdiction_name,
             local_tax_rate, local_flat_tax_annual, local_flat_tax_exempt, tax_attributes,
             bank_name, account_type, routing_number, account_number, bank_account_masked, is_active
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35)`,
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36)`,
           [
             emp.id,
+            (emp.companyId && validCompIds.has(emp.companyId)) ? emp.companyId : fallbackCompId,
             emp.firstName || '',
             emp.lastName || '',
             emp.age ?? null,
@@ -610,12 +611,13 @@ export async function saveAllDataToPostgres(data: any): Promise<{ success: boole
       for (const r of data.payrollRuns) {
         await client.query(
           `INSERT INTO payroll_runs (
-            id, period_start, period_end, pay_date, status,
+            id, company_id, period_start, period_end, pay_date, status,
             total_gross, total_employee_taxes, total_reimbursements,
             total_net_pay, total_employer_taxes, total_company_cost, stubs_count
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
           [
-            r.id, r.periodStart, r.periodEnd, r.payDate, r.status,
+            r.id, (r.companyId && validCompIds.has(r.companyId)) ? r.companyId : fallbackCompId,
+            r.periodStart, r.periodEnd, r.payDate, r.status,
             r.totalGross, r.totalEmployeeTaxes, r.totalReimbursements,
             r.totalNetPay, r.totalEmployerTaxes, r.totalCompanyCost, r.stubsCount
           ]
